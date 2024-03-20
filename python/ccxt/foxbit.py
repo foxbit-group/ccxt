@@ -161,3 +161,72 @@ class foxbit(Exchange, ImplicitAPI):
                 'brokerId': '',
             },
         })
+    
+    def fetch_markets(self, params={}):
+        response = self.publicGetMarkets(params)
+        
+        data = self.safe_value(response, 'data', [])
+        return self.parse_markets(data)
+
+    def sign(self, path, api='public', method='GET', params={}, headers=None, body=None):
+        url = self.implode_hostname(self.urls['api']['rest']) + '/' + path
+        headers = { 'Content-Type': 'application/json' }
+
+        if method == "POST":
+            body = self.json(params)
+        
+        return {'url': url, 'method': method, 'body': body, 'headers': headers}
+
+    def parse_markets(self, markets):			
+        result = []
+
+        for market in markets:
+            base = market['base']
+            quote = market['quote']
+            
+            result.append({                              
+                'id':      market['symbol'],      
+                'symbol':  f"{base['symbol'].upper()}/{quote['symbol'].upper()}",     
+                'base':    base["symbol"],         
+                'quote':   quote["symbol"],         
+                'baseId':  base["symbol"],         
+                'quoteId':  quote["symbol"],        
+                'active':   True,         
+                'type':    'spot',        
+                'spot':     True,         
+                'margin':   True,         
+                'future':   False,                                      
+                'swap':     False,                                      
+                'option':   False,                                      
+                'contract': False,                                 
+                'settle':   quote["symbol"].lower(),                                
+                'settleId': quote["symbol"],                                
+                'contractSize': 1,                                 
+                'linear':   True,                                  
+                'inverse':  False,                                 
+                'expiry':  None,                          
+                'expiryDatetime': '',      
+                'strike': 4000,                                    
+                'optionType': 'call',                             
+                'taker':    0.002,                                 
+                'maker':    0.005,                                
+                'percentage': True,                                
+                'tierBased': False,                                
+                'feeSide': 'get',                                  
+                'precision': {                                     
+                        'price': 8,                                    
+                        'amount': 8,                                   
+                        'cost': 8,                                          
+                },
+                'limits': {                                             
+                        'amount': {
+                                'min': market['price_min'],                                    
+                                'max': 0,                                    
+                        },
+                        'price': { ... },                                   
+                        'cost':  { ... },                                   
+                        'leverage': { ... },                                
+                },
+                'info':      { ... }
+            })
+        return result 
