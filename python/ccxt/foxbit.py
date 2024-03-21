@@ -230,3 +230,41 @@ class foxbit(Exchange, ImplicitAPI):
                 'info':      { ... }
             })
         return result 
+
+    def fetch_currencies(self, params={}):
+        response = self.publicGetCurrencies(params)
+        
+        data = self.safe_value(response, 'data', [])
+        return self.parse_currencies(data)
+    
+    def parse_currencies(self, currencies):        
+        result = {}
+
+        for currency in currencies:
+            result[currency['symbol'].upper()] = self.parse_currency(currency)        
+
+    def parse_currency(self, currency):
+        fee = '0.0'
+        if not currency['withdraw_info'] is None:
+            fee = currency['withdraw_info']['fee']
+        
+        return {
+            'id':       currency['symbol'],   
+            'code':     currency['symbol'].upper(),   
+            'name':     currency['name'],   
+            'active':    True,  
+            'fee':       fee,  
+            'precision': currency['precision'],  
+            'deposit':   True, 
+            'withdraw':  True,  
+            'limits': {   
+                'amount': {
+                    'min': 0.01,  
+                    'max': 1000,  
+                },
+                'withdraw': { ... },   
+                'deposit': {...},
+            },
+            'networks': {...},
+            'info': { ... }
+        }
