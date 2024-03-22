@@ -1,6 +1,8 @@
 from ccxt.base.exchange import Exchange
 from ccxt.abstract.foxbit import ImplicitAPI
 from ccxt.base.decimal_to_precision import TICK_SIZE
+from ccxt.base.types import Strings, Ticker, Tickers
+from datetime import datetime
 
 class foxbit(Exchange, ImplicitAPI):
 
@@ -120,7 +122,7 @@ class foxbit(Exchange, ImplicitAPI):
                         'markets': 6,
                         'markets/quotes': 2,
                         'markets/{market_symbol}/orderbook': 10,
-                        'markets/{market_symbol}/candlesticks': 3
+                        'markets/{market_symbol}/candlesticks': 10
                     },
                 },
                 'private': {},
@@ -169,7 +171,7 @@ class foxbit(Exchange, ImplicitAPI):
         return self.parse_markets(data)
 
     def sign(self, path, api='public', method='GET', params={}, headers=None, body=None):
-        url = self.implode_hostname(self.urls['api']['rest']) + '/' + path
+        url = self.implode_hostname(self.urls['api']['rest']) + '/' + self.implode_params(path, params)
         headers = { 'Content-Type': 'application/json' }
 
         if method == "POST":
@@ -239,9 +241,149 @@ class foxbit(Exchange, ImplicitAPI):
     
     def parse_currencies(self, currencies):        
         result = {}
+        '''EXPECTED RESPONSE
+            {
+                "BTC": {
+                    "info": {
+                        "coinId": "1",
+                        "coin": "BTC",
+                        "transfer": "true",
+                        "chains": [
+                            {
+                                "chain": "BTC",
+                                "needTag": "false",
+                                "withdrawable": "true",
+                                "rechargeable": "true",
+                                "withdrawFee": "0.00015",
+                                "extraWithdrawFee": "0",
+                                "depositConfirm": "1",
+                                "withdrawConfirm": "1",
+                                "minDepositAmount": "0.00001",
+                                "minWithdrawAmount": "0.001",
+                                "browserUrl": "https://blockchair.com/bitcoin/transaction/",
+                                "contractAddress": None,
+                                "withdrawStep": "0"
+                            },
+                            {
+                                "chain": "BEP20",
+                                "needTag": "false",
+                                "withdrawable": "false",
+                                "rechargeable": "true",
+                                "withdrawFee": "0.00000305",
+                                "extraWithdrawFee": "0",
+                                "depositConfirm": "15",
+                                "withdrawConfirm": "15",
+                                "minDepositAmount": "0.000001",
+                                "minWithdrawAmount": "0.0000078",
+                                "browserUrl": "https://bscscan.com/tx/",
+                                "contractAddress": "0x7130d2a12b9bcbfae4f2634d864a1ee1ce3ead9c",
+                                "withdrawStep": "0"
+                            }
+                        ],
+                        "areaCoin": "no"
+                    },
+                    "id": "1",
+                    "code": "BTC",
+                    "networks": {
+                        "BTC": {
+                            "info": {
+                                "chain": "BTC",
+                                "needTag": "false",
+                                "withdrawable": "true",
+                                "rechargeable": "true",
+                                "withdrawFee": "0.00015",
+                                "extraWithdrawFee": "0",
+                                "depositConfirm": "1",
+                                "withdrawConfirm": "1",
+                                "minDepositAmount": "0.00001",
+                                "minWithdrawAmount": "0.001",
+                                "browserUrl": "https://blockchair.com/bitcoin/transaction/",
+                                "contractAddress": None,
+                                "withdrawStep": "0"
+                            },
+                            "id": "BTC",
+                            "network": "BTC",
+                            "limits": {
+                                "withdraw": {
+                                    "min": 0.001,
+                                    "max": None
+                                },
+                                "deposit": {
+                                    "min": 1e-05,
+                                    "max": None
+                                }
+                            },
+                            "active": True,
+                            "withdraw": True,
+                            "deposit": True,
+                            "fee": 0.00015,
+                            "precision": None
+                        },
+                        "BEP20": {
+                            "info": {
+                                "chain": "BEP20",
+                                "needTag": "false",
+                                "withdrawable": "false",
+                                "rechargeable": "true",
+                                "withdrawFee": "0.00000305",
+                                "extraWithdrawFee": "0",
+                                "depositConfirm": "15",
+                                "withdrawConfirm": "15",
+                                "minDepositAmount": "0.000001",
+                                "minWithdrawAmount": "0.0000078",
+                                "browserUrl": "https://bscscan.com/tx/",
+                                "contractAddress": "0x7130d2a12b9bcbfae4f2634d864a1ee1ce3ead9c",
+                                "withdrawStep": "0"
+                            },
+                            "id": "BEP20",
+                            "network": "BEP20",
+                            "limits": {
+                                "withdraw": {
+                                    "min": 7.8e-06,
+                                    "max": None
+                                },
+                                "deposit": {
+                                    "min": 1e-06,
+                                    "max": None
+                                }
+                            },
+                            "active": False,
+                            "withdraw": False,
+                            "deposit": True,
+                            "fee": 3.05e-06,
+                            "precision": None
+                        }
+                    },
+                    "type": None,
+                    "name": None,
+                    "active": True,
+                    "deposit": True,
+                    "withdraw": True,
+                    "fee": 3.05e-06,
+                    "precision": None,
+                    "limits": {
+                        "amount": {
+                            "min": None,
+                            "max": None
+                        },
+                        "withdraw": {
+                            "min": 7.8e-06,
+                            "max": None
+                        },
+                        "deposit": {
+                            "min": 1e-06,
+                            "max": None
+                        }
+                    },
+                    "created": None
+                }
+            }        
+        '''
 
         for currency in currencies:
-            result[currency['symbol'].upper()] = self.parse_currency(currency)        
+            result[currency['symbol'].upper()] = self.parse_currency(currency)   
+
+        return result     
 
     def parse_currency(self, currency):
         fee = '0.0'
@@ -268,3 +410,152 @@ class foxbit(Exchange, ImplicitAPI):
             'networks': {...},
             'info': { ... }
         }
+
+    def fetch_trading_limits(self, symbols: Strings = None, params={}):
+        '''EXPECTED RETURN
+            {
+                "ETH/BTC": {
+                    "info": {
+                        "symbol": "ethbtc",
+                        "buy-limit-must-less-than": "1.1",
+                        "buy-limit-must-greater-than": "0.1",
+                        "sell-limit-must-less-than": "10",
+                        "sell-limit-must-greater-than": "0.9",
+                        "limit-order-must-greater-than": "0.001",
+                        "limit-order-must-less-than": "10000",
+                        "limit-buy-amount-must-less-than": "10000",
+                        "limit-sell-amount-must-less-than": "10000",
+                        "market-buy-order-must-greater-than": "0.0001",
+                        "market-sell-amount-must-less-than": "0.0001",
+                        "market-buy-volume-must-greater-than": "0.0001",
+                        "market-sell-volume-must-less-than": "0.0001",
+                        "market-bs-calc-max-scale": "1",
+                        "market-buy-order-must-less-than": "100",
+                        "market-sell-order-must-greater-than": "0.001",
+                        "market-sell-order-must-less-than": "1000",
+                        "limit-order-before-open-greater-than": "999999999",
+                        "limit-order-before-open-less-than": "0",
+                        "circuit-break-when-greater-than": "100",
+                        "circuit-break-when-less-than": "10",
+                        "order-must-less-than": "0",
+                        "market-sell-order-rate-must-less-than": "0.1",
+                        "market-buy-order-rate-must-less-than": "0.1",
+                        "market-order-disabled-start-time": "0",
+                        "market-order-disabled-end-time": "0",
+                        "limit-order-limit-price-start-time": "0",
+                        "limit-order-limit-price-end-time": "0",
+                        "limit-order-limit-price-greater-than": None,
+                        "limit-order-limit-price-less-than": None,
+                        "equity-deviation-rate": None,
+                        "equity-deviation-rate-buy": None,
+                        "equity-deviation-rate-sell": None,
+                        "market-equity-deviation-rate": None,
+                        "market-equity-deviation-rate-buy": None,
+                        "market-equity-deviation-rate-sell": None,
+                        "equity-deviation-rate-switch": "0",
+                        "market-equity-deviation-rate-switch": "0",
+                        "limit-order-switch": "0",
+                        "limit-order-buy-offset": "0",
+                        "market-order-switch": "0",
+                        "market-order-buy-offset": "0",
+                        "updated-at": "1611743119000"
+                    },
+                    "limits": {
+                        "amount": {
+                            "min": 0.001,
+                            "max": 10000.0
+                        }
+                    }
+                }
+            }          
+        '''
+      
+        self.load_markets()
+        
+        if symbols is None:
+            symbols = self.symbols
+        
+        result = {}
+        
+        for symbol in symbols:
+            result[symbol] = self.fetch_trading_by_market(self.market(symbol), params) 
+
+        return result
+    
+    def fetch_trading_by_market(self, market, params):
+        return {
+            "info": {
+                "symbol": market['id'],
+                "buy-limit-must-less-than": "1.1",
+                "buy-limit-must-greater-than": "0.1",
+                "sell-limit-must-less-than": "10",
+                "sell-limit-must-greater-than": "0.9",
+                "limit-order-must-greater-than": "0.001",
+                "limit-order-must-less-than": "10000",
+                "limit-buy-amount-must-less-than": "10000",
+                "limit-sell-amount-must-less-than": "10000",
+                "market-buy-order-must-greater-than": "0.0001",
+                "market-sell-amount-must-less-than": "0.0001",
+                "market-buy-volume-must-greater-than": "0.0001",
+                "market-sell-volume-must-less-than": "0.0001",
+                "market-bs-calc-max-scale": "1",
+                "market-buy-order-must-less-than": "100",
+                "market-sell-order-must-greater-than": "0.001",
+                "market-sell-order-must-less-than": "1000",
+                "limit-order-before-open-greater-than": "999999999",
+                "limit-order-before-open-less-than": "0",
+                "circuit-break-when-greater-than": "100",
+                "circuit-break-when-less-than": "10",
+                "order-must-less-than": "0",
+                "market-sell-order-rate-must-less-than": "0.1",
+                "market-buy-order-rate-must-less-than": "0.1",
+                "market-order-disabled-start-time": "0",
+                "market-order-disabled-end-time": "0",
+                "limit-order-limit-price-start-time": "0",
+                "limit-order-limit-price-end-time": "0",
+                "limit-order-limit-price-greater-than": None,
+                "limit-order-limit-price-less-than": None,
+                "equity-deviation-rate": None,
+                "equity-deviation-rate-buy": None,
+                "equity-deviation-rate-sell": None,
+                "market-equity-deviation-rate": None,
+                "market-equity-deviation-rate-buy": None,
+                "market-equity-deviation-rate-sell": None,
+                "equity-deviation-rate-switch": "0",
+                "market-equity-deviation-rate-switch": "0",
+                "limit-order-switch": "0",
+                "limit-order-buy-offset": "0",
+                "market-order-switch": "0",
+                "market-order-buy-offset": "0",
+                "updated-at": self.timestamp_now()
+            },
+            "limits": {
+                "amount": {
+                    "min": market['limits']['amount']['min'],
+                    "max": None
+                }
+            }
+        }
+    
+    def timestamp_now(self):
+        return str(
+            datetime.now().timestamp()
+        )
+    
+    def fetch_ticker(self, symbol: str, params={}) -> Ticker:
+        if symbol is None:
+            symbol = self.symbol
+        
+        result = {}
+        self.load_markets()
+
+        request = {
+            'market_symbol': self.market_id(symbol)
+        }
+
+        response =  self.publicGetTicker(self.extend(request, params))
+
+        return result
+
+    def fetch_tickers(self, symbols: Strings = None, params={}) -> Tickers:
+        ...
