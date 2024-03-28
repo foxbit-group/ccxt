@@ -1,9 +1,11 @@
 from ccxt.base.exchange import Exchange
 from ccxt.abstract.foxbit import ImplicitAPI
 from ccxt.base.decimal_to_precision import TICK_SIZE
-from ccxt.base.types import Strings, Ticker, Tickers, Int, OrderBook, Trade
+from ccxt.base.types import Strings, Ticker, Tickers, Int, OrderBook, Trade, Balances
 from datetime import datetime
 from typing import List
+import hmac
+import hashlib
 
 class foxbit(Exchange, ImplicitAPI):
 
@@ -262,7 +264,8 @@ class foxbit(Exchange, ImplicitAPI):
 
         request = {
             'market_symbol': market,
-            'interval': interval
+            'interval': interval,
+            'limit': 1
         }
 
         response =  self.publicGetTicker(self.extend(request, params))
@@ -306,7 +309,7 @@ class foxbit(Exchange, ImplicitAPI):
     def fetch_trades(self, symbol: str, since: Int = None, limit: Int = None, params={}) -> List[Trade]:
         ...
 
-    def fetch_ohlcv(self, symbol: str, timeframe='1m', since: Int = None, limit: Int = None, params={}) -> List[list]:
+    def fetch_ohlcv(self, symbol: str, timeframe='1m', since: Int = None, limit: int = 1, params={}) -> List[list]:
         """
             SETTINGS POSITION 5 VOLUME
         """
@@ -317,12 +320,52 @@ class foxbit(Exchange, ImplicitAPI):
         request = {
             'interval': timeframe,
             'market_symbol': market['id'],
+            'limit': limit
         }
         response = self.publicGetTicker(self.extend(request, params))
 
         return self.parse_ohlcvs(response, market, timeframe, since, limit)
 
     # PRIVATE
+
+    def fetch_balance(self, params={})-> Balances:
+        self.load_markets()
+        response = self.privateGetBalance(params)
+
+        result = { 'info': response }
+
+        for account in response['data']:
+            result[account['currency_symbol'].upper()] = self.parse_balance(account)
+        
+        return result
+
+    def create_order(self, params={}):
+        ...
+
+    def cancel_order(self, params={}):
+        ...
+
+    def fetch_order(self, params={}):
+        ...
+
+    def fetch_orders(self, params={}):
+        ...
+
+    def fetch_open_orders(self, params={}):
+        ...
+    
+    def fetch_close_orders(self, params={}):
+        ...
+
+    def fetch_my_trades(self, params={}):
+        ...
+
+    def deposit(self, params={}):
+        ...
+
+    def withdraw(self, params={}):
+        ...
+
         
     # PARSER
 
@@ -330,8 +373,44 @@ class foxbit(Exchange, ImplicitAPI):
         url = self.implode_hostname(self.urls['api']['rest']) + '/' + self.implode_params(path, params)
         headers = { 'Content-Type': 'application/json' }
 
-        if method == "POST":
-            body = self.json(params)
+        if api == "private":
+            format_url = url.split("?")
+            query_params = ""
+            try:
+                query_params = format_url[1]
+            except:
+                ... 
+
+            payload = {
+                "method": method,
+                "url": f"/rest/v3/{path}",
+                "query": query_params
+            }
+            
+            timestamp = self.__timestamp_now()
+
+            prehash = f"{timestamp}{payload['method']}{payload['url']}{payload['query']}"
+
+            secret_key = bytes(self.secret, "utf-8")
+        
+            hash = hmac.new(
+                secret_key, 
+                prehash.encode("utf-8"),
+                hashlib.sha256
+            ).hexdigest()
+
+            headers['X-FB-ACCESS-KEY']       = self.apiKey
+            headers['X-FB-ACCESS-TIMESTAMP'] = timestamp
+            headers['X-FB-ACCESS-SIGNATURE'] = str(hash)
+
+            if method == "GET":
+                return {'url': url, 'method': method, 'body': None, 'headers': headers}
+            
+            elif method == "POST":
+                return {'url': url, 'method': method, 'body': body, 'headers': headers}
+
+
+            
         
         return {'url': url, 'method': method, 'body': body, 'headers': headers}
 
@@ -377,20 +456,20 @@ class foxbit(Exchange, ImplicitAPI):
                 'tierBased': False,                                
                 'feeSide': 'get',                                  
                 'precision': {                                     
-                        'price': 8,                                    
-                        'amount': 8,                                   
-                        'cost': 8,                                          
+                    'price': 8,                                    
+                    'amount': 8,                                   
+                    'cost': 8,                                          
                 },
                 'limits': {                                             
-                        'amount': {
-                                'min': market['price_min'],                                    
-                                'max': 0,                                    
-                        },
-                        'price': { ... },                                   
-                        'cost':  { ... },                                   
-                        'leverage': { ... },                                
+                    'amount': {
+                        'min': market['price_min'],                                    
+                        'max': 0,                                    
+                    },
+                    'price': {},                                   
+                    'cost':  {},                                   
+                    'leverage': {},                                
                 },
-                'info':      { ... }
+                'info': market
             })
         return result
 
@@ -645,3 +724,10 @@ class foxbit(Exchange, ImplicitAPI):
             'info': ticker,
         }
 
+    def parse_balance(self, account):
+        return {
+            'free': float(account.get('balance_available', None)),
+            'used': float(account.get('balance_locked', None)),
+            'total': float(account.get('balance', None))
+        }
+    
