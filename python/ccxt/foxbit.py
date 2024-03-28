@@ -307,7 +307,20 @@ class foxbit(Exchange, ImplicitAPI):
         ...
 
     def fetch_ohlcv(self, symbol: str, timeframe='1m', since: Int = None, limit: Int = None, params={}) -> List[list]:
-        ...
+        """
+            SETTINGS POSITION 5 VOLUME
+        """
+        self.load_markets()
+        
+        market = self.market(symbol)
+        
+        request = {
+            'interval': timeframe,
+            'market_symbol': market['id'],
+        }
+        response = self.publicGetTicker(self.extend(request, params))
+
+        return self.parse_ohlcvs(response, market, timeframe, since, limit)
 
     # PRIVATE
         
