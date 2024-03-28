@@ -357,8 +357,25 @@ class foxbit(Exchange, ImplicitAPI):
     def fetch_close_orders(self, params={}):
         ...
 
-    def fetch_my_trades(self, params={}):
-        ...
+    def fetch_my_trades(self, symbol: str = None, since: int = None, limit: int = None, params={}):
+        if symbol is None:
+            symbol = "BTC/BRL"
+        
+        self.load_markets()
+        market = self.market(symbol)
+        
+        request = {
+            'market_symbol': market['id'],
+        }
+        
+        response = self.privateGetTrades(self.extend(request, params))
+
+        result = []
+
+        for trade in response['data']:
+            result.append(self.parse_trade(trade))
+        
+        return result
 
     def deposit(self, params={}):
         ...
@@ -374,16 +391,16 @@ class foxbit(Exchange, ImplicitAPI):
         headers = { 'Content-Type': 'application/json' }
 
         if api == "private":
-            format_url = url.split("?")
+            format_path = path.split("?")[0]
             query_params = ""
             try:
-                query_params = format_url[1]
+                query_params = url.split("?")[1]
             except:
                 ... 
 
             payload = {
                 "method": method,
-                "url": f"/rest/v3/{path}",
+                "url": f"/rest/v3/{format_path}",
                 "query": query_params
             }
             
@@ -409,9 +426,6 @@ class foxbit(Exchange, ImplicitAPI):
             elif method == "POST":
                 return {'url': url, 'method': method, 'body': body, 'headers': headers}
 
-
-            
-        
         return {'url': url, 'method': method, 'body': body, 'headers': headers}
 
     def __timestamp_now(self):
@@ -731,3 +745,30 @@ class foxbit(Exchange, ImplicitAPI):
             'total': float(account.get('balance', None))
         }
     
+    def parse_trade(self, trade):
+        # REFAC
+        return {
+            'id':           '12345-67890:09876/54321',   
+            'timestamp':    1502962946216,  
+            'datetime':     '2017-08-17 12:42:48.000',   
+            'symbol':       'ETH/BTC',   
+            'order':        '12345-67890:09876/54321',   
+            'type':         'limit',   
+            'side':         'buy',   
+            'takerOrMaker': 'taker',   
+            'price':        0.06917684,  
+            'amount':       1.5,  
+            'cost':         0.10376526,  
+            'fee':          {   
+                'cost':  0.0015,  
+                'currency': 'ETH',   
+                'rate': 0.002,  
+            },
+            'fees': [
+                {
+                    'cost':  0.0015,
+                    'currency': 'ETH',
+                    'rate': 0.002,
+                },
+            ],
+        }
