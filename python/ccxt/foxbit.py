@@ -244,91 +244,64 @@ class foxbit(Exchange, ImplicitAPI):
         result = {}
         
         for symbol in symbols:
-            result[symbol] = self.fetch_trading_by_market(self.market(symbol), params) 
+            result[symbol] = self.parse_trading_by_market(self.market(symbol), params) 
 
         return result
     
-    def fetch_trading_by_market(self, market, params):
-        return {
-            "info": {
-                "symbol": market['id'],
-                "buy-limit-must-less-than": "1.1",
-                "buy-limit-must-greater-than": "0.1",
-                "sell-limit-must-less-than": "10",
-                "sell-limit-must-greater-than": "0.9",
-                "limit-order-must-greater-than": "0.001",
-                "limit-order-must-less-than": "10000",
-                "limit-buy-amount-must-less-than": "10000",
-                "limit-sell-amount-must-less-than": "10000",
-                "market-buy-order-must-greater-than": "0.0001",
-                "market-sell-amount-must-less-than": "0.0001",
-                "market-buy-volume-must-greater-than": "0.0001",
-                "market-sell-volume-must-less-than": "0.0001",
-                "market-bs-calc-max-scale": "1",
-                "market-buy-order-must-less-than": "100",
-                "market-sell-order-must-greater-than": "0.001",
-                "market-sell-order-must-less-than": "1000",
-                "limit-order-before-open-greater-than": "999999999",
-                "limit-order-before-open-less-than": "0",
-                "circuit-break-when-greater-than": "100",
-                "circuit-break-when-less-than": "10",
-                "order-must-less-than": "0",
-                "market-sell-order-rate-must-less-than": "0.1",
-                "market-buy-order-rate-must-less-than": "0.1",
-                "market-order-disabled-start-time": "0",
-                "market-order-disabled-end-time": "0",
-                "limit-order-limit-price-start-time": "0",
-                "limit-order-limit-price-end-time": "0",
-                "limit-order-limit-price-greater-than": None,
-                "limit-order-limit-price-less-than": None,
-                "equity-deviation-rate": None,
-                "equity-deviation-rate-buy": None,
-                "equity-deviation-rate-sell": None,
-                "market-equity-deviation-rate": None,
-                "market-equity-deviation-rate-buy": None,
-                "market-equity-deviation-rate-sell": None,
-                "equity-deviation-rate-switch": "0",
-                "market-equity-deviation-rate-switch": "0",
-                "limit-order-switch": "0",
-                "limit-order-buy-offset": "0",
-                "market-order-switch": "0",
-                "market-order-buy-offset": "0",
-                "updated-at": self.__timestamp_now()
-            },
-            "limits": {
-                "amount": {
-                    "min": market['limits']['amount']['min'],
-                    "max": None
-                }
-            }
-        }
-
     def fetch_ticker(self, symbol: str, params={}) -> Ticker:
         if symbol is None:
             symbol = self.symbol
+
+        interval = "1d"
+
+        if params.get("interval", None):
+            interval = params["interval"]
         
-        result = {}
         self.load_markets()
+        market = self.market_id(symbol)
 
         request = {
-            'market_symbol': self.market_id(symbol)
+            'market_symbol': market,
+            'interval': interval
         }
 
         response =  self.publicGetTicker(self.extend(request, params))
 
-        return result
+        return self.parse_ticker(response[0], symbol)
 
     def fetch_tickers(self, symbols: Strings = None, params={}) -> Tickers:
         ...
 
     def fetch_trading_fees(self, params={}):
-        ...
+        """
+            NOT ROUTE TO FEE
+        """
+        self.load_markets()
+        result = {}
+        
+        for symbol in self.symbols:
+            result[symbol] = {
+                'info': {},
+                'symbol': symbol,
+                'maker': None,
+                'taker': None,
+                'percentage': True,
+                'tierBased': True,
+            }
+        
+        return result
 
-    def fetch_funding_limits(self, params={}):
-        ...
+    def fetch_order_book(self, symbol: str, limit: int = 1, params={}) -> OrderBook:
+        self.load_markets()        
+        market = self.market_id(symbol)
 
-    def fetch_order_book(self, symbol: str, limit: Int = None, params={}) -> OrderBook:
-        ...
+        request = {
+            'market_symbol': market,
+            'depth': limit
+        }
+
+        response = self.publicGetOrderBook(self.extend(request, params))
+        return self.parse_order_book(response, symbol, None, 'bids', 'asks', 0, 1)
 
     def fetch_trades(self, symbol: str, since: Int = None, limit: Int = None, params={}) -> List[Trade]:
         ...
@@ -352,7 +325,7 @@ class foxbit(Exchange, ImplicitAPI):
     def __timestamp_now(self):
         return str(
             datetime.now().timestamp()
-        )
+        ).split('.')[0]
     
     def parse_markets(self, markets):
         result = []
@@ -579,3 +552,83 @@ class foxbit(Exchange, ImplicitAPI):
             'networks': {...},
             'info': { ... }
         }
+
+    def parse_trading_by_market(self, market, params):
+        return {
+            "info": {
+                "symbol": market['id'],
+                "buy-limit-must-less-than": "1.1",
+                "buy-limit-must-greater-than": "0.1",
+                "sell-limit-must-less-than": "10",
+                "sell-limit-must-greater-than": "0.9",
+                "limit-order-must-greater-than": "0.001",
+                "limit-order-must-less-than": "10000",
+                "limit-buy-amount-must-less-than": "10000",
+                "limit-sell-amount-must-less-than": "10000",
+                "market-buy-order-must-greater-than": "0.0001",
+                "market-sell-amount-must-less-than": "0.0001",
+                "market-buy-volume-must-greater-than": "0.0001",
+                "market-sell-volume-must-less-than": "0.0001",
+                "market-bs-calc-max-scale": "1",
+                "market-buy-order-must-less-than": "100",
+                "market-sell-order-must-greater-than": "0.001",
+                "market-sell-order-must-less-than": "1000",
+                "limit-order-before-open-greater-than": "999999999",
+                "limit-order-before-open-less-than": "0",
+                "circuit-break-when-greater-than": "100",
+                "circuit-break-when-less-than": "10",
+                "order-must-less-than": "0",
+                "market-sell-order-rate-must-less-than": "0.1",
+                "market-buy-order-rate-must-less-than": "0.1",
+                "market-order-disabled-start-time": "0",
+                "market-order-disabled-end-time": "0",
+                "limit-order-limit-price-start-time": "0",
+                "limit-order-limit-price-end-time": "0",
+                "limit-order-limit-price-greater-than": None,
+                "limit-order-limit-price-less-than": None,
+                "equity-deviation-rate": None,
+                "equity-deviation-rate-buy": None,
+                "equity-deviation-rate-sell": None,
+                "market-equity-deviation-rate": None,
+                "market-equity-deviation-rate-buy": None,
+                "market-equity-deviation-rate-sell": None,
+                "equity-deviation-rate-switch": "0",
+                "market-equity-deviation-rate-switch": "0",
+                "limit-order-switch": "0",
+                "limit-order-buy-offset": "0",
+                "market-order-switch": "0",
+                "market-order-buy-offset": "0",
+                "updated-at": self.__timestamp_now()
+            },
+            "limits": {
+                "amount": {
+                    "min": market['limits']['amount']['min'],
+                    "max": None
+                }
+            }
+        }
+
+    def parse_ticker(self, ticker, symbol):
+        return {
+            'symbol': symbol,
+            'timestamp': ticker[0],
+            'datetime': self.iso8601(ticker[0]),
+            'high': float(ticker[2]),
+            'low': float(ticker[3]),
+            'bid': self.safe_string(ticker, 'bid'),
+            'bidVolume': None,
+            'ask': self.safe_string(ticker, 'ask'),
+            'askVolume': None,
+            'vwap': None,
+            'open': float(ticker[1]),
+            'close': float(ticker[4]),
+            'last': None,
+            'previousClose': None,
+            'change': None,
+            'percentage': None,
+            'average': None,
+            'baseVolume': float(ticker[6]),
+            'quoteVolume': float(ticker[7]),
+            'info': ticker,
+        }
+
