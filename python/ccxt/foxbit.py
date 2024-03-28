@@ -1,8 +1,9 @@
 from ccxt.base.exchange import Exchange
 from ccxt.abstract.foxbit import ImplicitAPI
 from ccxt.base.decimal_to_precision import TICK_SIZE
-from ccxt.base.types import Strings, Ticker, Tickers
+from ccxt.base.types import Strings, Ticker, Tickers, Int, OrderBook, Trade
 from datetime import datetime
+from typing import List
 
 class foxbit(Exchange, ImplicitAPI):
 
@@ -170,6 +171,175 @@ class foxbit(Exchange, ImplicitAPI):
         data = self.safe_value(response, 'data', [])
         return self.parse_markets(data)
 
+    def fetch_currencies(self, params={}):
+        response = self.publicGetCurrencies(params)
+        
+        data = self.safe_value(response, 'data', [])
+        return self.parse_currencies(data)
+    
+    def fetch_trading_limits(self, symbols: Strings = None, params={}):
+        '''EXPECTED RETURN
+            {
+                "ETH/BTC": {
+                    "info": {
+                        "symbol": "ethbtc",
+                        "buy-limit-must-less-than": "1.1",
+                        "buy-limit-must-greater-than": "0.1",
+                        "sell-limit-must-less-than": "10",
+                        "sell-limit-must-greater-than": "0.9",
+                        "limit-order-must-greater-than": "0.001",
+                        "limit-order-must-less-than": "10000",
+                        "limit-buy-amount-must-less-than": "10000",
+                        "limit-sell-amount-must-less-than": "10000",
+                        "market-buy-order-must-greater-than": "0.0001",
+                        "market-sell-amount-must-less-than": "0.0001",
+                        "market-buy-volume-must-greater-than": "0.0001",
+                        "market-sell-volume-must-less-than": "0.0001",
+                        "market-bs-calc-max-scale": "1",
+                        "market-buy-order-must-less-than": "100",
+                        "market-sell-order-must-greater-than": "0.001",
+                        "market-sell-order-must-less-than": "1000",
+                        "limit-order-before-open-greater-than": "999999999",
+                        "limit-order-before-open-less-than": "0",
+                        "circuit-break-when-greater-than": "100",
+                        "circuit-break-when-less-than": "10",
+                        "order-must-less-than": "0",
+                        "market-sell-order-rate-must-less-than": "0.1",
+                        "market-buy-order-rate-must-less-than": "0.1",
+                        "market-order-disabled-start-time": "0",
+                        "market-order-disabled-end-time": "0",
+                        "limit-order-limit-price-start-time": "0",
+                        "limit-order-limit-price-end-time": "0",
+                        "limit-order-limit-price-greater-than": None,
+                        "limit-order-limit-price-less-than": None,
+                        "equity-deviation-rate": None,
+                        "equity-deviation-rate-buy": None,
+                        "equity-deviation-rate-sell": None,
+                        "market-equity-deviation-rate": None,
+                        "market-equity-deviation-rate-buy": None,
+                        "market-equity-deviation-rate-sell": None,
+                        "equity-deviation-rate-switch": "0",
+                        "market-equity-deviation-rate-switch": "0",
+                        "limit-order-switch": "0",
+                        "limit-order-buy-offset": "0",
+                        "market-order-switch": "0",
+                        "market-order-buy-offset": "0",
+                        "updated-at": "1611743119000"
+                    },
+                    "limits": {
+                        "amount": {
+                            "min": 0.001,
+                            "max": 10000.0
+                        }
+                    }
+                }
+            }          
+        '''
+      
+        self.load_markets()
+        
+        if symbols is None:
+            symbols = self.symbols
+        
+        result = {}
+        
+        for symbol in symbols:
+            result[symbol] = self.fetch_trading_by_market(self.market(symbol), params) 
+
+        return result
+    
+    def fetch_trading_by_market(self, market, params):
+        return {
+            "info": {
+                "symbol": market['id'],
+                "buy-limit-must-less-than": "1.1",
+                "buy-limit-must-greater-than": "0.1",
+                "sell-limit-must-less-than": "10",
+                "sell-limit-must-greater-than": "0.9",
+                "limit-order-must-greater-than": "0.001",
+                "limit-order-must-less-than": "10000",
+                "limit-buy-amount-must-less-than": "10000",
+                "limit-sell-amount-must-less-than": "10000",
+                "market-buy-order-must-greater-than": "0.0001",
+                "market-sell-amount-must-less-than": "0.0001",
+                "market-buy-volume-must-greater-than": "0.0001",
+                "market-sell-volume-must-less-than": "0.0001",
+                "market-bs-calc-max-scale": "1",
+                "market-buy-order-must-less-than": "100",
+                "market-sell-order-must-greater-than": "0.001",
+                "market-sell-order-must-less-than": "1000",
+                "limit-order-before-open-greater-than": "999999999",
+                "limit-order-before-open-less-than": "0",
+                "circuit-break-when-greater-than": "100",
+                "circuit-break-when-less-than": "10",
+                "order-must-less-than": "0",
+                "market-sell-order-rate-must-less-than": "0.1",
+                "market-buy-order-rate-must-less-than": "0.1",
+                "market-order-disabled-start-time": "0",
+                "market-order-disabled-end-time": "0",
+                "limit-order-limit-price-start-time": "0",
+                "limit-order-limit-price-end-time": "0",
+                "limit-order-limit-price-greater-than": None,
+                "limit-order-limit-price-less-than": None,
+                "equity-deviation-rate": None,
+                "equity-deviation-rate-buy": None,
+                "equity-deviation-rate-sell": None,
+                "market-equity-deviation-rate": None,
+                "market-equity-deviation-rate-buy": None,
+                "market-equity-deviation-rate-sell": None,
+                "equity-deviation-rate-switch": "0",
+                "market-equity-deviation-rate-switch": "0",
+                "limit-order-switch": "0",
+                "limit-order-buy-offset": "0",
+                "market-order-switch": "0",
+                "market-order-buy-offset": "0",
+                "updated-at": self.__timestamp_now()
+            },
+            "limits": {
+                "amount": {
+                    "min": market['limits']['amount']['min'],
+                    "max": None
+                }
+            }
+        }
+
+    def fetch_ticker(self, symbol: str, params={}) -> Ticker:
+        if symbol is None:
+            symbol = self.symbol
+        
+        result = {}
+        self.load_markets()
+
+        request = {
+            'market_symbol': self.market_id(symbol)
+        }
+
+        response =  self.publicGetTicker(self.extend(request, params))
+
+        return result
+
+    def fetch_tickers(self, symbols: Strings = None, params={}) -> Tickers:
+        ...
+
+    def fetch_trading_fees(self, params={}):
+        ...
+
+    def fetch_funding_limits(self, params={}):
+        ...
+
+    def fetch_order_book(self, symbol: str, limit: Int = None, params={}) -> OrderBook:
+        ...
+
+    def fetch_trades(self, symbol: str, since: Int = None, limit: Int = None, params={}) -> List[Trade]:
+        ...
+
+    def fetch_ohlcv(self, symbol: str, timeframe='1m', since: Int = None, limit: Int = None, params={}) -> List[list]:
+        ...
+
+    # PRIVATE
+        
+    # PARSER
+
     def sign(self, path, api='public', method='GET', params={}, headers=None, body=None):
         url = self.implode_hostname(self.urls['api']['rest']) + '/' + self.implode_params(path, params)
         headers = { 'Content-Type': 'application/json' }
@@ -179,7 +349,12 @@ class foxbit(Exchange, ImplicitAPI):
         
         return {'url': url, 'method': method, 'body': body, 'headers': headers}
 
-    def parse_markets(self, markets):			
+    def __timestamp_now(self):
+        return str(
+            datetime.now().timestamp()
+        )
+    
+    def parse_markets(self, markets):
         result = []
 
         for market in markets:
@@ -231,15 +406,9 @@ class foxbit(Exchange, ImplicitAPI):
                 },
                 'info':      { ... }
             })
-        return result 
+        return result
 
-    def fetch_currencies(self, params={}):
-        response = self.publicGetCurrencies(params)
-        
-        data = self.safe_value(response, 'data', [])
-        return self.parse_currencies(data)
-    
-    def parse_currencies(self, currencies):        
+    def parse_currencies(self, currencies):
         result = {}
         '''EXPECTED RESPONSE
             {
@@ -410,152 +579,3 @@ class foxbit(Exchange, ImplicitAPI):
             'networks': {...},
             'info': { ... }
         }
-
-    def fetch_trading_limits(self, symbols: Strings = None, params={}):
-        '''EXPECTED RETURN
-            {
-                "ETH/BTC": {
-                    "info": {
-                        "symbol": "ethbtc",
-                        "buy-limit-must-less-than": "1.1",
-                        "buy-limit-must-greater-than": "0.1",
-                        "sell-limit-must-less-than": "10",
-                        "sell-limit-must-greater-than": "0.9",
-                        "limit-order-must-greater-than": "0.001",
-                        "limit-order-must-less-than": "10000",
-                        "limit-buy-amount-must-less-than": "10000",
-                        "limit-sell-amount-must-less-than": "10000",
-                        "market-buy-order-must-greater-than": "0.0001",
-                        "market-sell-amount-must-less-than": "0.0001",
-                        "market-buy-volume-must-greater-than": "0.0001",
-                        "market-sell-volume-must-less-than": "0.0001",
-                        "market-bs-calc-max-scale": "1",
-                        "market-buy-order-must-less-than": "100",
-                        "market-sell-order-must-greater-than": "0.001",
-                        "market-sell-order-must-less-than": "1000",
-                        "limit-order-before-open-greater-than": "999999999",
-                        "limit-order-before-open-less-than": "0",
-                        "circuit-break-when-greater-than": "100",
-                        "circuit-break-when-less-than": "10",
-                        "order-must-less-than": "0",
-                        "market-sell-order-rate-must-less-than": "0.1",
-                        "market-buy-order-rate-must-less-than": "0.1",
-                        "market-order-disabled-start-time": "0",
-                        "market-order-disabled-end-time": "0",
-                        "limit-order-limit-price-start-time": "0",
-                        "limit-order-limit-price-end-time": "0",
-                        "limit-order-limit-price-greater-than": None,
-                        "limit-order-limit-price-less-than": None,
-                        "equity-deviation-rate": None,
-                        "equity-deviation-rate-buy": None,
-                        "equity-deviation-rate-sell": None,
-                        "market-equity-deviation-rate": None,
-                        "market-equity-deviation-rate-buy": None,
-                        "market-equity-deviation-rate-sell": None,
-                        "equity-deviation-rate-switch": "0",
-                        "market-equity-deviation-rate-switch": "0",
-                        "limit-order-switch": "0",
-                        "limit-order-buy-offset": "0",
-                        "market-order-switch": "0",
-                        "market-order-buy-offset": "0",
-                        "updated-at": "1611743119000"
-                    },
-                    "limits": {
-                        "amount": {
-                            "min": 0.001,
-                            "max": 10000.0
-                        }
-                    }
-                }
-            }          
-        '''
-      
-        self.load_markets()
-        
-        if symbols is None:
-            symbols = self.symbols
-        
-        result = {}
-        
-        for symbol in symbols:
-            result[symbol] = self.fetch_trading_by_market(self.market(symbol), params) 
-
-        return result
-    
-    def fetch_trading_by_market(self, market, params):
-        return {
-            "info": {
-                "symbol": market['id'],
-                "buy-limit-must-less-than": "1.1",
-                "buy-limit-must-greater-than": "0.1",
-                "sell-limit-must-less-than": "10",
-                "sell-limit-must-greater-than": "0.9",
-                "limit-order-must-greater-than": "0.001",
-                "limit-order-must-less-than": "10000",
-                "limit-buy-amount-must-less-than": "10000",
-                "limit-sell-amount-must-less-than": "10000",
-                "market-buy-order-must-greater-than": "0.0001",
-                "market-sell-amount-must-less-than": "0.0001",
-                "market-buy-volume-must-greater-than": "0.0001",
-                "market-sell-volume-must-less-than": "0.0001",
-                "market-bs-calc-max-scale": "1",
-                "market-buy-order-must-less-than": "100",
-                "market-sell-order-must-greater-than": "0.001",
-                "market-sell-order-must-less-than": "1000",
-                "limit-order-before-open-greater-than": "999999999",
-                "limit-order-before-open-less-than": "0",
-                "circuit-break-when-greater-than": "100",
-                "circuit-break-when-less-than": "10",
-                "order-must-less-than": "0",
-                "market-sell-order-rate-must-less-than": "0.1",
-                "market-buy-order-rate-must-less-than": "0.1",
-                "market-order-disabled-start-time": "0",
-                "market-order-disabled-end-time": "0",
-                "limit-order-limit-price-start-time": "0",
-                "limit-order-limit-price-end-time": "0",
-                "limit-order-limit-price-greater-than": None,
-                "limit-order-limit-price-less-than": None,
-                "equity-deviation-rate": None,
-                "equity-deviation-rate-buy": None,
-                "equity-deviation-rate-sell": None,
-                "market-equity-deviation-rate": None,
-                "market-equity-deviation-rate-buy": None,
-                "market-equity-deviation-rate-sell": None,
-                "equity-deviation-rate-switch": "0",
-                "market-equity-deviation-rate-switch": "0",
-                "limit-order-switch": "0",
-                "limit-order-buy-offset": "0",
-                "market-order-switch": "0",
-                "market-order-buy-offset": "0",
-                "updated-at": self.timestamp_now()
-            },
-            "limits": {
-                "amount": {
-                    "min": market['limits']['amount']['min'],
-                    "max": None
-                }
-            }
-        }
-    
-    def timestamp_now(self):
-        return str(
-            datetime.now().timestamp()
-        )
-    
-    def fetch_ticker(self, symbol: str, params={}) -> Ticker:
-        if symbol is None:
-            symbol = self.symbol
-        
-        result = {}
-        self.load_markets()
-
-        request = {
-            'market_symbol': self.market_id(symbol)
-        }
-
-        response =  self.publicGetTicker(self.extend(request, params))
-
-        return result
-
-    def fetch_tickers(self, symbols: Strings = None, params={}) -> Tickers:
-        ...
