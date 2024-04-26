@@ -61,8 +61,11 @@ public partial class indodax : Exchange
                 { "fetchOrderBook", true },
                 { "fetchOrders", false },
                 { "fetchPosition", false },
+                { "fetchPositionHistory", false },
                 { "fetchPositionMode", false },
                 { "fetchPositions", false },
+                { "fetchPositionsForSymbol", false },
+                { "fetchPositionsHistory", false },
                 { "fetchPositionsRisk", false },
                 { "fetchPremiumIndexOHLCV", false },
                 { "fetchTicker", true },
@@ -478,7 +481,7 @@ public partial class indodax : Exchange
         //         }
         //     }
         //
-        object ticker = this.safeValue(response, "ticker", new Dictionary<string, object>() {});
+        object ticker = this.safeDict(response, "ticker", new Dictionary<string, object>() {});
         return this.parseTicker(ticker, market);
     }
 
@@ -512,7 +515,7 @@ public partial class indodax : Exchange
         // }
         //
         object response = await this.publicGetApiTickerAll(parameters);
-        object tickers = this.safeValue(response, "tickers");
+        object tickers = this.safeList(response, "tickers");
         return this.parseTickers(tickers, symbols);
     }
 

@@ -92,7 +92,11 @@ class coinlist extends Exchange {
                 'fetchOrders' => true,
                 'fetchOrderTrades' => true,
                 'fetchPosition' => false,
+                'fetchPositionHistory' => false,
+                'fetchPositionMode' => false,
                 'fetchPositions' => false,
+                'fetchPositionsForSymbol' => false,
+                'fetchPositionsHistory' => false,
                 'fetchPositionsRisk' => false,
                 'fetchPremiumIndexOHLCV' => false,
                 'fetchStatus' => false,
@@ -331,7 +335,7 @@ class coinlist extends Exchange {
         }) ();
     }
 
-    public function fetch_currencies($params = array ()) {
+    public function fetch_currencies($params = array ()): PromiseInterface {
         return Async\async(function () use ($params) {
             /**
              * fetches all available $currencies on an exchange
@@ -396,7 +400,7 @@ class coinlist extends Exchange {
         }) ();
     }
 
-    public function fetch_markets($params = array ()) {
+    public function fetch_markets($params = array ()): PromiseInterface {
         return Async\async(function () use ($params) {
             /**
              * retrieves data on all $markets for coinlist
@@ -725,7 +729,7 @@ class coinlist extends Exchange {
             //         )
             //     }
             //
-            $candles = $this->safe_value($response, 'candles', array());
+            $candles = $this->safe_list($response, 'candles', array());
             return $this->parse_ohlcvs($candles, $market, $timeframe, $since, $limit);
         }) ();
     }
@@ -805,7 +809,7 @@ class coinlist extends Exchange {
             //         )
             //     }
             //
-            $auctions = $this->safe_value($response, 'auctions', array());
+            $auctions = $this->safe_list($response, 'auctions', array());
             return $this->parse_trades($auctions, $market, $since, $limit);
         }) ();
     }
@@ -886,7 +890,7 @@ class coinlist extends Exchange {
         ), $market);
     }
 
-    public function fetch_trading_fees($params = array ()) {
+    public function fetch_trading_fees($params = array ()): PromiseInterface {
         return Async\async(function () use ($params) {
             /**
              * fetch the trading $fees for multiple markets
@@ -1217,7 +1221,7 @@ class coinlist extends Exchange {
             //         )
             //     }
             //
-            $fills = $this->safe_value($response, 'fills', array());
+            $fills = $this->safe_list($response, 'fills', array());
             return $this->parse_trades($fills, $market, $since, $limit);
         }) ();
     }
@@ -1305,7 +1309,7 @@ class coinlist extends Exchange {
             //         )
             //     }
             //
-            $orders = $this->safe_value($response, 'orders', array());
+            $orders = $this->safe_list($response, 'orders', array());
             return $this->parse_orders($orders, $market, $since, $limit);
         }) ();
     }
@@ -1554,7 +1558,7 @@ class coinlist extends Exchange {
             //         "timestamp" => "2023-10-26T11:30:55.376Z"
             //     }
             //
-            $order = $this->safe_value($response, 'order', array());
+            $order = $this->safe_dict($response, 'order', array());
             return $this->parse_order($order, $market);
         }) ();
     }
@@ -1846,7 +1850,7 @@ class coinlist extends Exchange {
             //         )
             //     }
             //
-            $transfers = $this->safe_value($response, 'transfers', array());
+            $transfers = $this->safe_list($response, 'transfers', array());
             return $this->parse_transfers($transfers, $currency, $since, $limit);
         }) ();
     }
@@ -1994,7 +1998,7 @@ class coinlist extends Exchange {
         }) ();
     }
 
-    public function withdraw(string $code, float $amount, $address, $tag = null, $params = array ()) {
+    public function withdraw(string $code, float $amount, string $address, $tag = null, $params = array ()) {
         return Async\async(function () use ($code, $amount, $address, $tag, $params) {
             /**
              * $request a withdrawal from CoinList wallet. (Disabled by default. Contact CoinList to apply for an exception.)
@@ -2019,7 +2023,7 @@ class coinlist extends Exchange {
             //         "transfer_id" => "d4a2d8dd-7def-4545-a062-761683b9aa05"
             //     }
             //
-            $data = $this->safe_value($response, 'data', array());
+            $data = $this->safe_dict($response, 'data', array());
             return $this->parse_transaction($data, $currency);
         }) ();
     }
