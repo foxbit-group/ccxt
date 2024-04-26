@@ -10,3 +10,4 @@ class ImplicitAPI:
   private_get_private_orders         = privateGetOrders             = Entry('orders?state={state}&market_symbol={market_symbol}&page_size={page_size}', 'private', 'GET', {})  
   private_get_private_orders_w_state = privateGetOrdersWithoutState = Entry('orders?market_symbol={market_symbol}&page_size={page_size}', 'private', 'GET', {}) 
   private_get_private_order          = privateGetOrder              = Entry('orders/by-order-id/{order_id}', 'private', 'GET', {})
+  private_post_private_create_order  = privatePostOrderCreate       = Entry('orders', 'private', 'POST', {})

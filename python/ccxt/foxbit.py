@@ -3,20 +3,23 @@ from ccxt.abstract.foxbit import ImplicitAPI
 from ccxt.base.exchange import Exchange
 from datetime import datetime
 from ccxt.base.types import (
-    Strings,
-    Ticker,
-    Tickers,
-    Int,
-    OrderBook,
-    Trade,
-    Balances,
-		Order,
-		Market
+	Num,
+	OrderType,
+	OrderSide,
+	Strings,
+	Ticker,
+	Tickers,
+	Int,
+	OrderBook,
+	Trade,
+	Balances,
+	Order,
+	Market
 )
 from typing import List
 import hashlib
 import hmac
-
+import json
 
 class foxbit(Exchange, ImplicitAPI):
 
@@ -294,8 +297,26 @@ class foxbit(Exchange, ImplicitAPI):
 
 		return result
 
-	def create_order(self, params={}):
-			...
+	def create_order(self, symbol: str, type: OrderType, side: OrderSide, amount: float, price: Num = None, params={}):
+		market = self.market(symbol)
+
+		request = {
+			"side": side.upper(),
+			"type": type.upper(),
+			"market_symbol": market['id'],
+			"quantity": str(amount)
+		}
+
+		if type == "limit":
+			request['price'] = str(price)
+
+		response = self.privatePostOrderCreate(self.extend(request, params))
+		request = {
+			'order_id': response['id']
+		}
+
+		response = self.privateGetOrder(self.extend(request, params))		
+		return self.parse_order(response, market)
 
 	def cancel_order(self, params={}):
 			...
@@ -395,20 +416,25 @@ class foxbit(Exchange, ImplicitAPI):
 		headers = {'Content-Type': 'application/json'}
 
 		if api == "private":
-			format_path  = self.implode_params(path, params)
 			query_params = ""
-			
-			if "?" in path:
-				format_path = path.split("?")[0]
-				query_params = url.split("?")[1]
-
+			format_path  = self.implode_params(path, params)
+			timestamp 	 = self.__timestamp_now()
 			payload = {
 				"method": method,
-				"url": f"/rest/v3/{format_path}",
-				"query": query_params
+				"url": f"/rest/v3/{format_path}"
 			}
-			timestamp = self.__timestamp_now()
-			prehash = f"{timestamp}{payload['method']}{payload['url']}{payload['query']}"
+
+			if method == "POST":
+				body = json.dumps(params)
+				payload['body'] = body
+				prehash = f"{timestamp}{payload['method']}{payload['url']}{payload['body']}"
+			else:
+				if "?" in path:
+					format_path = path.split("?")[0]
+					query_params = url.split("?")[1]
+
+				payload['query'] = query_params
+				prehash = f"{timestamp}{payload['method']}{payload['url']}{query_params}"
 
 			secret_key = bytes(self.secret, "utf-8")
 
@@ -466,9 +492,8 @@ class foxbit(Exchange, ImplicitAPI):
 				'tierBased': False,
 				'feeSide': 'get',
 				'precision': {
-					'price': 8,
-					'amount': 8,
-					'cost': 8,
+					'price': base['precision'],
+					'amount': quote['precision']
 				},
 				'limits': {
 					'amount': {
