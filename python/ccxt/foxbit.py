@@ -9,7 +9,9 @@ from ccxt.base.types import (
     Int,
     OrderBook,
     Trade,
-    Balances
+    Balances,
+		Order,
+		Market
 )
 from typing import List
 import hashlib
@@ -264,7 +266,7 @@ class foxbit(Exchange, ImplicitAPI):
 
 	def fetch_ohlcv(self, symbol: str, timeframe='1m', since: Int = None, limit: int = 1, params={}) -> List[list]:
 		"""
-										SETTINGS POSITION 5 VOLUME
+			SETTINGS POSITION 5 VOLUME
 		"""
 		self.load_markets()
 
@@ -298,17 +300,52 @@ class foxbit(Exchange, ImplicitAPI):
 	def cancel_order(self, params={}):
 			...
 
-	def fetch_order(self, params={}):
-			...
+	def fetch_order(self, id: str, symbol: str = None, params={}):
+		market = self.market(symbol)
+		request = {
+			'order_id': id
+		}
 
-	def fetch_orders(self, params={}):
-			...
+		response = self.privateGetOrder(self.extend(request, params))		
+		return self.parse_order(response, market)
 
-	def fetch_open_orders(self, params={}):
-			...
+	def fetch_orders(self, symbol: str = None, since: Int = None, limit: Int = None, params={}) -> List[Order]:
+		market = self.market(symbol)
+		request = {
+			'market_symbol': market['id'],
+			'page_size': limit
+		}
 
-	def fetch_close_orders(self, params={}):
-			...
+		response = self.privateGetOrdersWithoutState(self.extend(request, params))
+		orders = self.safe_list(response, 'data', [])
+
+		return self.parse_orders(orders, market, since, limit)
+
+	def fetch_open_orders(self, symbol: str = None, since: Int = None, limit: Int = 10, params={}) -> List[Order]:
+		market = self.market(symbol)
+		request = {
+			'market_symbol': market['id'],
+			'state': 'ACTIVE',
+			'page_size': limit
+		}
+
+		response = self.privateGetOrders(self.extend(request, params))
+		orders = self.safe_list(response, 'data', [])
+
+		return self.parse_orders(orders, market, since, limit)
+
+	def fetch_close_orders(self, symbol: str = None, since: Int = None, limit: Int = 10, params={}) -> List[Order]:
+		market = self.market(symbol)
+		request = {
+			'market_symbol': market['id'],
+			'state': 'CANCELED',
+			'page_size': limit
+		}
+
+		response = self.privateGetOrders(self.extend(request, params))
+		orders = self.safe_list(response, 'data', [])
+
+		return self.parse_orders(orders, market, since, limit)
 
 	def fetch_my_trades(self, symbol: str = None, since: int = None, limit: int = None, params={}):
 		if symbol is None:
@@ -358,13 +395,12 @@ class foxbit(Exchange, ImplicitAPI):
 		headers = {'Content-Type': 'application/json'}
 
 		if api == "private":
-			format_path = path.split("?")[0]
+			format_path  = self.implode_params(path, params)
 			query_params = ""
 			
-			try:
+			if "?" in path:
+				format_path = path.split("?")[0]
 				query_params = url.split("?")[1]
-			except:
-					...
 
 			payload = {
 				"method": method,
@@ -593,4 +629,32 @@ class foxbit(Exchange, ImplicitAPI):
 					'rate': 0.002,
 				},
 			],
+		}
+
+	def parse_order(self, order, market: Market = None) -> Order:
+		if order['price'] is None:
+			price = 0.0
+		else:
+			price = float(order['price'])
+
+		return {
+			'id': order['id'],
+			'clientOrderId':  order['sn'],
+			'datetime': order['created_at'],
+			'timestamp': self.iso8601(order['created_at']),
+			'lastTradeTimestamp': None,
+			'status': order['state'],
+			'symbol': market['symbol'],
+			'type': order['type'].lower(),
+			'timeInForce': 'GTC',    
+			'side': order['side'].lower(),
+			'price': price,
+			'average': float(order['price_avg']),
+			'amount': order['quantity'],
+			'filled': float(order['quantity_executed']),
+			'remaining': None,
+			'cost': None,
+			'trades': None,
+			'fee': {},
+			'info': order
 		}
