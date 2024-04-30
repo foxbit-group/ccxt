@@ -444,11 +444,11 @@ class foxbit(Exchange, ImplicitAPI):
                 prehash = f"{timestamp}{payload['method']}{payload['url']}{payload['body']}"
             else:
                 if "?" in path:
-                    format_path = path.split("?")[0]
+                    format_path = payload['url'].split("?")[0]
                     query_params = url.split("?")[1]
 
                 payload['query'] = query_params
-                prehash = f"{timestamp}{payload['method']}{payload['url']}{query_params}"
+                prehash = f"{timestamp}{payload['method']}/rest/v3/{format_path}{query_params}"
 
             secret_key = bytes(self.secret, "utf-8")
 
