@@ -5,6 +5,8 @@ from datetime import datetime
 from ccxt.base.types import (
     Num,
     OrderType,
+    Currency,
+    Transaction,
     OrderSide,
     Strings,
     Ticker,
@@ -402,14 +404,56 @@ class foxbit(Exchange, ImplicitAPI):
 
         return result
 
-    def fetch_deposit_address(self, params={}):
-        ...
+    def fetch_deposit_address(self, code: str, params={}):
+        self.load_markets()
+        currency = self.currency(code)
+        request = {'market_symbol': currency['id']}
+        response = self.privateDepositAddress(self.extend(request, params))
 
-    def fetch_deposits(self, params={}):
-        ...
+        return {
+            'currency': response['currency_symbol'],
+            'address': response['address'],
+            'tag': response['destination_tag'],
+            'network': None,
+            'info': response,
+        }
 
-    def fetch_withdraws(self, params={}):
-        ...
+    def fetch_deposits(self, code: str = None, since: Int = None, limit: Int = None, params={}) -> List[Transaction]:
+        request = {
+            'limit': 100
+        }
+        currency = None
+
+        if code is not None:
+            self.load_markets()
+            currency = self.currency(code)
+            request['market_symbol'] = currency['id']
+        if limit is not None:
+            request['limit'] = limit
+
+        response = self.privateDeposit(self.extend(request, params))
+
+        deposits = self.safe_list(response, 'data', [])
+        return self.parse_transactions(deposits, currency, since, limit)
+
+    def fetch_withdrawals(self, code: str = None, since: Int = None, limit: Int = None, params={}) -> List[Transaction]:
+        request = {
+            'limit': 100
+        }
+        currency = None
+
+        if code is not None:
+            self.load_markets()
+            currency = self.currency(code)
+            request['market_symbol'] = currency['id']
+
+        if limit is not None:
+            request['limit'] = limit
+
+        response = self.privateWithdrawals(self.extend(request, params))
+
+        withdrawals = self.safe_list(response, 'data', [])
+        return self.parse_transactions(withdrawals, currency, since, limit)
 
     def fetch_transactions(self, params={}):
         ...
@@ -417,8 +461,43 @@ class foxbit(Exchange, ImplicitAPI):
     def fetch_ledger(self, params={}):
         ...
 
-    def withdraw(self, params={}):
-        ...
+    def withdraw(self, code: str, amount: float, address: str, tag=None, params={}):
+        if code == "BRL":
+            body = {
+                "amount": amount,
+                "currency_symbol": "brl",
+                "bank": {
+                    "code": params['code_bank'],
+                    "branch": {
+                        "number": params['branch_number'],
+                        "digit": params['branch_digit']
+                    },
+                    "account": {
+                        "number": params['account_number'],
+                        "digit": params['account_digit'],
+                        "type": "CHECK"
+                    }
+                }
+
+            }
+        else:
+            self.load_markets()
+            currency = self.currency(code)
+
+            body = {
+                "amount": amount,
+                "currency_symbol": currency['id'],
+                "destination_address": address,
+                "destination_tag": tag
+            }
+
+        response = self.privatePostWithdrawals(self.extend(body, params))
+
+        return self.extend(response['data'], {
+            'code': response['sn'],
+            'address': None,
+            'tag': None,
+        })
 
     def transfer(self, params={}):
         ...
@@ -446,9 +525,11 @@ class foxbit(Exchange, ImplicitAPI):
                 if "?" in path:
                     format_path = payload['url'].split("?")[0]
                     query_params = url.split("?")[1]
+                else:
+                    format_path = payload['url']
 
                 payload['query'] = query_params
-                prehash = f"{timestamp}{payload['method']}/rest/v3/{format_path}{query_params}"
+                prehash = f"{timestamp}{payload['method']}{format_path}{query_params}"  # /rest/v3/
 
             secret_key = bytes(self.secret, "utf-8")
 
@@ -696,4 +777,41 @@ class foxbit(Exchange, ImplicitAPI):
             'trades': None,
             'fee': {},
             'info': order
+        }
+
+    def parse_transaction(self, transaction, currency: Currency = None, params={}) -> Transaction:
+
+        # request = {
+        #     'sn': transaction['sn']
+        # }
+
+        # response = self.privateDepositSn((self.extend(request, params)))
+        # response['details_crypto']['transaction_id']
+        # response['details_crypto']['receiving_address']
+
+        return {
+            'info': transaction,
+            'id': transaction['sn'],
+            'txid': None,
+            'type': None,
+            'currency': None,
+            'network': None,
+            'amount': transaction['amount'],
+            'status': transaction['state'],
+            'timestamp': None,
+            'datetime': None,
+            'address': None,
+            'addressFrom': None,
+            'addressTo': None,
+            'tag': None,
+            'tagFrom': None,
+            'tagTo': None,
+            'updated': None,
+            'comment': None,
+            'fee': {
+                'currency': None,
+                'cost': None,
+                'rate': None,
+            },
+            'internal': False,
         }

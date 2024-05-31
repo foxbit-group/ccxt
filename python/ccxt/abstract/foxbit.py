@@ -13,3 +13,8 @@ class ImplicitAPI:
     private_get_private_order = privateGetOrder = Entry('orders/by-order-id/{order_id}', 'private', 'GET', {})
     private_post_private_create_order = privatePostOrderCreate = Entry('orders', 'private', 'POST', {})
     private_put_private_cancel_order = privateCancelOrder = Entry('orders/cancel', 'private', 'PUT', {})
+    private_get_private_deposit_address = privateDepositAddress = Entry('deposits/address?currency_symbol={market_symbol}', 'private', 'GET', {})
+    private_get_private_deposit = privateDeposit = Entry('deposits?page_size={limit}', 'private', 'GET', {})
+    private_get_private_deposit_sn = privateDepositSn = Entry('deposits/{sn}', 'private', 'GET', {})
+    private_get_private_withdrawals = privateWithdrawals = Entry('withdrawals', 'private', 'GET', {})
+    private_port_private_withdrawals = privatePostWithdrawals = Entry('withdrawals', 'private', 'POST', {})
