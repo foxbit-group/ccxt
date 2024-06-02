@@ -131,6 +131,7 @@ public partial class okx : Exchange
                 { "fetchWithdrawalWhitelist", false },
                 { "reduceMargin", true },
                 { "repayCrossMargin", true },
+                { "sandbox", true },
                 { "setLeverage", true },
                 { "setMargin", false },
                 { "setMarginMode", true },
@@ -232,6 +233,9 @@ public partial class okx : Exchange
                         { "sprd/books", divide(1, 2) },
                         { "sprd/ticker", 1 },
                         { "sprd/public-trades", divide(1, 5) },
+                        { "market/sprd-ticker", 2 },
+                        { "market/sprd-candles", 2 },
+                        { "market/sprd-history-candles", 2 },
                         { "tradingBot/grid/ai-param", 1 },
                         { "tradingBot/grid/min-investment", 1 },
                         { "tradingBot/public/rsi-back-testing", 1 },
@@ -239,6 +243,9 @@ public partial class okx : Exchange
                         { "finance/staking-defi/eth/apy-history", divide(5, 3) },
                         { "finance/savings/lending-rate-summary", divide(5, 3) },
                         { "finance/savings/lending-rate-history", divide(5, 3) },
+                        { "finance/fixed-loan/lending-offers", divide(10, 3) },
+                        { "finance/fixed-loan/lending-apy-history", divide(10, 3) },
+                        { "finance/fixed-loan/pending-lending-volume", divide(10, 3) },
                         { "finance/sfp/dcd/products", divide(2, 3) },
                         { "copytrading/public-lead-traders", 4 },
                         { "copytrading/public-weekly-pnl", 4 },
@@ -446,6 +453,7 @@ public partial class okx : Exchange
                         { "tradingBot/grid/compute-margin-balance", 1 },
                         { "tradingBot/grid/margin-balance", 1 },
                         { "tradingBot/grid/min-investment", 1 },
+                        { "tradingBot/grid/adjust-investment", 1 },
                         { "tradingBot/signal/create-signal", 1 },
                         { "tradingBot/signal/order-algo", 1 },
                         { "tradingBot/signal/stop-order-algo", 1 },
@@ -841,7 +849,24 @@ public partial class okx : Exchange
                     { "60017", typeof(BadRequest) },
                     { "60018", typeof(BadRequest) },
                     { "60019", typeof(BadRequest) },
+                    { "60020", typeof(ExchangeError) },
+                    { "60021", typeof(AccountNotEnabled) },
+                    { "60022", typeof(AuthenticationError) },
+                    { "60023", typeof(DDoSProtection) },
+                    { "60024", typeof(AuthenticationError) },
+                    { "60025", typeof(ExchangeError) },
+                    { "60026", typeof(AuthenticationError) },
+                    { "60027", typeof(ArgumentsRequired) },
+                    { "60028", typeof(NotSupported) },
+                    { "60029", typeof(AccountNotEnabled) },
+                    { "60030", typeof(AccountNotEnabled) },
+                    { "60031", typeof(AuthenticationError) },
+                    { "60032", typeof(AuthenticationError) },
                     { "63999", typeof(ExchangeError) },
+                    { "64000", typeof(BadRequest) },
+                    { "64001", typeof(BadRequest) },
+                    { "64002", typeof(BadRequest) },
+                    { "64003", typeof(AccountNotEnabled) },
                     { "70010", typeof(BadRequest) },
                     { "70013", typeof(BadRequest) },
                     { "70016", typeof(BadRequest) },
@@ -2669,6 +2694,8 @@ public partial class okx : Exchange
         object takeProfitDefined = (!isEqual(takeProfit, null));
         object trailingPercent = this.safeString2(parameters, "trailingPercent", "callbackRatio");
         object isTrailingPercentOrder = !isEqual(trailingPercent, null);
+        object trigger = isTrue((!isEqual(triggerPrice, null))) || isTrue((isEqual(type, "trigger")));
+        object isReduceOnly = this.safeValue(parameters, "reduceOnly", false);
         object defaultMarginMode = this.safeString2(this.options, "defaultMarginMode", "marginMode", "cross");
         object marginMode = this.safeString2(parameters, "marginMode", "tdMode"); // cross or isolated, tdMode not ommited so as to be extended into the request
         object margin = false;
@@ -2701,6 +2728,30 @@ public partial class okx : Exchange
                 if (isTrue(!isEqual(positionSide, null)))
                 {
                     ((IDictionary<string,object>)request)["posSide"] = positionSide;
+                } else
+                {
+                    object hedged = null;
+                    var hedgedparametersVariable = this.handleOptionAndParams(parameters, "createOrder", "hedged");
+                    hedged = ((IList<object>)hedgedparametersVariable)[0];
+                    parameters = ((IList<object>)hedgedparametersVariable)[1];
+                    if (isTrue(hedged))
+                    {
+                        object isBuy = (isEqual(side, "buy"));
+                        object isProtective = isTrue(isTrue((!isEqual(takeProfitPrice, null))) || isTrue((!isEqual(stopLossPrice, null)))) || isTrue(isReduceOnly);
+                        if (isTrue(isProtective))
+                        {
+                            // in case of protective orders, the posSide should be opposite of position side
+                            // reduceOnly is emulated and not natively supported by the exchange
+                            ((IDictionary<string,object>)request)["posSide"] = ((bool) isTrue(isBuy)) ? "short" : "long";
+                            if (isTrue(isReduceOnly))
+                            {
+                                parameters = this.omit(parameters, "reduceOnly");
+                            }
+                        } else
+                        {
+                            ((IDictionary<string,object>)request)["posSide"] = ((bool) isTrue(isBuy)) ? "long" : "short";
+                        }
+                    }
                 }
             }
             ((IDictionary<string,object>)request)["tdMode"] = marginMode;
@@ -2713,7 +2764,6 @@ public partial class okx : Exchange
         parameters = this.omit(parameters, new List<object>() {"currency", "ccy", "marginMode", "timeInForce", "stopPrice", "triggerPrice", "clientOrderId", "stopLossPrice", "takeProfitPrice", "slOrdPx", "tpOrdPx", "margin", "stopLoss", "takeProfit", "trailingPercent"});
         object ioc = isTrue((isEqual(timeInForce, "IOC"))) || isTrue((isEqual(type, "ioc")));
         object fok = isTrue((isEqual(timeInForce, "FOK"))) || isTrue((isEqual(type, "fok")));
-        object trigger = isTrue((!isEqual(triggerPrice, null))) || isTrue((isEqual(type, "trigger")));
         object conditional = isTrue(isTrue((!isEqual(stopLossPrice, null))) || isTrue((!isEqual(takeProfitPrice, null)))) || isTrue((isEqual(type, "conditional")));
         object marketIOC = isTrue((isTrue(isMarketOrder) && isTrue(ioc))) || isTrue((isEqual(type, "optimal_limit_ioc")));
         object defaultTgtCcy = this.safeString(this.options, "tgtCcy", "base_ccy");
@@ -2957,6 +3007,7 @@ public partial class okx : Exchange
         * @param {string} [params.positionSide] if position mode is one-way: set to 'net', if position mode is hedge-mode: set to 'long' or 'short'
         * @param {string} [params.trailingPercent] the percent to trail away from the current market price
         * @param {string} [params.tpOrdKind] 'condition' or 'limit', the default is 'condition'
+        * @param {string} [params.hedged] true/false, to automatically set exchange-specific params needed when trading in hedge mode
         * @returns {object} an [order structure]{@link https://docs.ccxt.com/#/?id=order-structure}
         */
         parameters ??= new Dictionary<string, object>();
@@ -4171,11 +4222,11 @@ public partial class okx : Exchange
             {
                 ((IDictionary<string,object>)request)["begin"] = since;
             }
-            object until = this.safeInteger2(query, "till", "until");
+            object until = this.safeInteger(query, "until");
             if (isTrue(!isEqual(until, null)))
             {
                 ((IDictionary<string,object>)request)["end"] = until;
-                query = this.omit(query, new List<object>() {"until", "till"});
+                query = this.omit(query, new List<object>() {"until"});
             }
         }
         object send = this.omit(query, new List<object>() {"method", "stop", "trigger", "trailing"});
@@ -4366,11 +4417,11 @@ public partial class okx : Exchange
             {
                 ((IDictionary<string,object>)request)["begin"] = since;
             }
-            object until = this.safeInteger2(query, "till", "until");
+            object until = this.safeInteger(query, "until");
             if (isTrue(!isEqual(until, null)))
             {
                 ((IDictionary<string,object>)request)["end"] = until;
-                query = this.omit(query, new List<object>() {"until", "till"});
+                query = this.omit(query, new List<object>() {"until"});
             }
             ((IDictionary<string,object>)request)["state"] = "filled";
         }
@@ -5817,7 +5868,7 @@ public partial class okx : Exchange
         //    }
         //
         object marketId = this.safeString(position, "instId");
-        market = this.safeMarket(marketId, market);
+        market = this.safeMarket(marketId, market, null, "contract");
         object symbol = getValue(market, "symbol");
         object pos = this.safeString(position, "pos"); // 'pos' field: One way mode: 0 if position is not open, 1 if open | Two way (hedge) mode: -1 if short, 1 if long, 0 if position is not open
         object contractsAbs = Precise.stringAbs(pos);
@@ -6082,7 +6133,7 @@ public partial class okx : Exchange
         return this.safeString(statuses, status, status);
     }
 
-    public async virtual Task<object> fetchTransfer(object id, object code = null, object parameters = null)
+    public async override Task<object> fetchTransfer(object id, object code = null, object parameters = null)
     {
         parameters ??= new Dictionary<string, object>();
         await this.loadMarkets();
@@ -6115,7 +6166,7 @@ public partial class okx : Exchange
         return this.parseTransfer(transfer);
     }
 
-    public async virtual Task<object> fetchTransfers(object code = null, object since = null, object limit = null, object parameters = null)
+    public async override Task<object> fetchTransfers(object code = null, object since = null, object limit = null, object parameters = null)
     {
         /**
         * @method
@@ -6276,6 +6327,22 @@ public partial class okx : Exchange
         //        "nextFundingRate": "0.00017",
         //        "nextFundingTime": "1634284800000"
         //    }
+        // ws
+        //     {
+        //        "fundingRate":"0.0001875391284828",
+        //        "fundingTime":"1700726400000",
+        //        "instId":"BTC-USD-SWAP",
+        //        "instType":"SWAP",
+        //        "method": "next_period",
+        //        "maxFundingRate":"0.00375",
+        //        "minFundingRate":"-0.00375",
+        //        "nextFundingRate":"0.0002608059239328",
+        //        "nextFundingTime":"1700755200000",
+        //        "premium": "0.0001233824646391",
+        //        "settFundingRate":"0.0001699799259033",
+        //        "settState":"settled",
+        //        "ts":"1700724675402"
+        //     }
         //
         // in the response above nextFundingRate is actually two funding rates from now
         //
@@ -6519,6 +6586,47 @@ public partial class okx : Exchange
         //     }
         //
         return response;
+    }
+
+    public async virtual Task<object> fetchPositionMode(object symbol = null, object parameters = null)
+    {
+        /**
+        * @method
+        * @name okx#fetchPositionMode
+        * @see https://www.okx.com/docs-v5/en/#trading-account-rest-api-get-account-configuration
+        * @description fetchs the position mode, hedged or one way, hedged for binance is set identically for all linear markets or all inverse markets
+        * @param {string} symbol unified symbol of the market to fetch the order book for
+        * @param {object} [params] extra parameters specific to the exchange API endpoint
+        * @param {string} [param.accountId] if you have multiple accounts, you must specify the account id to fetch the position mode
+        * @returns {object} an object detailing whether the market is in hedged or one-way mode
+        */
+        parameters ??= new Dictionary<string, object>();
+        object accounts = await this.fetchAccounts();
+        object length = getArrayLength(accounts);
+        object selectedAccount = null;
+        if (isTrue(isGreaterThan(length, 1)))
+        {
+            object accountId = this.safeString(parameters, "accountId");
+            if (isTrue(isEqual(accountId, null)))
+            {
+                object accountIds = this.getListFromObjectValues(accounts, "id");
+                throw new ExchangeError ((string)add(add(this.id, " fetchPositionMode() can not detect position mode, because you have multiple accounts. Set params[\"accountId\"] to desired id from: "), String.Join(", ", ((IList<object>)accountIds).ToArray()))) ;
+            } else
+            {
+                object accountsById = this.indexBy(accounts, "id");
+                selectedAccount = this.safeDict(accountsById, accountId);
+            }
+        } else
+        {
+            selectedAccount = getValue(accounts, 0);
+        }
+        object mainAccount = getValue(selectedAccount, "info");
+        object posMode = this.safeString(mainAccount, "posMode"); // long_short_mode, net_mode
+        object isHedged = isEqual(posMode, "long_short_mode");
+        return new Dictionary<string, object>() {
+            { "info", mainAccount },
+            { "hedged", isHedged },
+        };
     }
 
     public async override Task<object> setPositionMode(object hedged, object symbol = null, object parameters = null)
@@ -7413,11 +7521,11 @@ public partial class okx : Exchange
             {
                 ((IDictionary<string,object>)request)["begin"] = since;
             }
-            object until = this.safeInteger2(parameters, "till", "until");
+            object until = this.safeInteger(parameters, "until");
             if (isTrue(!isEqual(until, null)))
             {
                 ((IDictionary<string,object>)request)["end"] = until;
-                parameters = this.omit(parameters, new List<object>() {"until", "till"});
+                parameters = this.omit(parameters, new List<object>() {"until"});
             }
             response = await this.publicGetRubikStatContractsOpenInterestVolume(this.extend(request, parameters));
         }

@@ -88,6 +88,7 @@ class bitmex extends bitmex$1 {
                 'fetchTransfer': false,
                 'fetchTransfers': false,
                 'reduceMargin': undefined,
+                'sandbox': true,
                 'setLeverage': true,
                 'setMargin': undefined,
                 'setMarginMode': true,
@@ -240,6 +241,7 @@ class bitmex extends bitmex$1 {
                     'orderQty is invalid': errors.InvalidOrder,
                     'Invalid price': errors.InvalidOrder,
                     'Invalid stopPx for ordType': errors.InvalidOrder,
+                    'Account is restricted': errors.PermissionDenied, // {"error":{"message":"Account is restricted","name":"HTTPError"}}
                 },
                 'broad': {
                     'Signature not valid': errors.AuthenticationError,
@@ -1487,7 +1489,7 @@ class bitmex extends bitmex$1 {
         }
         // send JSON key/value pairs, such as {"key": "value"}
         // filter by individual fields and do advanced queries on timestamps
-        // let filter = { 'key': 'value' };
+        // let filter: Dict = { 'key': 'value' };
         // send a bare series (e.g. XBU) to nearest expiring contract in that series
         // you can also send a timeframe, e.g. XBU:monthly
         // timeframes: daily, weekly, monthly, quarterly, and biquarterly
@@ -2569,8 +2571,8 @@ class bitmex extends bitmex$1 {
         if (limit !== undefined) {
             request['count'] = limit;
         }
-        const until = this.safeInteger2(params, 'until', 'till');
-        params = this.omit(params, ['until', 'till']);
+        const until = this.safeInteger(params, 'until');
+        params = this.omit(params, ['until']);
         if (until !== undefined) {
             request['endTime'] = this.iso8601(until);
         }

@@ -1405,7 +1405,7 @@ public partial class mexc : Exchange
         object trades = null;
         if (isTrue(getValue(market, "spot")))
         {
-            object until = this.safeIntegerN(parameters, new List<object>() {"endTime", "until", "till"});
+            object until = this.safeIntegerN(parameters, new List<object>() {"endTime", "until"});
             if (isTrue(!isEqual(since, null)))
             {
                 ((IDictionary<string,object>)request)["startTime"] = since;
@@ -1690,7 +1690,7 @@ public partial class mexc : Exchange
         object candles = null;
         if (isTrue(getValue(market, "spot")))
         {
-            object until = this.safeIntegerN(parameters, new List<object>() {"until", "endTime", "till"});
+            object until = this.safeIntegerN(parameters, new List<object>() {"until", "endTime"});
             if (isTrue(!isEqual(since, null)))
             {
                 ((IDictionary<string,object>)request)["startTime"] = since;
@@ -1708,7 +1708,7 @@ public partial class mexc : Exchange
             }
             if (isTrue(!isEqual(until, null)))
             {
-                parameters = this.omit(parameters, new List<object>() {"until", "till"});
+                parameters = this.omit(parameters, new List<object>() {"until"});
                 ((IDictionary<string,object>)request)["endTime"] = until;
             }
             object response = await this.spotPublicGetKlines(this.extend(request, parameters));
@@ -1729,14 +1729,14 @@ public partial class mexc : Exchange
             candles = response;
         } else if (isTrue(getValue(market, "swap")))
         {
-            object until = this.safeIntegerProductN(parameters, new List<object>() {"until", "endTime", "till"}, 0.001);
+            object until = this.safeIntegerProductN(parameters, new List<object>() {"until", "endTime"}, 0.001);
             if (isTrue(!isEqual(since, null)))
             {
                 ((IDictionary<string,object>)request)["start"] = this.parseToInt(divide(since, 1000));
             }
             if (isTrue(!isEqual(until, null)))
             {
-                parameters = this.omit(parameters, new List<object>() {"until", "till"});
+                parameters = this.omit(parameters, new List<object>() {"until"});
                 ((IDictionary<string,object>)request)["end"] = until;
             }
             object priceType = this.safeString(parameters, "price", "default");
@@ -2337,7 +2337,9 @@ public partial class mexc : Exchange
         //     {"success":true,"code":0,"data":259208506303929856}
         //
         object data = this.safeString(response, "data");
-        return this.parseOrder(data, market);
+        return this.safeOrder(new Dictionary<string, object>() {
+            { "id", data },
+        }, market);
     }
 
     public async override Task<object> createOrders(object orders, object parameters = null)
@@ -4376,8 +4378,8 @@ public partial class mexc : Exchange
             return new List<object>() {new Dictionary<string, object>() {
     { "tier", 0 },
     { "currency", this.safeCurrencyCode(quoteId) },
-    { "notionalFloor", null },
-    { "notionalCap", null },
+    { "minNotional", null },
+    { "maxNotional", null },
     { "maintenanceMarginRate", null },
     { "maxLeverage", this.safeNumber(info, "maxLeverage") },
     { "info", info },
@@ -4389,8 +4391,8 @@ public partial class mexc : Exchange
             ((IList<object>)tiers).Add(new Dictionary<string, object>() {
                 { "tier", this.parseNumber(Precise.stringDiv(cap, riskIncrVol)) },
                 { "currency", this.safeCurrencyCode(quoteId) },
-                { "notionalFloor", this.parseNumber(floor) },
-                { "notionalCap", this.parseNumber(cap) },
+                { "minNotional", this.parseNumber(floor) },
+                { "maxNotional", this.parseNumber(cap) },
                 { "maintenanceMarginRate", this.parseNumber(maintenanceMarginRate) },
                 { "maxLeverage", this.parseNumber(Precise.stringDiv("1", initialMarginRate)) },
                 { "info", info },
@@ -4969,7 +4971,7 @@ public partial class mexc : Exchange
         });
     }
 
-    public async virtual Task<object> fetchTransfer(object id, object since = null, object limit = null, object parameters = null)
+    public async override Task<object> fetchTransfer(object id, object code = null, object parameters = null)
     {
         parameters ??= new Dictionary<string, object>();
         var marketTypequeryVariable = this.handleMarketTypeAndParams("fetchTransfer", null, parameters);
@@ -5004,7 +5006,7 @@ public partial class mexc : Exchange
         return null;
     }
 
-    public async virtual Task<object> fetchTransfers(object code = null, object since = null, object limit = null, object parameters = null)
+    public async override Task<object> fetchTransfers(object code = null, object since = null, object limit = null, object parameters = null)
     {
         /**
         * @method
