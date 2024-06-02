@@ -18,6 +18,28 @@ from ccxt.base.types import (
     Order,
     Market
 )
+from ccxt.base.errors import ExchangeError
+from ccxt.base.errors import AuthenticationError
+from ccxt.base.errors import PermissionDenied
+from ccxt.base.errors import AccountSuspended
+from ccxt.base.errors import ArgumentsRequired
+from ccxt.base.errors import BadRequest
+from ccxt.base.errors import BadSymbol
+from ccxt.base.errors import OperationRejected
+from ccxt.base.errors import MarginModeAlreadySet
+from ccxt.base.errors import BadResponse
+from ccxt.base.errors import InsufficientFunds
+from ccxt.base.errors import InvalidOrder
+from ccxt.base.errors import OrderNotFound
+from ccxt.base.errors import OrderImmediatelyFillable
+from ccxt.base.errors import OrderNotFillable
+from ccxt.base.errors import NotSupported
+from ccxt.base.errors import OperationFailed
+from ccxt.base.errors import DDoSProtection
+from ccxt.base.errors import RateLimitExceeded
+from ccxt.base.errors import OnMaintenance
+from ccxt.base.errors import InvalidNonce
+from ccxt.base.errors import RequestTimeout
 from typing import List
 import hashlib
 import hmac
@@ -31,15 +53,15 @@ class foxbit(Exchange, ImplicitAPI):
             'id': 'foxbit',
             'name': 'Foxbit',
             'countries': ['BR'],
-            'rateLimit': 33.34,
+            'rateLimit': 1000,
             'version': 'v3',
-            'certified': True,
+            'certified': False,
             'pro': False,
             'has': {
-                    'CORS': None,
-                    'spot': False,
-                    'margin': True,
-                'swap': True,
+                'CORS': None,
+                'spot': True,
+                'margin': False,
+                'swap': False,
                 'future': False,
                 'option': False,
                 'borrowCrossMargin': False,
@@ -48,16 +70,16 @@ class foxbit(Exchange, ImplicitAPI):
                 'cancelOrder': True,
                 'cancelOrders': False,
                 'createMarketBuyOrderWithCost': True,
-                'createMarketOrderWithCost': False,
-                'createMarketSellOrderWithCost': False,
+                'createMarketOrderWithCost': True,
+                'createMarketSellOrderWithCost': True,
                 'createOrder': True,
-                'createPostOnlyOrder': True,
-                'createStopLimitOrder': False,
+                'createPostOnlyOrder': False,
+                'createStopLimitOrder': True,
                 'createStopMarketOrder': False,
-                'createStopOrder': False,
-                'createTrailingPercentOrder': True,
+                'createStopOrder': True,
+                'createTrailingPercentOrder': False,
                 'fetchBalance': True,
-                'fetchBorrowInterest': True,
+                'fetchBorrowInterest': False,
                 'fetchBorrowRateHistories': False,
                 'fetchBorrowRateHistory': False,
                 'fetchCanceledOrders': True,
@@ -70,77 +92,78 @@ class foxbit(Exchange, ImplicitAPI):
                 'fetchDepositAddresses': False,
                 'fetchDepositAddressesByNetwork': False,
                 'fetchDeposits': True,
-                'fetchDepositWithdrawFee': True,
+                'fetchDepositWithdrawFee': False,
                 'fetchDepositWithdrawFees': False,
-                'fetchFundingHistory': None,
-                'fetchFundingRate': True,
+                'fetchFundingHistory': False,
+                'fetchFundingRate': False,
                 'fetchFundingRateHistory': False,
                 'fetchFundingRates': False,
-                'fetchIsolatedBorrowRate': True,
-                'fetchIsolatedBorrowRates': True,
+                'fetchIsolatedBorrowRate': False,
+                'fetchIsolatedBorrowRates': False,
                 'fetchLiquidations': False,
                 'fetchMarginMode': False,
                 'fetchMarkets': True,
-                'fetchMyLiquidations': True,
+                'fetchMyLiquidations': False,
                 'fetchMyTrades': True,
                 'fetchOHLCV': True,
-                'fetchOpenInterest': True,
+                'fetchOpenInterest': False,
                 'fetchOpenInterestHistory': False,
                 'fetchOpenOrders': True,
                 'fetchOrder': True,
                 'fetchOrderBook': True,
-                'fetchOrders': False,
+                'fetchOrders': True,
                 'fetchOrderTrades': True,
-                'fetchPosition': True,
+                'fetchPosition': False,
                 'fetchPositionMode': False,
-                'fetchPositions': True,
+                'fetchPositions': False,
                 'fetchStatus': True,
                 'fetchTicker': True,
                 'fetchTickers': True,
                 'fetchTime': True,
                 'fetchTrades': True,
-                'fetchTradingFee': True,
+                'fetchTradingFee': False,
                 'fetchTradingFees': False,
-                'fetchTransactionFee': True,
+                'fetchTransactionFee': False,
                 'fetchTransactionFees': False,
                 'fetchTransfer': False,
-                'fetchTransfers': True,
+                'fetchTransfers': False,
                 'fetchWithdrawAddressesByNetwork': False,
                 'fetchWithdrawal': True,
                 'fetchWithdrawals': True,
                 'reduceMargin': False,
                 'repayCrossMargin': False,
-                'repayIsolatedMargin': True,
-                'setLeverage': True,
+                'repayIsolatedMargin': False,
+                'setLeverage': False,
                 'setMarginMode': False,
-                'transfer': True,
+                'transfer': False,
                 'withdraw': True,
             },
             'hostname': 'foxbit.com.br',
             'urls': {
-                'logo': 'https://docs.foxbit.com.br/rest/v3/logo-with-text.svg',
-                        'api': {
-                            'rest': 'https://api.{hostname}/rest/v3',
-                        },
+                'logo': 'https://docs.{hostname}/rest/v3/logo-with-text.svg',
+                'api': {
+                    'rest': 'https://api.{hostname}/rest/v3',
+                },
                 'www': 'https://www.{hostname}/',
                 'doc': 'https://docs.{hostname}/rest/v3/',
                 'referral': {
-                            'url': '',
-                            'discount': 0.0,
-                        },
+                    'url': '',
+                    'discount': 0.0,
+                },
                 'fees': 'https://{hostname}/taxas/',
             },
             'requiredCredentials': {
                 'apiKey': True,
                 'secret': True,
-                'uid': False,
             },
             'api': {
+                # TODO: Adicionar v3?
                 'public': {
                     'get': {
+                        # TODO: Adicionar todos os outros? Pelo menos os que usamos.
                         'currencies': 6,
-                        'markets': 6,
-                        'markets/quotes': 2,
+                        'marketsxxx': 6,
+                        'markets/quotes': 2, # TODO: Será que faz sentido ter esse?
                         'markets/{market_symbol}/orderbook': 10,
                         'markets/{market_symbol}/candlesticks': 10
                     },
@@ -148,29 +171,49 @@ class foxbit(Exchange, ImplicitAPI):
                 'private': {},
             },
             'timeframes': {
-                '1m': 1,
-                '5m': 5,
-                '15m': 15,
-                '30m': 30,
-                '1h': 60,
-                '2h': 120,
-                '4h': 240,
-                '1d': 1440,
-                '1w': 10080,
+                '1m': '1m',
+                '5m': '5m',
+                '15m': '15m',
+                '30m': '30m',
+                '1h': '1h',
+                '2h': '2h',
+                '4h': '4h',
+                '6h': '6h',
+                '12h': '12h',
+                '1d': '1d',
+                '1w': '1w',
+                '2w': '2w',
+                '1M': '1M',
             },
             'fees': {
                 'trading': {
                     'tierBased': True,
                     'percentage': True,
-                    'taker': self.parse_number('0.0020'),
-                    'maker': self.parse_number('0.0050'),
+                    'taker': self.parse_number('0.0025'), # TODO: Isso não pode ficar hard coded
+                    'maker': self.parse_number('0.0050'), # TODO: Isso não pode ficar hard coded
                     'tiers': {},
                 },
             },
-            'precisionMode': TICK_SIZE,
-            'exceptions': {},
+            'precisionMode': TICK_SIZE, # TODO: Seria isso ou DECIMAL_PLACES?
+            'exceptions': {
+                'exact': {
+                    '400': BadRequest,
+                    '401': AuthenticationError,
+                    '403': PermissionDenied,
+                    '404': BadRequest,
+                    '429': RateLimitExceeded,
+                    '500': ExchangeError,
+                    '504': ExchangeError,
+                    # TODO: Vários erros aqui: https://docs.foxbit.com.br/rest/v3/#tag/Errors
+                    '2001': AuthenticationError,
+                    '2002': AuthenticationError,
+                    '2003': AuthenticationError,
+                    '2004': AuthenticationError,
+                }
+            },
             'commonCurrencies': {},
             'options': {
+                # TODO: De onde vieram essas options, precisa mesmo?
                 'defaultNetwork': 'ERC20',
                 'defaultNetworks': {
                     'USDT': 'ERC20',
@@ -198,19 +241,8 @@ class foxbit(Exchange, ImplicitAPI):
         data = self.safe_value(response, 'data', [])
         return self.parse_currencies(data)
 
-    def fetch_trading_limits(self, symbols: Strings = None, params={}):
-        self.load_markets()
 
-        if symbols is None:
-            symbols = self.symbols
-
-        result = {}
-
-        for symbol in symbols:
-            result[symbol] = self.parse_trading_by_market(self.market(symbol), params)
-
-        return result
-
+    # TODO: Esse cara ta apontando pro lugar errado
     def fetch_ticker(self, symbol: str, params={}) -> Ticker:
         if symbol is None:
             symbol = self.symbol
@@ -233,12 +265,14 @@ class foxbit(Exchange, ImplicitAPI):
 
         return self.parse_ticker(response[0], symbol)
 
+    # TODO: Implementar
     def fetch_tickers(self, symbols: Strings = None, params={}) -> Tickers:
         ...
 
+    # TODO: Será que podemos remover?
     def fetch_trading_fees(self, params={}):
         """
-                                                                        NOT ROUTE TO FEE
+        NOT ROUTE TO FEE
         """
         self.load_markets()
         result = {}
@@ -267,17 +301,20 @@ class foxbit(Exchange, ImplicitAPI):
         response = self.publicGetOrderBook(self.extend(request, params))
         return self.parse_order_book(response, symbol, None, 'bids', 'asks', 0, 1)
 
+    # TODO: Implementar
     def fetch_trades(self, symbol: str, since: Int = None, limit: Int = None, params={}) -> List[Trade]:
         ...
 
     def fetch_ohlcv(self, symbol: str, timeframe='1m', since: Int = None, limit: int = 1, params={}) -> List[list]:
+        # TODO: @Neville, pq vc da esses espaços antes de começar o texto?
         """
-                SETTINGS POSITION 5 VOLUME
+        SETTINGS POSITION 5 VOLUME
         """
         self.load_markets()
 
         market = self.market(symbol)
 
+        # TODO: Falta start_time e end_time
         request = {
             'interval': timeframe,
             'market_symbol': market['id'],
@@ -300,6 +337,7 @@ class foxbit(Exchange, ImplicitAPI):
 
         return result
 
+    # TODO: Implementar os outros tipos de ordem
     def create_order(self, symbol: str, type: OrderType, side: OrderSide, amount: float, price: Num = None, params={}):
         market = self.market(symbol)
 
@@ -321,6 +359,8 @@ class foxbit(Exchange, ImplicitAPI):
         response = self.privateGetOrder(self.extend(request, params))
         return self.parse_order(response, market)
 
+    # TODO: Muitas funções para implementar (https://docs.foxbit.com.br/rest/v3/#tag/Trading/operation/OrdersController_cancel)
+    #       Não implementar SN
     def cancel_order(self, id: str, symbol: str = None, params={}):
         market = self.market(symbol)
         request = {
@@ -337,6 +377,7 @@ class foxbit(Exchange, ImplicitAPI):
 
         return self.parse_order(response, market)
 
+    # TODO: Get by client_order_id
     def fetch_order(self, id: str, symbol: str = None, params={}):
         market = self.market(symbol)
         request = {
@@ -346,6 +387,7 @@ class foxbit(Exchange, ImplicitAPI):
         response = self.privateGetOrder(self.extend(request, params))
         return self.parse_order(response, market)
 
+    # TODO: Tem váriso parâmetros que podem ser implementados: https://docs.foxbit.com.br/rest/v3/#tag/Trading/operation/OrdersController_listOrders
     def fetch_orders(self, symbol: str = None, since: Int = None, limit: Int = None, params={}) -> List[Order]:
         market = self.market(symbol)
         request = {
@@ -363,7 +405,7 @@ class foxbit(Exchange, ImplicitAPI):
         request = {
             'market_symbol': market['id'],
             'state': 'ACTIVE',
-            'page_size': limit
+            'page_size': limit # TODO: Tem como colocar a página?
         }
 
         response = self.privateGetOrders(self.extend(request, params))
@@ -376,7 +418,7 @@ class foxbit(Exchange, ImplicitAPI):
         request = {
             'market_symbol': market['id'],
             'state': 'CANCELED',
-            'page_size': limit
+            'page_size': limit # TODO: Tem como colocar a página?
         }
 
         response = self.privateGetOrders(self.extend(request, params))
@@ -386,7 +428,7 @@ class foxbit(Exchange, ImplicitAPI):
 
     def fetch_my_trades(self, symbol: str = None, since: int = None, limit: int = None, params={}):
         if symbol is None:
-            symbol = "BTC/BRL"
+            symbol = "BTC/BRL" # TODO: Precisa mesmo desse fallback ou deveria dar erro?
 
         self.load_markets()
         market = self.market(symbol)
@@ -458,6 +500,7 @@ class foxbit(Exchange, ImplicitAPI):
     def fetch_transactions(self, params={}):
         ...
 
+    # TODO: Remover, não temos
     def fetch_ledger(self, params={}):
         ...
 
@@ -499,6 +542,7 @@ class foxbit(Exchange, ImplicitAPI):
             'tag': None,
         })
 
+    # TODO: Até temos, mas só liberamos para alguns parceiros, remover
     def transfer(self, params={}):
         ...
 
@@ -546,6 +590,7 @@ class foxbit(Exchange, ImplicitAPI):
         return {'url': url, 'method': method, 'body': body, 'headers': headers}
 
     def __timestamp_now(self):
+        # TODO: Vi outras chamando self.milliseconds() simplesmente
         return str(
             datetime.now().timestamp()
         ).split('.')[0]
@@ -558,50 +603,55 @@ class foxbit(Exchange, ImplicitAPI):
             quote = market['quote']
 
             result.append({
-                'id': market['symbol'],
+                'id': market['symbol'].upper(), # TODO: aqui não teria um UPPER?
                 'symbol': f"{base['symbol'].upper()}/{quote['symbol'].upper()}",
-                'base': base["symbol"],
-                'quote': quote["symbol"],
-                'baseId': base["symbol"],
-                'quoteId': quote["symbol"],
+                'base': base["symbol"].upper(), # TODO: aqui não teria um UPPER?
+                'quote': quote["symbol"].upper(), # TODO: aqui não teria um UPPER?
+                'baseId': base["symbol"].upper(), # TODO: aqui não teria um UPPER?
+                'quoteId': quote["symbol"].upper(), # TODO: aqui não teria um UPPER?
                 'active': True,
                 'type': 'spot',
                 'spot': True,
-                'margin': True,
+                'margin': False,
                 'future': False,
                 'swap': False,
                 'option': False,
                 'contract': False,
-                'settle': quote["symbol"].lower(),
-                'settleId': quote["symbol"],
-                'contractSize': 1,
-                'linear': True,
-                'inverse': False,
+                'settle': None,
+                'settleId': None,
+                'contractSize': None,
+                'linear': None,
+                'inverse': None,
                 'expiry': None,
-                'expiryDatetime': '',
-                'strike': 4000,
-                'optionType': 'call',
-                'taker': 0.002,
-                'maker': 0.005,
+                'expiryDatetime': None,
+                'strike': None,
+                'optionType': None,
+                'taker': '0.0025', # TODO: Temos como pegar isso da configuração? E na verdade não sei se devemos passar isso, pois é dinâmico por usuario
+                'maker': '0.005', # TODO: Temos como pegar isso da configuração?
                 'percentage': True,
-                'tierBased': False,
+                'tierBased': True,
                 'feeSide': 'get',
                 'precision': {
-                    'price': base['precision'],
-                    'amount': quote['precision']
+                    'price': self.__count_decimals(market['price_increment']),
+                    'amount': self.__count_decimals(market['quantity_increment'])
                 },
                 'limits': {
                     'amount': {
-                        'min': market['price_min'],
-                        'max': 0,
+                        'min': market['quantity_min'],
+                        'max': None,
                     },
                     'price': {},
-                    'cost': {},
-                    'leverage': {},
                 },
                 'info': market
             })
         return result
+
+    def __count_decimals(self, number_str):
+        if '.' in number_str:
+            parts = number_str.split('.')
+            return len(parts[1])
+        else:
+            return 0
 
     def parse_currencies(self, currencies):
         result = {}
@@ -613,8 +663,16 @@ class foxbit(Exchange, ImplicitAPI):
 
     def parse_currency(self, currency):
         fee = '0.0'
+        withdraw = False
+        withdraw_min = '0.0'
         if not currency['withdraw_info'] is None:
             fee = currency['withdraw_info']['fee']
+            withdraw = currency['withdraw_info']['enabled']
+            withdraw_min = self.safe_number(currency['withdraw_info'], 'min_amount')
+
+        deposit_min = '0.0'
+        if not currency['deposit_info'] is None:
+            deposit_min = self.safe_number(currency['deposit_info'], 'min_amount')
 
         return {
             'id': currency['symbol'],
@@ -624,73 +682,77 @@ class foxbit(Exchange, ImplicitAPI):
             'fee': fee,
             'precision': currency['precision'],
             'deposit': True,
-            'withdraw': True,
+            'withdraw': withdraw,
             'limits': {
-                'amount': {
-                    'min': 0.01,
-                    'max': 1000,
+                'deposit': {
+                    min: deposit_min,
+                    max: None,
                 },
-                'withdraw': {...},
-                'deposit': {...},
+                'withdraw': {
+                    min: withdraw_min,
+                    max: None,
+                },
             },
             'networks': {...},
             'info': {...}
         }
 
-    def parse_trading_by_market(self, market, params):
-        return {
-            "info": {
-                "symbol": market['id'],
-                "buy-limit-must-less-than": "1.1",
-                "buy-limit-must-greater-than": "0.1",
-                "sell-limit-must-less-than": "10",
-                "sell-limit-must-greater-than": "0.9",
-                "limit-order-must-greater-than": "0.001",
-                "limit-order-must-less-than": "10000",
-                "limit-buy-amount-must-less-than": "10000",
-                "limit-sell-amount-must-less-than": "10000",
-                "market-buy-order-must-greater-than": "0.0001",
-                "market-sell-amount-must-less-than": "0.0001",
-                "market-buy-volume-must-greater-than": "0.0001",
-                "market-sell-volume-must-less-than": "0.0001",
-                "market-bs-calc-max-scale": "1",
-                "market-buy-order-must-less-than": "100",
-                "market-sell-order-must-greater-than": "0.001",
-                "market-sell-order-must-less-than": "1000",
-                "limit-order-before-open-greater-than": "999999999",
-                "limit-order-before-open-less-than": "0",
-                "circuit-break-when-greater-than": "100",
-                "circuit-break-when-less-than": "10",
-                "order-must-less-than": "0",
-                "market-sell-order-rate-must-less-than": "0.1",
-                "market-buy-order-rate-must-less-than": "0.1",
-                "market-order-disabled-start-time": "0",
-                "market-order-disabled-end-time": "0",
-                "limit-order-limit-price-start-time": "0",
-                "limit-order-limit-price-end-time": "0",
-                "limit-order-limit-price-greater-than": None,
-                "limit-order-limit-price-less-than": None,
-                "equity-deviation-rate": None,
-                "equity-deviation-rate-buy": None,
-                "equity-deviation-rate-sell": None,
-                "market-equity-deviation-rate": None,
-                "market-equity-deviation-rate-buy": None,
-                "market-equity-deviation-rate-sell": None,
-                "equity-deviation-rate-switch": "0",
-                "market-equity-deviation-rate-switch": "0",
-                "limit-order-switch": "0",
-                "limit-order-buy-offset": "0",
-                "market-order-switch": "0",
-                "market-order-buy-offset": "0",
-                "updated-at": self.__timestamp_now()
-            },
-            "limits": {
-                "amount": {
-                    "min": market['limits']['amount']['min'],
-                    "max": None
-                }
-            }
-        }
+    # TODO: Usando outra versão da Binance, parece fazer mais sentido, removemos?
+    # def parse_trading_by_market(self, market, params):
+    #     return {
+    #         # TODO: Não encontrei essa config na BitMart e nem em outras grande, faz sentido termos?
+    #         "info": {
+    #             "symbol": market['id'],
+    #             "buy-limit-must-less-than": "1.1",
+    #             "buy-limit-must-greater-than": "0.1",
+    #             "sell-limit-must-less-than": "10",
+    #             "sell-limit-must-greater-than": "0.9",
+    #             "limit-order-must-greater-than": "0.001",
+    #             "limit-order-must-less-than": "10000",
+    #             "limit-buy-amount-must-less-than": "10000",
+    #             "limit-sell-amount-must-less-than": "10000",
+    #             "market-buy-order-must-greater-than": "0.0001",
+    #             "market-sell-amount-must-less-than": "0.0001",
+    #             "market-buy-volume-must-greater-than": "0.0001",
+    #             "market-sell-volume-must-less-than": "0.0001",
+    #             "market-bs-calc-max-scale": "1",
+    #             "market-buy-order-must-less-than": "100",
+    #             "market-sell-order-must-greater-than": "0.001",
+    #             "market-sell-order-must-less-than": "1000",
+    #             "limit-order-before-open-greater-than": "999999999",
+    #             "limit-order-before-open-less-than": "0",
+    #             "circuit-break-when-greater-than": "100",
+    #             "circuit-break-when-less-than": "10",
+    #             "order-must-less-than": "0",
+    #             "market-sell-order-rate-must-less-than": "0.1",
+    #             "market-buy-order-rate-must-less-than": "0.1",
+    #             "market-order-disabled-start-time": "0",
+    #             "market-order-disabled-end-time": "0",
+    #             "limit-order-limit-price-start-time": "0",
+    #             "limit-order-limit-price-end-time": "0",
+    #             "limit-order-limit-price-greater-than": None,
+    #             "limit-order-limit-price-less-than": None,
+    #             "equity-deviation-rate": None,
+    #             "equity-deviation-rate-buy": None,
+    #             "equity-deviation-rate-sell": None,
+    #             "market-equity-deviation-rate": None,
+    #             "market-equity-deviation-rate-buy": None,
+    #             "market-equity-deviation-rate-sell": None,
+    #             "equity-deviation-rate-switch": "0",
+    #             "market-equity-deviation-rate-switch": "0",
+    #             "limit-order-switch": "0",
+    #             "limit-order-buy-offset": "0",
+    #             "market-order-switch": "0",
+    #             "market-order-buy-offset": "0",
+    #             "updated-at": self.__timestamp_now()
+    #         },
+    #         "limits": {
+    #             "amount": {
+    #                 "min": market['limits']['amount']['min'],
+    #                 "max": None
+    #             }
+    #         }
+    #     }
 
     def parse_ticker(self, ticker, symbol):
         return {
@@ -717,10 +779,11 @@ class foxbit(Exchange, ImplicitAPI):
         }
 
     def parse_balance(self, account):
+        # TODO: Acho que aqui não precisa ser float certo?
         return {
-            'free': float(account.get('balance_available', None)),
-            'used': float(account.get('balance_locked', None)),
-            'total': float(account.get('balance', None))
+            'free': self.safe_string(account, 'balance_available'),
+            'used': self.safe_string(account, 'balance_locked'),
+            'total': self.safe_string(account, 'balance'),
         }
 
     def parse_trade(self, trade):
@@ -738,9 +801,9 @@ class foxbit(Exchange, ImplicitAPI):
             'amount': 1.5,
             'cost': 0.10376526,
             'fee': {
-                        'cost': 0.0015,
-                        'currency': 'ETH',
-                        'rate': 0.002,
+                'cost': 0.0015,
+                'currency': 'ETH',
+                'rate': 0.002,
             },
             'fees': [
                 {
