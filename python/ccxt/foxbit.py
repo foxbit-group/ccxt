@@ -5,6 +5,7 @@ from datetime import datetime
 from ccxt.base.types import (
     Num,
     OrderType,
+    Currencies,
     Currency,
     Transaction,
     OrderSide,
@@ -235,7 +236,7 @@ class foxbit(Exchange, ImplicitAPI):
         data = self.safe_value(response, 'data', [])
         return self.parse_markets(data)
 
-    def fetch_currencies(self, params={}):
+    def fetch_currencies(self, params={}) -> Currencies:
         response = self.publicGetCurrencies(params)
 
         data = self.safe_value(response, 'data', [])
@@ -662,39 +663,27 @@ class foxbit(Exchange, ImplicitAPI):
         return result
 
     def parse_currency(self, currency):
-        fee = '0.0'
-        withdraw = False
-        withdraw_min = '0.0'
-        if not currency['withdraw_info'] is None:
-            fee = currency['withdraw_info']['fee']
-            withdraw = currency['withdraw_info']['enabled']
-            withdraw_min = self.safe_number(currency['withdraw_info'], 'min_amount')
-
-        deposit_min = '0.0'
-        if not currency['deposit_info'] is None:
-            deposit_min = self.safe_number(currency['deposit_info'], 'min_amount')
-
         return {
-            'id': currency['symbol'],
+            'id': currency['symbol'].upper(),
             'code': currency['symbol'].upper(),
             'name': currency['name'],
-            'active': True,
-            'fee': fee,
-            'precision': currency['precision'],
-            'deposit': True,
-            'withdraw': withdraw,
+            'active': None,
+            'fee': None,
+            'precision': int(currency['precision']),
+            'deposit': None,
+            'withdraw': None,
             'limits': {
                 'deposit': {
-                    min: deposit_min,
-                    max: None,
+                    'min': None,
+                    'max': None,
                 },
                 'withdraw': {
-                    min: withdraw_min,
-                    max: None,
+                    'min': None,
+                    'max': None,
                 },
             },
-            'networks': {...},
-            'info': {...}
+            'networks': {},
+            'info': currency
         }
 
     # TODO: Usando outra versão da Binance, parece fazer mais sentido, removemos?
