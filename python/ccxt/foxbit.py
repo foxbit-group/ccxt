@@ -166,7 +166,9 @@ class foxbit(Exchange, ImplicitAPI):
                         'marketsxxx': 6,
                         'markets/quotes': 2, # TODO: Será que faz sentido ter esse?
                         'markets/{market_symbol}/orderbook': 10,
-                        'markets/{market_symbol}/candlesticks': 10
+                        'markets/{market_symbol}/candlesticks': 10,
+                        'markets/{market_symbol}/ticker/24hr': 4,
+                        'markets/ticker/24hr': 1,
                     },
                 },
                 'private': {},
@@ -242,33 +244,73 @@ class foxbit(Exchange, ImplicitAPI):
         data = self.safe_value(response, 'data', [])
         return self.parse_currencies(data)
 
-
-    # TODO: Esse cara ta apontando pro lugar errado
     def fetch_ticker(self, symbol: str, params={}) -> Ticker:
-        if symbol is None:
-            symbol = self.symbol
-
-        interval = "1d"
-
-        if params.get("interval", None):
-            interval = params["interval"]
-
         self.load_markets()
-        market = self.market_id(symbol)
-
+        market = self.market(symbol)
+        market_id = market['id'].lower()
         request = {
-            'market_symbol': market,
-            'interval': interval,
-            'limit': 1
+            'market_symbol': market_id,
         }
-
         response = self.publicGetTicker(self.extend(request, params))
+        # {
+        #   "data": [
+        #     {
+        #       "market_symbol": "btcbrl",
+        #       "last_trade": {
+        #         "price": "358657.88430000",
+        #         "volume": "0.00000278",
+        #         "date": "2024-06-02T22:47:40.000Z"
+        #       },
+        #       "rolling_24h": {
+        #         "price_change": "1158.98430000",
+        #         "price_change_percent": "0.32419241",
+        #         "volume": "3.69065955",
+        #         "trades_count": 2693,
+        #         "open": "357498.90000000",
+        #         "high": "360000.00000000",
+        #         "low": "355000.00010000"
+        #       },
+        #       "best": {
+        #         "ask": {
+        #           "price": "358802.05790000",
+        #           "volume": "0.00178600"
+        #         },
+        #         "bid": {
+        #           "price": "358016.00050000",
+        #           "volume": "0.00020012"
+        #         }
+        #       }
+        #     }
+        #   ]
+        # }
+        return self.parse_ticker(response['data'][0], market['symbol'])
 
-        return self.parse_ticker(response[0], symbol)
-
-    # TODO: Implementar
     def fetch_tickers(self, symbols: Strings = None, params={}) -> Tickers:
-        ...
+        self.load_markets()
+        # {
+        #   "data": [
+        #     {
+        #       "market_symbol": "btcbrl",
+        #       "last_trade": {
+        #         "price": "358578.09360000",
+        #         "volume": "0.00002937",
+        #         "date": "2024-06-03T00:52:38.000Z"
+        #       },
+        #       "rolling_24h": {
+        #         "price_change": "947.20430000",
+        #         "price_change_percent": "0.26485528",
+        #         "volume": "3.41562704",
+        #         "trades_count": 2689,
+        #         "open": "357630.88930000",
+        #         "high": "360000.00000000",
+        #         "low": "355000.00010000"
+        #       }
+        #     },
+        #     ...
+        #   ]
+        # }
+        response = self.publicGetTickers()
+        return self.parse_tickers(response['data'])
 
     # TODO: Será que podemos remover?
     def fetch_trading_fees(self, params={}):
@@ -744,28 +786,114 @@ class foxbit(Exchange, ImplicitAPI):
     #     }
 
     def parse_ticker(self, ticker, symbol):
+        # {
+        #   "market_symbol": "btcbrl",
+        #   "last_trade": {
+        #     "price": "358657.88430000",
+        #     "volume": "0.00000278",
+        #     "date": "2024-06-02T22:47:40.000Z"
+        #   },
+        #   "rolling_24h": {
+        #     "price_change": "1158.98430000",
+        #     "price_change_percent": "0.32419241",
+        #     "volume": "3.69065955",
+        #     "trades_count": 2693,
+        #     "open": "357498.90000000",
+        #     "high": "360000.00000000",
+        #     "low": "355000.00010000"
+        #   },
+        #   "best": {
+        #     "ask": {
+        #       "price": "358802.05790000",
+        #       "volume": "0.00178600"
+        #     },
+        #     "bid": {
+        #       "price": "358016.00050000",
+        #       "volume": "0.00020012"
+        #     }
+        #   }
+        # }
+        last_trade = self.safe_value(ticker, 'last_trade', {})
+        rolling_24h = self.safe_value(ticker, 'rolling_24h', {})
+        best = self.safe_value(ticker, 'best', {})
+        ask = self.safe_value(best, 'ask', {})
+        bid = self.safe_value(best, 'bid', {})
+        last = self.safe_string(last_trade, 'price')
+
         return {
             'symbol': symbol,
-            'timestamp': ticker[0],
-            'datetime': self.iso8601(ticker[0]),
-            'high': float(ticker[2]),
-            'low': float(ticker[3]),
-            'bid': self.safe_string(ticker, 'bid'),
-            'bidVolume': None,
-            'ask': self.safe_string(ticker, 'ask'),
-            'askVolume': None,
+            'timestamp': self.parse8601(self.safe_string(last_trade, 'date')),
+            'datetime': self.safe_string(last_trade, 'date'),
+            'high': self.safe_string(rolling_24h, 'high'),
+            'low': self.safe_string(rolling_24h, 'low'),
+            'bid': self.safe_string(bid, 'price'),
+            'bidVolume': self.safe_string(bid, 'volume'),
+            'ask': self.safe_string(ask, 'price'),
+            'askVolume': self.safe_string(ask, 'volume'),
             'vwap': None,
-            'open': float(ticker[1]),
-            'close': float(ticker[4]),
-            'last': None,
+            'open': self.safe_string(rolling_24h, 'open'),
+            'close': last,
+            'last': last,
             'previousClose': None,
-            'change': None,
-            'percentage': None,
+            'change': self.safe_string(rolling_24h, 'price_change'),
+            'percentage': self.safe_string(rolling_24h, 'price_change_percent'),
             'average': None,
-            'baseVolume': float(ticker[6]),
-            'quoteVolume': float(ticker[7]),
+            'baseVolume': self.safe_string(rolling_24h, 'volume'),
+            'quoteVolume': None,
             'info': ticker,
         }
+
+    def parse_tickers(self, tickers):
+        # {
+        #   "market_symbol": "btcbrl",
+        #   "last_trade": {
+        #     "price": "358657.88430000",
+        #     "volume": "0.00000278",
+        #     "date": "2024-06-02T22:47:40.000Z"
+        #   },
+        #   "rolling_24h": {
+        #     "price_change": "1158.98430000",
+        #     "price_change_percent": "0.32419241",
+        #     "volume": "3.69065955",
+        #     "trades_count": 2693,
+        #     "open": "357498.90000000",
+        #     "high": "360000.00000000",
+        #     "low": "355000.00010000"
+        #   }
+        # }
+        result = {}
+
+        for ticker in tickers:
+            market_id = ticker['market_symbol'].upper()
+            market = self.market(market_id)
+            symbol = market['symbol']
+            last_trade = self.safe_value(ticker, 'last_trade', {})
+            rolling_24h = self.safe_value(ticker, 'rolling_24h', {})
+            last = self.safe_string(last_trade, 'price')
+
+            result[symbol] = {
+                'symbol': symbol,
+                'timestamp': self.parse8601(self.safe_string(last_trade, 'date')),
+                'datetime': self.safe_string(last_trade, 'date'),
+                'high': self.safe_string(rolling_24h, 'high'),
+                'low': self.safe_string(rolling_24h, 'low'),
+                'bid': None,
+                'bidVolume': None,
+                'ask': None,
+                'askVolume': None,
+                'vwap': None,
+                'open': self.safe_string(rolling_24h, 'open'),
+                'close': last,
+                'last': last,
+                'previousClose': None,
+                'change': self.safe_string(rolling_24h, 'price_change'),
+                'percentage': self.safe_string(rolling_24h, 'price_change_percent'),
+                'average': None,
+                'baseVolume': self.safe_string(rolling_24h, 'volume'),
+                'quoteVolume': None,
+                'info': ticker,
+            }
+        return result
 
     def parse_balance(self, account):
         # TODO: Acho que aqui não precisa ser float certo?
