@@ -185,6 +185,8 @@ from ccxt.woofipro import woofipro                                    # noqa: F4
 from ccxt.yobit import yobit                                          # noqa: F401
 from ccxt.zaif import zaif                                            # noqa: F401
 from ccxt.zonda import zonda                                          # noqa: F401
+from ccxt.foxbit import foxbit                                        # noqa: F401
+
 
 exchanges = [
     'ace',
@@ -244,6 +246,7 @@ exchanges = [
     'digifinex',
     'exmo',
     'fmfwio',
+    'foxbit',
     'gate',
     'gateio',
     'gemini',
