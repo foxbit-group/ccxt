@@ -53,6 +53,46 @@
         {},
         10
       ]
-    }
+    },
+    "fetchOHLCV": [
+      {
+        "description": "Fetch OHLCV with limit",
+        "method": "fetchOHLCV",
+        "url": "https://api.foxbit.com.br/rest/v3/markets/btcbrl/candlesticks?interval=15m",
+        "input": [
+          "BTC/BRL",
+          "15m",
+          null,
+          5
+        ]
+      },
+      {
+        "description": "Fetch OHLCV without limit",
+        "method": "fetchOHLCV",
+        "url": "https://api.foxbit.com.br/rest/v3/markets/btcbrl/candlesticks?interval=15m",
+        "input": [
+          "BTC/BRL",
+          "15m"
+        ]
+      },
+      {
+        "description": "Fetch OHLCV with 1 minute interval",
+        "method": "fetchOHLCV",
+        "url": "https://api.foxbit.com.br/rest/v3/markets/btcbrl/candlesticks?interval=1m",
+        "input": [
+          "BTC/BRL",
+          "1m"
+        ]
+      },
+      {
+        "description": "Fetch OHLCV at BTC/USDT symbol",
+        "method": "fetchOHLCV",
+        "url": "https://api.foxbit.com.br/rest/v3/markets/btcbrl/candlesticks?interval=1m",
+        "input": [
+          "BTC/USDT",
+          "15m"
+        ]
+      }
+    ]
   }
 }

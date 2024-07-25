@@ -1,5 +1,5 @@
 import Exchange from './abstract/foxbit';
-import type { Currencies, Market, OrderBook, Dict, Ticker, TradingFees, Int, Str, Num, Dictionary, Trade, OHLCV, Balances, Order, Account, OrderType, OrderSide, Strings, Tickers } from './base/types.js';
+import type { Currencies, Market, OrderBook, Dict, Ticker, TradingFees, Int, Str, Num, Trade, OHLCV, Balances, Order, Account, OrderType, OrderSide, Strings, Tickers } from './base/types.js';
 
 /**
  * @class foxbit
@@ -32,8 +32,9 @@ export default class foxbit extends Exchange {
                         'get': [
                             'rest/v3/currencies',
                             'rest/v3/markets',
-                            'rest/v3/markets/{market}/orderbook',
                             'rest/v3/markets/ticker/24hr',
+                            'rest/v3/markets/{market}/orderbook',
+                            'rest/v3/markets/{market}/candlesticks?interval={interval}',
                             'rest/v3/markets/{market}/ticker/24hr',
                             'rest/v3/markets/{market}/orderbook?depth={depth}',
                         ],
@@ -51,9 +52,9 @@ export default class foxbit extends Exchange {
                 'fetchCurrencies': true,
                 'fetchMarkets': true,
                 'fetchOrderBook': true,
-                'fetchOrderBooks': false,
                 'fetchTicker': true,
                 'fetchTickers': true,
+                'fetchOHLCV': true,
             },
             'timeframes': {
                 '1m': '1m',
@@ -697,17 +698,40 @@ export default class foxbit extends Exchange {
         return this.parseOrderBook (response, symbol, timestamp);
     }
 
-    async fetchOrderBooks (symbols: string[], limit?: number, params?: {}): Promise<Dictionary<OrderBook>> {
-        // NAO TEMOS ENDPOINT
-        return undefined;
-    }
-
     async fetchTrades (symbol: string, since?: number, limit?: number, params?: {}): Promise<Trade[]> {
         return [];
     }
 
     async fetchOHLCV (symbol: string, timeframe = '1m', since: Int = undefined, limit: Int = undefined, params = {}): Promise<OHLCV[]> {
-        return [];
+        await this.loadMarkets ();
+        const market = this.market (symbol);
+        const request: Dict = {
+            'market': market['baseId'] + market['quoteId'],
+            'interval': this.safeString (this.timeframes, timeframe),
+        };
+        if (limit !== undefined) {
+            request['limit'] = limit;
+        }
+        if (limit > 500) {
+            request['limit'] = 500;
+        }
+        const response = await this.v3PublicGetRestV3MarketsMarketCandlesticksIntervalInterval (this.extend (request, params));
+        // [
+        //     [
+        //         "1692918000000", // timestamp
+        //         "127772.05150000", // open
+        //         "128467.99980000", // high
+        //         "127750.01000000", // low
+        //         "128353.99990000", // close
+        //         "1692918060000", // close timestamp
+        //         "0.17080431", // base volume
+        //         "21866.35948786", // quote volume
+        //         66, // number of trades
+        //         "0.12073605", // taker buy base volume
+        //         "15466.34096391" // taker buy quote volume
+        //     ]
+        // ]
+        return this.parseOHLCVs (response, market, timeframe, since, limit);
     }
 
     async fetchBalance (params = {}): Promise<Balances> {
@@ -779,6 +803,17 @@ export default class foxbit extends Exchange {
             'quoteVolume': undefined,
             'info': ticker,
         }, market);
+    }
+
+    parseOHLCV (ohlcv): OHLCV {
+        return [
+            this.safeInteger (ohlcv, 0),
+            this.safeFloat (ohlcv, 1),
+            this.safeFloat (ohlcv, 2),
+            this.safeFloat (ohlcv, 3),
+            this.safeFloat (ohlcv, 4),
+            this.safeFloat (ohlcv, 6),
+        ];
     }
 }
 
