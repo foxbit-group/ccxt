@@ -93,6 +93,32 @@
           "15m"
         ]
       }
-    ]
+    ],
+    "fetchTrades": [
+      {
+        "description": "Fetch trades without filters",
+        "method": "fetchTrades",
+        "url": "https://api.foxbit.com.br/rest/v3/markets/btcbrl/trades/history",
+        "input": [
+          "BTC/BRL"
+        ]
+      },
+      {
+        "description": "Fetch trades with limit filter",
+        "method": "fetchTrades",
+        "url": "https://api.foxbit.com.br/rest/v3/markets/btcbrl/trades/history",
+        "input": [
+          "BTC/BRL",
+          null,
+          10
+        ]
+      }
+    ],
+    "fetchBalance": {
+      "description": "Fetches the balances of all accounts",
+      "method": "fetchBalance",
+      "url": "https://api.foxbit.com.br/rest/v3/accounts",
+      "input": []
+    }
   }
 }
