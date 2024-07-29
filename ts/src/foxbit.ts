@@ -808,7 +808,35 @@ export default class foxbit extends Exchange {
     }
 
     async fetchOpenOrders (symbol: Str = undefined, since: Int = undefined, limit: Int = undefined, params = {}): Promise<Order[]> {
-        return [];
+        return this.fetchOrdersByStatus ('ACTIVE', symbol, since, limit, params);
+    }
+
+    async fetchClosedOrders (symbol: Str = undefined, since: Int = undefined, limit: Int = undefined, params = {}): Promise<Order[]> {
+        return this.fetchOrdersByStatus ('FILLED', symbol, since, limit, params);
+    }
+
+    async fetchOrdersByStatus (status: Str, symbol: Str = undefined, since: Int = undefined, limit: Int = undefined, params = {}): Promise<Order[]> {
+        await this.loadMarkets ();
+        let market = undefined;
+        const request: Dict = {
+            'state': status,
+        };
+        if (symbol !== undefined) {
+            market = this.market (symbol);
+            request['market_symbol'] = market['baseId'] + market['quoteId'];
+        }
+        if (since !== undefined) {
+            request['start_time'] = this.iso8601 (since);
+        }
+        if (limit !== undefined) {
+            request['page_size'] = limit;
+            if (limit > 100) {
+                request['page_size'] = 100;
+            }
+        }
+        const response = await this.v3PrivateGetOrders (this.extend (request, params));
+        const data = this.safeList (response, 'data', []);
+        return this.parseOrders (data);
     }
 
     // TODO: consertar o método, o POST não está enviando BODY por algum motivo
@@ -898,7 +926,7 @@ export default class foxbit extends Exchange {
     // TODO: ajustar o parâmetro de since, está dando erro de assinatura, por algum motivo.
     async fetchOrders (symbol?: string, since?: number, limit?: number, params?: {}): Promise<Order[]> {
         await this.loadMarkets ();
-        let market;
+        let market = undefined;
         const request: Dict = {};
         if (symbol !== undefined) {
             market = this.market (symbol);
@@ -1060,11 +1088,11 @@ export default class foxbit extends Exchange {
         }
         const timestamp = this.parseDate (this.safeString (order, 'created_at'));
         const price = this.safeNumber (order, 'price');
-        const amount = this.safeNumber (order, 'quantity');
         const filled = this.safeNumber (order, 'quantity_executed');
-        let remaining = undefined;
-        if (amount !== undefined && filled !== undefined) {
-            remaining = amount - filled;
+        const remaining = this.safeNumber (order, 'quantity');
+        let amount = undefined;
+        if (remaining !== undefined && filled !== undefined) {
+            amount = remaining + filled;
         }
         return {
             'id': this.safeString (order, 'id'),
@@ -1111,12 +1139,15 @@ export default class foxbit extends Exchange {
                 url += '?' + query;
             }
         }
-        let rawBody = '';
         if (method === 'POST' || method === 'PUT') {
-            rawBody = this.json (params);
+            body = this.json (params);
+        }
+        let bodyToSignature = '';
+        if (body !== undefined) {
+            bodyToSignature = body;
         }
         // ADICIONAR RAW BODY NA ASSINATURA QUANDO FOR POST
-        const preHash = timestamp + method + fullPath + query + rawBody;
+        const preHash = timestamp + method + fullPath + query + bodyToSignature;
         console.log ('PRE HASH DA ASSINATURA:', preHash);
         const signature = this.hmac (preHash, this.secret, sha256, 'hex');
         console.log ('ASSINATURA DA REQUISIÇÃO:', signature);
@@ -1128,7 +1159,7 @@ export default class foxbit extends Exchange {
         };
         console.log ('BODY DA REQUISIÇÃO:', body);
         console.log ('FAZENDO REQUISIÇÃO PARA A ROTA: ', url);
-        return { 'url': url, 'method': method, 'body': rawBody, 'headers': headers };
+        return { 'url': url, 'method': method, 'body': body, 'headers': headers };
     }
 }
 
