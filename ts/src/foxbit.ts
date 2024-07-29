@@ -979,6 +979,15 @@ export default class foxbit extends Exchange {
         const request = {
             'market_symbol': market['baseId'] + market['quoteId'],
         };
+        if (since !== undefined) {
+            request['start_time'] = this.iso8601 (since);
+        }
+        if (limit !== undefined) {
+            request['page_size'] = limit;
+            if (limit > 100) {
+                request['page_size'] = 100;
+            }
+        }
         const response = await this.v3PrivateGetTrades (this.extend (request, params));
         // {
         //     "data": [
@@ -1046,8 +1055,14 @@ export default class foxbit extends Exchange {
         const timestamp = this.parseDate (this.safeString (trade, 'created_at'));
         const price = this.safeNumber (trade, 'price');
         const amount = this.safeNumber (trade, 'volume', this.safeNumber (trade, 'quantity'));
-        const side = this.safeStringLower (trade, 'taker_side');
+        const privateSideField = this.safeStringLower (trade, 'side');
+        const side = this.safeStringLower (trade, 'taker_side', privateSideField);
         const cost = amount * price;
+        const fee = {
+            'currency': this.safeSymbol (this.safeString (trade, 'fee_currency_symbol')),
+            'cost': this.safeNumber (trade, 'fee'),
+            'rate': undefined,
+        };
         return {
             'id': this.safeString (trade, 'id'),
             'info': trade,
@@ -1061,7 +1076,7 @@ export default class foxbit extends Exchange {
             'price': price,
             'amount': amount,
             'cost': cost,
-            'fee': undefined,
+            'fee': fee,
         };
     }
 
