@@ -52,6 +52,9 @@ export default class foxbit extends Exchange {
                         'post': [
                             'orders',
                         ],
+                        'put': [
+                            'orders/cancel',
+                        ],
                     },
                 },
             },
@@ -74,6 +77,7 @@ export default class foxbit extends Exchange {
                 'createOrder': true,
                 'fetchOrder': true,
                 'fetchOrders': true,
+                'cancelOrder': true,
             },
             'timeframes': {
                 '1m': '1m',
@@ -844,7 +848,23 @@ export default class foxbit extends Exchange {
     }
 
     async cancelOrder (id: string, symbol: Str = undefined, params = {}): Promise<{}> {
-        return {};
+        await this.loadMarkets ();
+        const request: Dict = {
+            'id': id,
+            'type': 'ID',
+        };
+        const response = await this.v3PrivatePutOrdersCancel (this.extend (request, params));
+        // {
+        //     "data": [
+        //         {
+        //         "sn": "OKMAKSDHRVVREK",
+        //         "id": 123456789
+        //         }
+        //     ]
+        // }
+        const data = this.safeList (response, 'data', []);
+        const result = this.safeValue (data, 0, {});
+        return this.parseOrder (result);
     }
 
     async fetchOrder (id: string, symbol: Str = undefined, params = {}): Promise<Order> {
@@ -1032,12 +1052,20 @@ export default class foxbit extends Exchange {
     // na criação, os dados da ordem não vêm
     parseOrder (order, market = undefined): Order {
         let symbol = this.safeString (order, 'market_symbol');
-        if (!market) market = this.market (symbol);
-        symbol = market['symbol'];
+        if (market === undefined && symbol !== undefined) {
+            market = this.market (symbol);
+        }
+        if (market !== undefined) {
+            symbol = market['symbol'];
+        }
         const timestamp = this.parseDate (this.safeString (order, 'created_at'));
         const price = this.safeNumber (order, 'price');
         const amount = this.safeNumber (order, 'quantity');
         const filled = this.safeNumber (order, 'quantity_executed');
+        let remaining = undefined;
+        if (amount !== undefined && filled !== undefined) {
+            remaining = amount - filled;
+        }
         return {
             'id': this.safeString (order, 'id'),
             'info': order,
@@ -1046,7 +1074,7 @@ export default class foxbit extends Exchange {
             'datetime': this.iso8601 (timestamp),
             'lastTradeTimestamp': undefined,
             'status': this.parseOrderStatus (this.safeString (order, 'state')),
-            'symbol': market['symbol'],
+            'symbol': this.safeString (market, 'symbol'),
             'type': this.safeString (order, 'type'),
             'timeInForce': undefined,
             'postOnly': undefined,
@@ -1060,7 +1088,7 @@ export default class foxbit extends Exchange {
             'average': this.safeNumber (order, 'price_avg'),
             'amount': amount,
             'filled': filled,
-            'remaining': amount - filled,
+            'remaining': remaining,
             'trades': undefined,
             'fee': {
                 'currency': undefined,
@@ -1076,15 +1104,19 @@ export default class foxbit extends Exchange {
         params = this.omit (params, this.extractParams (path));
         const timestamp = this.now ();
         let query = '';
-        console.log ('OS PARAMS QUE CHEGARAM FORAM', params);
+        console.log ('OS PARAMS QUE CHEGARAM NO sign() FORAM', params);
         if (method === 'GET') {
             if (Object.keys (params).length > 0) {
                 query = this.urlencode (params);
                 url += '?' + query;
             }
         }
+        let rawBody = '';
+        if (method === 'POST' || method === 'PUT') {
+            rawBody = this.json (params);
+        }
         // ADICIONAR RAW BODY NA ASSINATURA QUANDO FOR POST
-        const preHash = timestamp + method + fullPath + query;
+        const preHash = timestamp + method + fullPath + query + rawBody;
         console.log ('PRE HASH DA ASSINATURA:', preHash);
         const signature = this.hmac (preHash, this.secret, sha256, 'hex');
         console.log ('ASSINATURA DA REQUISIÇÃO:', signature);
@@ -1094,8 +1126,9 @@ export default class foxbit extends Exchange {
             'X-FB-ACCESS-TIMESTAMP': this.numberToString (timestamp),
             'X-FB-ACCESS-SIGNATURE': signature,
         };
+        console.log ('BODY DA REQUISIÇÃO:', body);
         console.log ('FAZENDO REQUISIÇÃO PARA A ROTA: ', url);
-        return { 'url': url, 'method': method, 'body': body, 'headers': headers };
+        return { 'url': url, 'method': method, 'body': rawBody, 'headers': headers };
     }
 }
 
