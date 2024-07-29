@@ -1,5 +1,6 @@
+import { ArgumentsRequired, InvalidOrder } from '../ccxt';
 import Exchange from './abstract/foxbit';
-import type { Currencies, Market, OrderBook, Dict, Ticker, TradingFees, Int, Str, Num, Trade, OHLCV, Balances, Order, Account, OrderType, OrderSide, Strings, Tickers } from './base/types.js';
+import type { Currencies, Market, OrderBook, Dict, Ticker, TradingFees, Int, Str, Num, Trade, OHLCV, Balances, Order, OrderType, OrderSide, Strings, Tickers } from './base/types.js';
 import { sha256 } from './static_dependencies/noble-hashes/sha256.js';
 
 /**
@@ -31,19 +32,25 @@ export default class foxbit extends Exchange {
                 'v3': {
                     'public': {
                         'get': [
-                            'rest/v3/currencies',
-                            'rest/v3/markets',
-                            'rest/v3/markets/ticker/24hr',
-                            'rest/v3/markets/{market}/orderbook',
-                            'rest/v3/markets/{market}/candlesticks?interval={interval}',
-                            'rest/v3/markets/{market}/trades/history',
-                            'rest/v3/markets/{market}/ticker/24hr',
-                            'rest/v3/markets/{market}/orderbook?depth={depth}',
+                            'currencies',
+                            'markets',
+                            'markets/ticker/24hr',
+                            'markets/{market}/orderbook',
+                            'markets/{market}/candlesticks',
+                            'markets/{market}/trades/history',
+                            'markets/{market}/ticker/24hr',
+                            'markets/{market}/orderbook',
                         ],
                     },
                     'private': {
                         'get': [
-                            'rest/v3/accounts',
+                            'accounts',
+                            'orders',
+                            'orders/by-order-id/{id}',
+                            'trades',
+                        ],
+                        'post': [
+                            'orders',
                         ],
                     },
                 },
@@ -63,6 +70,10 @@ export default class foxbit extends Exchange {
                 'fetchTickers': true,
                 'fetchOHLCV': true,
                 'fetchTrades': true,
+                'fetchBalance': true,
+                'createOrder': true,
+                'fetchOrder': true,
+                'fetchOrders': true,
             },
             'timeframes': {
                 '1m': '1m',
@@ -408,7 +419,7 @@ export default class foxbit extends Exchange {
 
     async fetchCurrencies (params = {}): Promise<Currencies> {
         await this.loadMarkets ();
-        const response = await this.v3PublicGetRestV3Currencies (params);
+        const response = await this.v3PublicGetCurrencies (params);
         // {
         //   "data": [
         //     {
@@ -476,7 +487,7 @@ export default class foxbit extends Exchange {
 
     async fetchMarkets (params = {}): Promise<Market[]> {
         await this.loadMarkets ();
-        const response = await this.v3PublicGetRestV3Markets (params);
+        const response = await this.v3PublicGetMarkets (params);
         //  {
         //    "data": [
         //      {
@@ -593,7 +604,7 @@ export default class foxbit extends Exchange {
         const request: Dict = {
             'market': market['baseId'] + market['quoteId'],
         };
-        const response = await this.v3PublicGetRestV3MarketsMarketTicker24hr (this.extend (request, params));
+        const response = await this.v3PublicGetMarketsMarketTicker24hr (this.extend (request, params));
         //  {
         //    "data": [
         //      {
@@ -633,7 +644,7 @@ export default class foxbit extends Exchange {
     async fetchTickers (symbols: Strings = undefined, params = {}): Promise<Tickers> {
         await this.loadMarkets ();
         symbols = this.marketSymbols (symbols);
-        const response = await this.v3PublicGetRestV3MarketsTicker24hr (params);
+        const response = await this.v3PublicGetMarketsTicker24hr (params);
         //  {
         //    "data": [
         //      {
@@ -667,7 +678,7 @@ export default class foxbit extends Exchange {
         return {};
     }
 
-    async fetchOrderBook (symbol: string, params: {}, limit: Int = 20): Promise<OrderBook> {
+    async fetchOrderBook (symbol: string, limit: Int = 20, params = {}): Promise<OrderBook> {
         await this.loadMarkets ();
         const market = this.market (symbol);
         if (limit === undefined) {
@@ -677,7 +688,7 @@ export default class foxbit extends Exchange {
             'market': market['baseId'] + market['quoteId'],
             'depth': limit,
         };
-        const response = await this.v3PublicGetRestV3MarketsMarketOrderbookDepthDepth (this.extend (request, params));
+        const response = await this.v3PublicGetMarketsMarketOrderbook (this.extend (request, params));
         //  {
         //    "sequence_id": 1234567890,
         //    "timestamp": 1713187921336,
@@ -721,7 +732,7 @@ export default class foxbit extends Exchange {
         //     "created_at": "2024-01-01T00:00:00Z"
         //     }
         // ]
-        const response = await this.v3PublicGetRestV3MarketsMarketTradesHistory (this.extend (request, params));
+        const response = await this.v3PublicGetMarketsMarketTradesHistory (this.extend (request, params));
         const data = this.safeList (response, 'data', []);
         return this.parseTrades (data, market, since, limit);
     }
@@ -739,7 +750,7 @@ export default class foxbit extends Exchange {
         if (limit > 500) {
             request['limit'] = 500;
         }
-        const response = await this.v3PublicGetRestV3MarketsMarketCandlesticksIntervalInterval (this.extend (request, params));
+        const response = await this.v3PublicGetMarketsMarketCandlesticks (this.extend (request, params));
         // [
         //     [
         //         "1692918000000", // timestamp
@@ -760,7 +771,7 @@ export default class foxbit extends Exchange {
 
     async fetchBalance (params = {}): Promise<Balances> {
         await this.loadMarkets ();
-        const response = await this.v3PrivateGetRestV3Accounts (params);
+        const response = await this.v3PrivateGetAccounts (params);
         // {
         //     "data": [
         //         {
@@ -796,12 +807,40 @@ export default class foxbit extends Exchange {
         return [];
     }
 
-    async fetchAccounts (params = {}): Promise<Account[]> {
-        return [];
-    }
-
+    // TODO: consertar o método, o POST não está enviando BODY por algum motivo
     async createOrder (symbol: string, type: OrderType, side: OrderSide, amount: number, price: Num = undefined, params = {}): Promise<Order> {
-        return undefined;
+        await this.loadMarkets ();
+        const market = this.market (symbol);
+        type = type.toUpperCase ();
+        const validOrderTypes = [ 'LIMIT', 'MARKET', 'STOP_MARKET', 'INSTANT' ];
+        const isOrderTypeValid = validOrderTypes.indexOf (type) >= 0;
+        if (!isOrderTypeValid) {
+            throw new InvalidOrder ('Invalid order type: ' + type + '. Must be one of ' + validOrderTypes.join (', ') + '.');
+        }
+        const request: Dict = {
+            'market_symbol': market['baseId'] + market['quoteId'],
+            'side': side.toUpperCase (),
+            'type': type,
+        };
+        if (type === 'LIMIT' || type === 'MARKET') {
+            request['quantity'] = this.amountToPrecision (symbol, amount);
+            if (type === 'LIMIT') {
+                request['price'] = this.priceToPrecision (symbol, price);
+            }
+        }
+        if (type === 'STOP_MARKET') {
+            request['stop_price'] = this.priceToPrecision (symbol, price);
+        }
+        if (type === 'INSTANT') {
+            request['amount'] = this.priceToPrecision (symbol, amount);
+        }
+        const response = await this.v3PrivatePostOrders (this.extend (request, params));
+        // {
+        //     "id": 1234567890,
+        //     "sn": "OKMAKSDHRVVREK",
+        //     "client_order_id": "451637946501"
+        // }
+        return this.parseOrder (response, market);
     }
 
     async cancelOrder (id: string, symbol: Str = undefined, params = {}): Promise<{}> {
@@ -809,15 +848,106 @@ export default class foxbit extends Exchange {
     }
 
     async fetchOrder (id: string, symbol: Str = undefined, params = {}): Promise<Order> {
-        return undefined;
+        await this.loadMarkets ();
+        const request: Dict = {
+            'id': id,
+        };
+        const response = await this.v3PrivateGetOrdersByOrderIdId (this.extend (request, params));
+        // {
+        //     "id": "1234567890",
+        //     "sn": "OKMAKSDHRVVREK",
+        //     "client_order_id": "451637946501",
+        //     "market_symbol": "btcbrl",
+        //     "side": "BUY",
+        //     "type": "LIMIT",
+        //     "state": "ACTIVE",
+        //     "price": "290000.0",
+        //     "price_avg": "295333.3333",
+        //     "quantity": "0.42",
+        //     "quantity_executed": "0.41",
+        //     "instant_amount": "290.0",
+        //     "instant_amount_executed": "290.0",
+        //     "created_at": "2021-02-15T22:06:32.999Z",
+        //     "trades_count": "2",
+        //     "remark": "A remarkable note for the order.",
+        //     "funds_received": "290.0"
+        // }
+        return this.parseOrder (response, undefined);
     }
 
+    // TODO: ajustar o parâmetro de since, está dando erro de assinatura, por algum motivo.
     async fetchOrders (symbol?: string, since?: number, limit?: number, params?: {}): Promise<Order[]> {
-        return []; // Coinex não possui essa function
+        await this.loadMarkets ();
+        let market;
+        const request: Dict = {};
+        if (symbol !== undefined) {
+            market = this.market (symbol);
+            request['market_symbol'] = market['baseId'] + market['quoteId'];
+        }
+        if (since !== undefined) {
+            request['start_time'] = this.iso8601 (since);
+        }
+        if (limit !== undefined) {
+            request['page_size'] = limit;
+            if (limit > 100) {
+                request['page_size'] = 100;
+            }
+        }
+        const response = await this.v3PrivateGetOrders (this.extend (request, params));
+        // {
+        //     "data": [
+        //         {
+        //         "id": "1234567890",
+        //         "sn": "OKMAKSDHRVVREK",
+        //         "client_order_id": "451637946501",
+        //         "market_symbol": "btcbrl",
+        //         "side": "BUY",
+        //         "type": "LIMIT",
+        //         "state": "ACTIVE",
+        //         "price": "290000.0",
+        //         "price_avg": "295333.3333",
+        //         "quantity": "0.42",
+        //         "quantity_executed": "0.41",
+        //         "instant_amount": "290.0",
+        //         "instant_amount_executed": "290.0",
+        //         "created_at": "2021-02-15T22:06:32.999Z",
+        //         "trades_count": "2",
+        //         "remark": "A remarkable note for the order.",
+        //         "funds_received": "290.0"
+        //         }
+        //     ]
+        // }
+        const list = this.safeList (response, 'data', []);
+        return this.parseOrders (list, market, since, limit);
     }
 
+    // TODO: fix it passing query params, the market_symbol is required, but I dont want to put this on the route
     async fetchMyTrades (symbol: Str = undefined, since: Int = undefined, limit: Int = undefined, params = {}): Promise<Trade[]> {
-        return [];
+        if (symbol === undefined) {
+            throw new ArgumentsRequired (this.id + ' fetchMyTrades() requires a symbol argument');
+        }
+        await this.loadMarkets ();
+        const market = this.market (symbol);
+        const request = {
+            'market_symbol': market['baseId'] + market['quoteId'],
+        };
+        const response = await this.v3PrivateGetTrades (this.extend (request, params));
+        // {
+        //     "data": [
+        //         "id": 1234567890,
+        //         "sn": "TC5JZVW2LLJ3IW",
+        //         "order_id": 1234567890,
+        //         "market_symbol": "btcbrl",
+        //         "side": "BUY",
+        //         "price": "290000.0",
+        //         "quantity": "1.0",
+        //         "fee": "0.01",
+        //         "fee_currency_symbol": "btc",
+        //         "created_at": "2021-02-15T22:06:32.999Z"
+        //     ]
+        // }
+        const data = this.safeList (response, 'data', []);
+        return this.parseTrades (data, market, since, limit);
     }
 
     parseTicker (ticker: Dict, market: Market = undefined): Ticker {
@@ -867,7 +997,7 @@ export default class foxbit extends Exchange {
     parseTrade (trade, market = undefined): Trade {
         const timestamp = this.parseDate (this.safeString (trade, 'created_at'));
         const price = this.safeNumber (trade, 'price');
-        const amount = this.safeNumber (trade, 'volume');
+        const amount = this.safeNumber (trade, 'volume', this.safeNumber (trade, 'quantity'));
         const side = this.safeStringLower (trade, 'taker_side');
         const cost = amount * price;
         return {
@@ -887,23 +1017,84 @@ export default class foxbit extends Exchange {
         };
     }
 
+    parseOrderStatus (status: Str) {
+        const statuses: Dict = {
+            'PARTIALLY_CANCELED': 'open',
+            'ACTIVE': 'open',
+            'PARTIALLY_FILLED': 'open',
+            'FILLED': 'closed',
+            'CANCELED': 'canceled',
+        };
+        return this.safeString (statuses, status, status);
+    }
+
+    // TODO: implementar parseOrder para quando fizer fetch de ordens funcionar também
+    // na criação, os dados da ordem não vêm
+    parseOrder (order, market = undefined): Order {
+        let symbol = this.safeString (order, 'market_symbol');
+        if (!market) market = this.market (symbol);
+        symbol = market['symbol'];
+        const timestamp = this.parseDate (this.safeString (order, 'created_at'));
+        const price = this.safeNumber (order, 'price');
+        const amount = this.safeNumber (order, 'quantity');
+        const filled = this.safeNumber (order, 'quantity_executed');
+        return {
+            'id': this.safeString (order, 'id'),
+            'info': order,
+            'clientOrderId': this.safeString (order, 'client_order_id'),
+            'timestamp': timestamp,
+            'datetime': this.iso8601 (timestamp),
+            'lastTradeTimestamp': undefined,
+            'status': this.parseOrderStatus (this.safeString (order, 'state')),
+            'symbol': market['symbol'],
+            'type': this.safeString (order, 'type'),
+            'timeInForce': undefined,
+            'postOnly': undefined,
+            'reduceOnly': undefined,
+            'side': this.safeStringLower (order, 'side'),
+            'price': price,
+            'triggerPrice': undefined,
+            'takeProfitPrice': undefined,
+            'stopLossPrice': undefined,
+            'cost': this.safeNumber (order, 'funds_received'),
+            'average': this.safeNumber (order, 'price_avg'),
+            'amount': amount,
+            'filled': filled,
+            'remaining': amount - filled,
+            'trades': undefined,
+            'fee': {
+                'currency': undefined,
+                'cost': undefined,
+            },
+        };
+    }
+
     sign (path, api = [], method = 'GET', params = {}, headers = undefined, body = undefined) {
-        path = this.implodeParams (path, params);
-        const url = this.urls['api'] + '/' + path;
+        const version = api[0];
+        const fullPath = '/rest/' + version + '/' + this.implodeParams (path, params);
+        let url = this.urls['api'] + fullPath;
+        params = this.omit (params, this.extractParams (path));
         const timestamp = this.now ();
-        let rawBody = '';
-        if (body) {
-            rawBody = this.json (body);
+        let query = '';
+        console.log ('OS PARAMS QUE CHEGARAM FORAM', params);
+        if (method === 'GET') {
+            if (Object.keys (params).length > 0) {
+                query = this.urlencode (params);
+                url += '?' + query;
+            }
         }
-        // TODO: add query string to this signature (when needed)
-        const preHash = timestamp + method + '/' + path + rawBody;
+        // ADICIONAR RAW BODY NA ASSINATURA QUANDO FOR POST
+        const preHash = timestamp + method + fullPath + query;
+        console.log ('PRE HASH DA ASSINATURA:', preHash);
         const signature = this.hmac (preHash, this.secret, sha256, 'hex');
+        console.log ('ASSINATURA DA REQUISIÇÃO:', signature);
         headers = {
             'Content-Type': 'application/json',
             'X-FB-ACCESS-KEY': this.apiKey,
             'X-FB-ACCESS-TIMESTAMP': this.numberToString (timestamp),
             'X-FB-ACCESS-SIGNATURE': signature,
         };
+        console.log ('FAZENDO REQUISIÇÃO PARA A ROTA: ', url);
         return { 'url': url, 'method': method, 'body': body, 'headers': headers };
     }
 }

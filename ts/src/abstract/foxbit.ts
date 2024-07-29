@@ -2,14 +2,18 @@ import { implicitReturnType } from '../base/types.js';
 import { Exchange as _Exchange } from '../base/Exchange'
 
 interface Exchange {
-  v3PublicGetRestV3Currencies (params?: {}): Promise<implicitReturnType>;
-  v3PublicGetRestV3Markets (params?: {}): Promise<implicitReturnType>;
-  v3PublicGetRestV3MarketsTicker24hr (params?: {}): Promise<implicitReturnType>;
-  v3PublicGetRestV3MarketsMarketCandlesticksIntervalInterval (params?: {}): Promise<implicitReturnType>;
-  v3PublicGetRestV3MarketsMarketTradesHistory (params?: {}): Promise<implicitReturnType>;
-  v3PrivateGetRestV3Accounts (params?: {}): Promise<implicitReturnType>;
-  v3PublicGetRestV3MarketsMarketTicker24hr (params?: {}): Promise<implicitReturnType>;
-  v3PublicGetRestV3MarketsMarketOrderbookDepthDepth (params?: {}): Promise<implicitReturnType>;
+  v3PublicGetCurrencies (params?: {}): Promise<implicitReturnType>;
+  v3PublicGetMarkets (params?: {}): Promise<implicitReturnType>;
+  v3PublicGetMarketsTicker24hr (params?: {}): Promise<implicitReturnType>;
+  v3PublicGetMarketsMarketCandlesticks (params?: {}): Promise<implicitReturnType>;
+  v3PublicGetMarketsMarketTradesHistory (params?: {}): Promise<implicitReturnType>;
+  v3PublicGetMarketsMarketTicker24hr (params?: {}): Promise<implicitReturnType>;
+  v3PublicGetMarketsMarketOrderbook (params?: {}): Promise<implicitReturnType>;
+  v3PrivateGetAccounts (params?: {}): Promise<implicitReturnType>;
+  v3PrivatePostOrders (params?: {}): Promise<implicitReturnType>;
+  v3PrivateGetOrdersByOrderIdId (params?: {}): Promise<implicitReturnType>;
+  v3PrivateGetOrders (params?: {}): Promise<implicitReturnType>;
+  v3PrivateGetTrades (params?: {}): Promise<implicitReturnType>;
 }
 abstract class Exchange extends _Exchange {}
 
