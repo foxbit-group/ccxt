@@ -1,6 +1,6 @@
 import { ArgumentsRequired, InvalidOrder } from '../ccxt';
 import Exchange from './abstract/foxbit';
-import type { Currencies, Market, OrderBook, Dict, Ticker, TradingFees, Int, Str, Num, Trade, OHLCV, Balances, Order, OrderType, OrderSide, Strings, Tickers } from './base/types.js';
+import type { Currencies, Market, OrderBook, Dict, Ticker, TradingFees, Int, Str, Num, Trade, OHLCV, Balances, Order, OrderType, OrderSide, Strings, Tickers, Currency } from './base/types.js';
 import { sha256 } from './static_dependencies/noble-hashes/sha256.js';
 
 /**
@@ -48,6 +48,7 @@ export default class foxbit extends Exchange {
                             'orders',
                             'orders/by-order-id/{id}',
                             'trades',
+                            'deposits/address',
                         ],
                         'post': [
                             'orders',
@@ -78,6 +79,7 @@ export default class foxbit extends Exchange {
                 'fetchOrder': true,
                 'fetchOrders': true,
                 'cancelOrder': true,
+                'fetchDepositAddress': true,
             },
             'timeframes': {
                 '1m': '1m',
@@ -1007,6 +1009,28 @@ export default class foxbit extends Exchange {
         return this.parseTrades (data, market, since, limit);
     }
 
+    async fetchDepositAddress (code: string, params = {}) {
+        await this.loadMarkets ();
+        const currency = this.currency (code);
+        const request: Dict = {
+            'currency_symbol': currency['id'],
+        };
+        // TODO: adicionar validações de networks válidas
+        // -- ainda é preciso fazer a implementação das networks
+        const response = await this.v3PrivateGetDepositsAddress (this.extend (request, params));
+        // {
+        //     "currency_symbol": "btc",
+        //     "address": "2N9sS8LgrY19rvcCWDmE1ou1tTVmqk4KQAB",
+        //     "message": "Address was retrieved successfully",
+        //     "destination_tag": "string",
+        //     "network": {
+        //         "name": "Bitcoin Network",
+        //         "code": "btc"
+        //     }
+        // }
+        return this.parseDepositAddress (response, currency);
+    }
+
     parseTicker (ticker: Dict, market: Market = undefined): Ticker {
         const marketId = this.safeString (ticker, 'market_symbol');
         const symbol = this.safeSymbol (marketId, market, undefined, 'spot');
@@ -1137,6 +1161,17 @@ export default class foxbit extends Exchange {
                 'currency': undefined,
                 'cost': undefined,
             },
+        };
+    }
+
+    parseDepositAddress (depositAddress, currency: Currency = undefined) {
+        const network = this.safeDict (depositAddress, 'network');
+        return {
+            'address': this.safeString (depositAddress, 'address'),
+            'tag': this.safeString (depositAddress, 'tag'),
+            'currency': this.safeCurrencyCode (undefined, currency),
+            'network': this.safeStringUpper (network, 'code'),
+            'info': depositAddress,
         };
     }
 
