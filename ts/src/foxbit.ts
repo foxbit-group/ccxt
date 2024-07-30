@@ -1,6 +1,6 @@
 import { ArgumentsRequired, InvalidOrder } from '../ccxt';
 import Exchange from './abstract/foxbit';
-import type { Currencies, Market, OrderBook, Dict, Ticker, TradingFees, Int, Str, Num, Trade, OHLCV, Balances, Order, OrderType, OrderSide, Strings, Tickers, Currency } from './base/types.js';
+import type { Currencies, Market, OrderBook, Dict, Ticker, TradingFees, Int, Str, Num, Trade, OHLCV, Balances, Order, OrderType, OrderSide, Strings, Tickers, Currency, Transaction } from './base/types.js';
 import { sha256 } from './static_dependencies/noble-hashes/sha256.js';
 
 /**
@@ -49,6 +49,7 @@ export default class foxbit extends Exchange {
                             'orders/by-order-id/{id}',
                             'trades',
                             'deposits/address',
+                            'deposits',
                         ],
                         'post': [
                             'orders',
@@ -80,6 +81,7 @@ export default class foxbit extends Exchange {
                 'fetchOrders': true,
                 'cancelOrder': true,
                 'fetchDepositAddress': true,
+                'fetchDeposits': true,
             },
             'timeframes': {
                 '1m': '1m',
@@ -1031,6 +1033,43 @@ export default class foxbit extends Exchange {
         return this.parseDepositAddress (response, currency);
     }
 
+    async fetchDeposits (code: Str = undefined, since: Int = undefined, limit: Int = undefined, params = {}): Promise<Transaction[]> {
+        await this.loadMarkets ();
+        const request: Dict = {};
+        let currency = undefined;
+        if (code !== undefined) {
+            currency = this.currency (code);
+        }
+        if (limit !== undefined) {
+            request['page_size'] = limit;
+            if (limit > 100) {
+                request['page_size'] = 100;
+            }
+        }
+        if (since !== undefined) {
+            request['start_time'] = this.iso8601 (since);
+        }
+        const response = await this.v3PrivateGetDeposits (this.extend (request, params));
+        // {
+        //     "data": [
+        //         {
+        //             "sn": "OKMAKSDHRVVREK",
+        //             "state": "ACCEPTED",
+        //             "currency_symbol": "btc",
+        //             "amount": "1.0",
+        //             "fee": "0.1",
+        //             "created_at": "2022-02-18T22:06:32.999Z",
+        //             "details_crypto": {
+        //                 "transaction_id": "e20f035387020c5d5ea18ad53244f09f3",
+        //                 "receiving_address": "2N2rTrnKEFcyJjEJqvVjgWZ3bKvKT7Aij61"
+        //             }
+        //         }
+        //     ]
+        // }
+        const data = this.safeList (response, 'data', []);
+        return this.parseTransactions (data, currency, since, limit);
+    }
+
     parseTicker (ticker: Dict, market: Market = undefined): Ticker {
         const marketId = this.safeString (ticker, 'market_symbol');
         const symbol = this.safeSymbol (marketId, market, undefined, 'spot');
@@ -1172,6 +1211,67 @@ export default class foxbit extends Exchange {
             'currency': this.safeCurrencyCode (undefined, currency),
             'network': this.safeStringUpper (network, 'code'),
             'info': depositAddress,
+        };
+    }
+
+    parseTransactionStatus (status: Str) {
+        const statuses: Dict = {
+            'SUBMITTING': 'pending',
+            'SUBMITTED': 'pending',
+            'WARNING': 'pending',
+            'UNBLOCKED': 'pending',
+            'BLOCKED': 'pending',
+            'ACCEPTED': 'ok',
+            'REJECTED': 'failed',
+            'CANCELLED': 'canceled',
+        };
+        return this.safeString (statuses, status, status);
+    }
+
+    parseTransaction (transaction, currency: Currency = undefined, since: Int = undefined, limit: Int = undefined): Transaction {
+        const cryptoDetails = this.safeDict (transaction, 'details_crypto');
+        const address = this.safeString (cryptoDetails, 'receiving_address');
+        const sn = this.safeString (transaction, 'sn');
+        const snPrefix = sn[0];
+        const type = snPrefix === 'W' ? 'withdrawal' : 'deposit';
+        const fee = this.safeNumber (transaction, 'fee');
+        const amount = this.safeNumber (transaction, 'amount');
+        const currencySymbol = this.safeString (transaction, 'currency_symbol');
+        let actualAmount = amount;
+        const currencyCode = this.safeCurrencyCode (currencySymbol);
+        const status = this.parseTransactionStatus (this.safeString (transaction, 'state'));
+        const created_at = this.safeString (transaction, 'created_at');
+        const timestamp = this.parseDate (created_at);
+        const datetime = this.iso8601 (timestamp);
+        if (fee !== undefined && amount !== undefined) {
+            actualAmount = amount - fee;
+        }
+        const feeObj = {
+            'cost': fee,
+            'currency': currencyCode,
+        };
+        feeObj['rate'] = feeObj['cost'] / actualAmount;
+        return {
+            'info': transaction,
+            'id': this.safeString (transaction, 'sn'),
+            'txid': this.safeString (cryptoDetails, 'transaction_id'),
+            'timestamp': timestamp,
+            'datetime': datetime,
+            'network': undefined,
+            'address': address,
+            'addressTo': address,
+            'addressFrom': undefined,
+            'tag': undefined,
+            'tagTo': undefined,
+            'tagFrom': undefined,
+            'type': type,
+            'amount': actualAmount,
+            'currency': currencyCode,
+            'status': status,
+            'updated': undefined,
+            'fee': feeObj,
+            'comment': undefined,
+            'internal': undefined,
         };
     }
 
