@@ -50,6 +50,7 @@ export default class foxbit extends Exchange {
                             'trades',
                             'deposits/address',
                             'deposits',
+                            'withdrawals',
                         ],
                         'post': [
                             'orders',
@@ -1070,6 +1071,66 @@ export default class foxbit extends Exchange {
         return this.parseTransactions (data, currency, since, limit);
     }
 
+    async fetchWithdrawals (code: Str = undefined, since: Int = undefined, limit: Int = undefined, params = {}): Promise<Transaction[]> {
+        await this.loadMarkets ();
+        const request: Dict = {};
+        let currency = undefined;
+        if (code !== undefined) {
+            currency = this.currency (code);
+        }
+        if (limit !== undefined) {
+            request['page_size'] = limit;
+            if (limit > 100) {
+                request['page_size'] = 100;
+            }
+        }
+        if (since !== undefined) {
+            request['start_time'] = this.iso8601 (since);
+        }
+        const response = await this.v3PrivateGetWithdrawals (this.extend (request, params));
+        // {
+        //     "data": [
+        //         {
+        //             "sn": "OKMAKSDHRVVREK",
+        //             "state": "ACCEPTED",
+        //             "rejection_reason": "monthly_limit_exceeded",
+        //             "currency_symbol": "btc",
+        //             "amount": "1.0",
+        //             "fee": "0.1",
+        //             "created_at": "2022-02-18T22:06:32.999Z",
+        //             "details_crypto": {
+        //                 "transaction_id": "e20f035387020c5d5ea18ad53244f09f3",
+        //                 "destination_address": "2N2rTrnKEFcyJjEJqvVjgWZ3bKvKT7Aij61"
+        //             },
+        //             "details_fiat": {
+        //                 "bank": {
+        //                     "code": "1",
+        //                     "branch": {
+        //                         "number": "1234567890",
+        //                         "digit": "1"
+        //                     },
+        //                     "account": {
+        //                         "number": "1234567890",
+        //                         "digit": "1",
+        //                         "type": "CHECK"
+        //                     }
+        //                 }
+        //             }
+        //         }
+        //     ]
+        // }
+        const data = this.safeList (response, 'data', []);
+        return this.parseTransactions (data, currency, since, limit);
+    }
+
+    async fetchTransactions (code: Str = undefined, since: Int = undefined, limit: Int = undefined, params = {}) {
+        const withdrawals = await this.fetchWithdrawals (code, since, limit, params);
+        const deposits = await this.fetchDeposits (code, since, limit, params);
+        const allTransactions = this.arrayConcat (withdrawals, deposits);
+        const result = this.sortBy (allTransactions, 'timestamp');
+        return result;
+    }
+
     parseTicker (ticker: Dict, market: Market = undefined): Ticker {
         const marketId = this.safeString (ticker, 'market_symbol');
         const symbol = this.safeSymbol (marketId, market, undefined, 'spot');
@@ -1216,14 +1277,21 @@ export default class foxbit extends Exchange {
 
     parseTransactionStatus (status: Str) {
         const statuses: Dict = {
+            // BOTH
             'SUBMITTING': 'pending',
             'SUBMITTED': 'pending',
+            'REJECTED': 'failed',
+            // DEPOSIT-SPECIFIC
+            'CANCELLED': 'canceled',
+            'ACCEPTED': 'ok',
             'WARNING': 'pending',
             'UNBLOCKED': 'pending',
             'BLOCKED': 'pending',
-            'ACCEPTED': 'ok',
-            'REJECTED': 'failed',
-            'CANCELLED': 'canceled',
+            // WITHDRAWAL-SPECIFIC
+            'PROCESSING': 'pending',
+            'CANCELED': 'canceled',
+            'FAILED': 'failed',
+            'DONE': 'ok',
         };
         return this.safeString (statuses, status, status);
     }
