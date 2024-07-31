@@ -937,7 +937,6 @@ export default class foxbit extends Exchange {
         return this.parseOrder (response, undefined);
     }
 
-    // TODO: quando não envia symbol, está dando erro na requisição
     async fetchOrders (symbol?: string, since?: number, limit?: number, params?: {}): Promise<Order[]> {
         await this.loadMarkets ();
         let market = undefined;
