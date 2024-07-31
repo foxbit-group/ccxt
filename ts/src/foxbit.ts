@@ -589,20 +589,29 @@ export default class foxbit extends Exchange {
                 'tierBased': false,
                 'feeSide': 'get',
                 'precision': {
-                    'price': undefined,
-                    'amount': undefined,
-                    'cost': undefined,
+                    'price': this.safeNumber (quoteAssets, 'precision'),
+                    'amount': this.safeNumber (baseAssets, 'precision'),
+                    'cost': this.safeNumber (quoteAssets, 'precision'),
                 },
                 'limits': {
                     'amount': {
+                        'min': this.safeNumber (market, 'quantity_min'),
+                        'max': undefined,
+                    },
+                    'price': {
+                        'min': this.safeNumber (market, 'price_min'),
+                        'max': undefined,
+                    },
+                    'cost': {
                         'min': undefined,
                         'max': undefined,
                     },
-                    'price': {},
-                    'cost': {},
-                    'leverage': {},
+                    'leverage': {
+                        'min': undefined,
+                        'max': undefined,
+                    },
                 },
-                'info': {},
+                'info': market,
             });
         }
         return result;
