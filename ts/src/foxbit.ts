@@ -462,17 +462,18 @@ export default class foxbit extends Exchange {
             const currencyId = this.safeString (currency, 'symbol');
             const name = this.safeString (currency, 'name');
             const code = this.safeCurrencyCode (currencyId);
+            const depositInfo = this.safeDict (currency, 'deposit_info');
+            const withdrawInfo = this.safeDict (currency, 'withdraw_info');
             if (this.safeValue (result, code) === undefined) {
                 result[code] = {
                     'id': currencyId,
-                    'numericId': undefined,
                     'code': code,
-                    'info': undefined,
+                    'info': currency,
                     'name': name,
                     'active': true,
-                    'deposit': undefined,
-                    'withdraw': undefined,
-                    'fee': undefined,
+                    'deposit': true,
+                    'withdraw': this.safeBool (withdrawInfo, 'enabled'),
+                    'fee': this.safeNumber (withdrawInfo, 'fee'),
                     'precision': precison,
                     'limits': {
                         'amount': {
@@ -480,11 +481,11 @@ export default class foxbit extends Exchange {
                             'max': undefined,
                         },
                         'deposit': {
-                            'min': undefined,
+                            'min': this.safeNumber (depositInfo, 'min_amount'),
                             'max': undefined,
                         },
                         'withdraw': {
-                            'min': undefined,
+                            'min': this.safeNumber (withdrawInfo, 'min_amount'),
                             'max': undefined,
                         },
                     },
