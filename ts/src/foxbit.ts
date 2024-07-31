@@ -854,7 +854,6 @@ export default class foxbit extends Exchange {
         return this.parseOrders (data);
     }
 
-    // TODO: consertar o método, o POST não está enviando BODY por algum motivo
     async createOrder (symbol: string, type: OrderType, side: OrderSide, amount: number, price: Num = undefined, params = {}): Promise<Order> {
         await this.loadMarkets ();
         const market = this.market (symbol);
@@ -938,7 +937,7 @@ export default class foxbit extends Exchange {
         return this.parseOrder (response, undefined);
     }
 
-    // TODO: ajustar o parâmetro de since, está dando erro de assinatura, por algum motivo.
+    // TODO: quando não envia symbol, está dando erro na requisição
     async fetchOrders (symbol?: string, since?: number, limit?: number, params?: {}): Promise<Order[]> {
         await this.loadMarkets ();
         let market = undefined;
@@ -1360,11 +1359,20 @@ export default class foxbit extends Exchange {
         params = this.omit (params, this.extractParams (path));
         const timestamp = this.now ();
         let query = '';
+        let signatureQuery = '';
         console.log ('OS PARAMS QUE CHEGARAM NO sign() FORAM', params);
         if (method === 'GET') {
-            if (Object.keys (params).length > 0) {
+            const paramKeys = Object.keys (params);
+            if (paramKeys.length > 0) {
                 query = this.urlencode (params);
                 url += '?' + query;
+            }
+            for (let i = 0; i < paramKeys.length; i++) {
+                const key = paramKeys[i];
+                signatureQuery += key + '=' + params[key];
+                if (i < paramKeys.length - 1) {
+                    signatureQuery += '&';
+                }
             }
         }
         if (method === 'POST' || method === 'PUT') {
@@ -1375,7 +1383,7 @@ export default class foxbit extends Exchange {
             bodyToSignature = body;
         }
         // ADICIONAR RAW BODY NA ASSINATURA QUANDO FOR POST
-        const preHash = timestamp + method + fullPath + query + bodyToSignature;
+        const preHash = timestamp + method + fullPath + signatureQuery + bodyToSignature;
         console.log ('PRE HASH DA ASSINATURA:', preHash);
         const signature = this.hmac (preHash, this.secret, sha256, 'hex');
         console.log ('ASSINATURA DA REQUISIÇÃO:', signature);
