@@ -983,7 +983,6 @@ export default class foxbit extends Exchange {
         return this.parseOrders (list, market, since, limit);
     }
 
-    // TODO: fix it passing query params, the market_symbol is required, but I dont want to put this on the route
     async fetchMyTrades (symbol: Str = undefined, since: Int = undefined, limit: Int = undefined, params = {}): Promise<Trade[]> {
         if (symbol === undefined) {
             throw new ArgumentsRequired (this.id + ' fetchMyTrades() requires a symbol argument');
@@ -1224,8 +1223,6 @@ export default class foxbit extends Exchange {
         return this.safeString (statuses, status, status);
     }
 
-    // TODO: implementar parseOrder para quando fizer fetch de ordens funcionar também
-    // na criação, os dados da ordem não vêm
     parseOrder (order, market = undefined): Order {
         let symbol = this.safeString (order, 'market_symbol');
         if (market === undefined && symbol !== undefined) {
