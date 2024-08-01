@@ -700,9 +700,6 @@ export default class foxbit extends Exchange {
     async fetchOrderBook (symbol: string, limit: Int = 20, params = {}): Promise<OrderBook> {
         await this.loadMarkets ();
         const market = this.market (symbol);
-        if (limit === undefined) {
-            limit = 20;
-        }
         const request: Dict = {
             'market': market['baseId'] + market['quoteId'],
             'depth': limit,
