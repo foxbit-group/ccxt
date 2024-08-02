@@ -11,20 +11,16 @@
         "MANA"
       ]
     },
-    "fetchMarkets": {
-      "description": "Fill this with a description of the method call",
-      "method": "fetchMarkets",
-      "url": "https://api.foxbit.com.br/rest/v3/markets",
-      "input": []
-    },
-    "fetchTicker": {
-      "description": "Fill this with a description of the method call",
-      "method": "fetchTicker",
-      "url": "https://api.foxbit.com.br/rest/v3/markets/manabrl/ticker/24hr",
-      "input": [
-        "MANA/BRL"
-      ]
-    },
+    "fetchTicker": [
+      {
+        "description": "Fetch a ticker by a market symbol",
+        "method": "fetchTicker",
+        "url": "https://api.foxbit.com.br/rest/v3/markets/manabrl/ticker/24hr",
+        "input": [
+          "MANA/BRL"
+        ]
+      }
+    ],
     "fetchTickers": [
       {
         "description": "Fetch tickers with filters",

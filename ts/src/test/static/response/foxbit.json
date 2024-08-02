@@ -9673,27 +9673,27 @@
             {
               "market_symbol": "manabrl",
               "last_trade": {
-                "price": "2.00700000",
-                "volume": "6.73575129",
-                "date": "2024-07-17T15:46:03.000Z"
+                "price": "1.77510000",
+                "volume": "55.77150583",
+                "date": "2024-08-02T00:12:21.000Z"
               },
               "rolling_24h": {
-                "price_change": "0.03570000",
-                "price_change_percent": "1.81098767",
-                "volume": "63385.50759705",
-                "trades_count": "675",
-                "open": "1.97130000",
-                "high": "2.03720000",
-                "low": "1.94570000"
+                "price_change": "-0.01120000",
+                "price_change_percent": "-0.62699435",
+                "volume": "68017.36498606",
+                "trades_count": "550",
+                "open": "1.78630000",
+                "high": "1.80630000",
+                "low": "1.67830000"
               },
               "best": {
                 "ask": {
-                  "price": "2.01580000",
-                  "volume": "5280.77222602"
+                  "price": "1.78930000",
+                  "volume": "3737.61618465"
                 },
                 "bid": {
-                  "price": "2.00550000",
-                  "volume": "6736.60980938"
+                  "price": "1.78160000",
+                  "volume": "5116.51950000"
                 }
               }
             }
@@ -9701,48 +9701,48 @@
         },
         "parsedResponse": {
           "symbol": "MANA/BRL",
-          "timestamp": null,
-          "datetime": null,
-          "high": null,
-          "low": null,
-          "bid": null,
-          "bidVolume": null,
-          "ask": null,
-          "askVolume": null,
+          "timestamp": 1722557541000,
+          "datetime": "2024-08-02T00:12:21.000Z",
+          "high": 1.8063,
+          "low": 1.6783,
+          "bid": 1.7816,
+          "bidVolume": 5116.5195,
+          "ask": 1.7893,
+          "askVolume": 3737.61618465,
           "vwap": null,
-          "open": null,
-          "close": null,
-          "last": null,
+          "open": 1.7863,
+          "close": 1.7751,
+          "last": 1.7751,
           "previousClose": null,
-          "change": null,
-          "percentage": null,
-          "average": null,
-          "baseVolume": null,
+          "change": -0.0112,
+          "percentage": -0.62699435,
+          "average": 1.7807,
+          "baseVolume": 68017.36498606,
           "quoteVolume": null,
           "info": {
             "market_symbol": "manabrl",
             "last_trade": {
-              "price": "2.00700000",
-              "volume": "6.73575129",
-              "date": "2024-07-17T15:46:03.000Z"
+              "price": "1.77510000",
+              "volume": "55.77150583",
+              "date": "2024-08-02T00:12:21.000Z"
             },
             "rolling_24h": {
-              "price_change": "0.03570000",
-              "price_change_percent": "1.81098767",
-              "volume": "63385.50759705",
-              "trades_count": "675",
-              "open": "1.97130000",
-              "high": "2.03720000",
-              "low": "1.94570000"
+              "price_change": "-0.01120000",
+              "price_change_percent": "-0.62699435",
+              "volume": "68017.36498606",
+              "trades_count": "550",
+              "open": "1.78630000",
+              "high": "1.80630000",
+              "low": "1.67830000"
             },
             "best": {
               "ask": {
-                "price": "2.01580000",
-                "volume": "5280.77222602"
+                "price": "1.78930000",
+                "volume": "3737.61618465"
               },
               "bid": {
-                "price": "2.00550000",
-                "volume": "6736.60980938"
+                "price": "1.78160000",
+                "volume": "5116.51950000"
               }
             }
           }
