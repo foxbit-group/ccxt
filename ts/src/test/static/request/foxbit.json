@@ -32,16 +32,25 @@
         "input": []
       }
     ],
-    "fetchOrderBook": {
-      "description": "Fill this with a description of the method call",
-      "method": "fetchOrderBook",
-      "url": "https://api.foxbit.com.br/rest/v3/markets/manabrl/orderbook?depth=10",
-      "input": [
-        "MANA/BRL",
-        {},
-        10
-      ]
-    },
+    "fetchOrderBook": [
+      {
+        "description": "Fetch order book without limit",
+        "method": "fetchOrderBook",
+        "url": "https://api.foxbit.com.br/rest/v3/markets/manabrl/orderbook?depth=20",
+        "input": [
+          "MANA/BRL"
+        ]
+      },
+      {
+        "description": "Fetch order book with limit",
+        "method": "fetchOrderBook",
+        "url": "https://api.foxbit.com.br/rest/v3/markets/manabrl/orderbook?depth=5",
+        "input": [
+          "MANA/BRL",
+          5
+        ]
+      }
+    ], 
     "fetchOHLCV": [
       {
         "description": "Fetch OHLCV with limit",
