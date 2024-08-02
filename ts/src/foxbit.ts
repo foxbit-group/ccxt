@@ -760,11 +760,14 @@ export default class foxbit extends Exchange {
             'market': market['baseId'] + market['quoteId'],
             'interval': this.safeString (this.timeframes, timeframe, timeframe),
         };
+        if (since !== undefined) {
+            request['start_time'] = this.iso8601 (since);
+        }
         if (limit !== undefined) {
             request['limit'] = limit;
-        }
-        if (limit > 500) {
-            request['limit'] = 500;
+            if (limit > 500) {
+                request['limit'] = 500;
+            }
         }
         const response = await this.v3PublicGetMarketsMarketCandlesticks (this.extend (request, params));
         // [
