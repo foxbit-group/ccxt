@@ -110,13 +110,13 @@
         ]
       },
       {
-        "description": "Fetch trades with limit filter",
+        "description": "Fetch trades with a limit filter",
         "method": "fetchTrades",
-        "url": "https://api.foxbit.com.br/rest/v3/markets/btcbrl/trades/history",
+        "url": "https://api.foxbit.com.br/rest/v3/markets/btcbrl/trades/history?page_size=5",
         "input": [
           "BTC/BRL",
           null,
-          10
+          5
         ]
       }
     ],

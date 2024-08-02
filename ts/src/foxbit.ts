@@ -739,13 +739,19 @@ export default class foxbit extends Exchange {
         const request: Dict = {
             'market': market['baseId'] + market['quoteId'],
         };
+        if (limit !== undefined) {
+            request['page_size'] = limit;
+            if (limit > 200) {
+                request['page_size'] = 200;
+            }
+        }
         // [
         //     {
-        //     "id": 1,
-        //     "price": "329248.74700000",
-        //     "volume": "0.00100000",
-        //     "taker_side": "BUY",
-        //     "created_at": "2024-01-01T00:00:00Z"
+        //         "id": 1,
+        //         "price": "329248.74700000",
+        //         "volume": "0.00100000",
+        //         "taker_side": "BUY",
+        //         "created_at": "2024-01-01T00:00:00Z"
         //     }
         // ]
         const response = await this.v3PublicGetMarketsMarketTradesHistory (this.extend (request, params));

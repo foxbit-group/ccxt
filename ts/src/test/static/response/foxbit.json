@@ -170,6 +170,48 @@
           ]
         ]
       }
+    ],
+    "fetchTrades": [
+      {
+        "description": "Fetch public trades",
+        "method": "fetchTrades",
+        "input": [
+          "BTC/BRL",
+          null,
+          1
+        ],
+        "httpResponse": {
+          "data": [
+            {
+              "id": "17230381",
+              "price": "373455.99120000",
+              "volume": "0.00001606",
+              "taker_side": "BUY",
+              "created_at": "2024-08-02T01:05:00.653Z"
+            }
+          ]
+        },
+        "parsedResponse": [
+          {
+            "id": "17230381",
+            "timestamp": 1722560700653,
+            "datetime": "2024-08-02T01:05:00.653Z",
+            "symbol": "BTC/BRL",
+            "order": null,
+            "type": null,
+            "side": "buy",
+            "takerOrMaker": null,
+            "price": 373455.9912,
+            "amount": 0.00001606,
+            "cost": 5.997703218671999,
+            "fee": {
+              "currency": null,
+              "cost": null,
+              "rate": null
+            }
+          }
+        ]
+      }
     ]
   }
 }
