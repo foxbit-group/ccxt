@@ -296,6 +296,41 @@
           5
         ]
       }
+    ],
+    "fetchClosedOrders": [
+      {
+        "description": "Fetch all closed orders",
+        "method": "fetchClosedOrders",
+        "url": "https://api.foxbit.com.br/rest/v3/orders?state=FILLED",
+        "input": []
+      },
+      {
+        "description": "Fetch closed orders with market symbol filter",
+        "method": "fetchClosedOrders",
+        "url": "https://api.foxbit.com.br/rest/v3/orders?state=FILLED&market_symbol=btcbrl",
+        "input": [
+          "BTC/BRL"
+        ]
+      },
+      {
+        "description": "Fetch closed orders with since filter",
+        "method": "fetchClosedOrders",
+        "url": "https://api.foxbit.com.br/rest/v3/orders?state=FILLED&start_time=2024-07-27T00%3A52%3A27.316Z",
+        "input": [
+          null,
+          1722041547316
+        ]
+      },
+      {
+        "description": "Fetch closed orders with limit filter",
+        "method": "fetchClosedOrders",
+        "url": "https://api.foxbit.com.br/rest/v3/orders?state=FILLED&page_size=5",
+        "input": [
+          null,
+          null,
+          5
+        ]
+      }
     ]
   }
 }
