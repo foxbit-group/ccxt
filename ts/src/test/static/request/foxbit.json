@@ -216,6 +216,16 @@
         ],
         "output": "{\"id\":3916418841,\"type\":\"ID\"}"
       }
+    ],
+    "fetchOrder": [
+      {
+        "description": "Fetch an order by ID",
+        "method": "fetchOrder",
+        "url": "https://api.foxbit.com.br/rest/v3/orders/by-order-id/3916393949",
+        "input": [
+          3916393949
+        ]
+      }
     ]
   }
 }
