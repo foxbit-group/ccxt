@@ -226,6 +226,41 @@
           3916393949
         ]
       }
+    ],
+    "fetchOrders": [
+      {
+        "description": "Fetch orders without filters",
+        "method": "fetchOrders",
+        "url": "https://api.foxbit.com.br/rest/v3/orders",
+        "input": []
+      },
+      {
+        "description": "Fetch orders with symbol filter",
+        "method": "fetchOrders",
+        "url": "https://api.foxbit.com.br/rest/v3/orders?market_symbol=btcbrl",
+        "input": [
+          "BTC/BRL"
+        ]
+      },
+      {
+        "description": "Fetch orders with start time filter",
+        "method": "fetchOrders",
+        "url": "https://api.foxbit.com.br/rest/v3/orders?start_time=2024-07-27T00%3A52%3A27.316Z",
+        "input": [
+          null,
+          1722041547316
+        ]
+      },
+      {
+        "description": "Fetch orders with limit filter",
+        "method": "fetchOrders",
+        "url": "https://api.foxbit.com.br/rest/v3/orders?page_size=5",
+        "input": [
+          null,
+          null,
+          5
+        ]
+      }
     ]
   }
 }
