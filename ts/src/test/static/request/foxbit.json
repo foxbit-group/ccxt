@@ -205,6 +205,17 @@
         ],
         "output": "{\"market_symbol\":\"btcbrl\",\"side\":\"BUY\",\"type\":\"STOP_MARKET\",\"stop_price\":\"330000\",\"quantity\":\"0.000005\"}"
       }
+    ],
+    "cancelOrder": [
+      {
+        "description": "Cancel an order by ID",
+        "method": "cancelOrder",
+        "url": "https://api.foxbit.com.br/rest/v3/orders/cancel",
+        "input": [
+          3916418841
+        ],
+        "output": "{\"id\":3916418841,\"type\":\"ID\"}"
+      }
     ]
   }
 }
