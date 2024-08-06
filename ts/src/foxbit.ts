@@ -882,6 +882,7 @@ export default class foxbit extends Exchange {
         }
         if (type === 'STOP_MARKET') {
             request['stop_price'] = this.priceToPrecision (symbol, price);
+            request['quantity'] = this.amountToPrecision (symbol, amount);
         }
         if (type === 'INSTANT') {
             request['amount'] = this.priceToPrecision (symbol, amount);

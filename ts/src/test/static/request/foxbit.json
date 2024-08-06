@@ -120,11 +120,91 @@
         ]
       }
     ],
-    "fetchBalance": {
-      "description": "Fetches the balances of all accounts",
-      "method": "fetchBalance",
-      "url": "https://api.foxbit.com.br/rest/v3/accounts",
-      "input": []
-    }
+    "fetchBalance": [
+      {
+        "description": "Fetches the balances of all accounts",
+        "method": "fetchBalance",
+        "url": "https://api.foxbit.com.br/rest/v3/accounts",
+        "input": []
+      }
+    ],
+    "createOrder": [
+      {
+        "description": "Create a limit sell order",
+        "method": "createOrder",
+        "url": "https://api.foxbit.com.br/rest/v3/orders",
+        "input": [
+          "BTC/BRL",
+          "LIMIT",
+          "SELL",
+          0.00001,
+          330000
+        ],
+        "output": "{\"market_symbol\":\"btcbrl\",\"side\":\"SELL\",\"type\":\"LIMIT\",\"quantity\":\"0.00001\",\"price\":\"330000\"}"
+      },
+      {
+        "description": "Create a limit buy order",
+        "method": "createOrder",
+        "url": "https://api.foxbit.com.br/rest/v3/orders",
+        "input": [
+          "BTC/BRL",
+          "LIMIT",
+          "BUY",
+          0.00001,
+          280000
+        ],
+        "output": "{\"market_symbol\":\"btcbrl\",\"side\":\"BUY\",\"type\":\"LIMIT\",\"quantity\":\"0.00001\",\"price\":\"280000\"}"
+      },
+      {
+        "description": "Create market buy order",
+        "method": "createOrder",
+        "url": "https://api.foxbit.com.br/rest/v3/orders",
+        "input": [
+          "BTC/BRL",
+          "MARKET",
+          "BUY",
+          0.000005
+        ],
+        "output": "{\"market_symbol\":\"btcbrl\",\"side\":\"BUY\",\"type\":\"MARKET\",\"quantity\":\"0.000005\"}"
+      },
+      {
+        "description": "Create market sell order",
+        "method": "createOrder",
+        "url": "https://api.foxbit.com.br/rest/v3/orders",
+        "input": [
+          "BTC/BRL",
+          "MARKET",
+          "SELL",
+          0.000005
+        ],
+        "output": "{\"market_symbol\":\"btcbrl\",\"side\":\"SELL\",\"type\":\"MARKET\",\"quantity\":\"0.000005\"}"
+      },
+      {
+        "description": "Create stop market sell order",
+        "method": "createOrder",
+        "url": "https://api.foxbit.com.br/rest/v3/orders",
+        "input": [
+          "BTC/BRL",
+          "STOP_MARKET",
+          "SELL",
+          0.000005,
+          330000
+        ],
+        "output": "{\"market_symbol\":\"btcbrl\",\"side\":\"SELL\",\"type\":\"STOP_MARKET\",\"stop_price\":\"330000\",\"quantity\":\"0.000005\"}"
+      },
+      {
+        "description": "Create stop market buy order",
+        "method": "createOrder",
+        "url": "https://api.foxbit.com.br/rest/v3/orders",
+        "input": [
+          "BTC/BRL",
+          "STOP_MARKET",
+          "BUY",
+          0.000005,
+          330000
+        ],
+        "output": "{\"market_symbol\":\"btcbrl\",\"side\":\"BUY\",\"type\":\"STOP_MARKET\",\"stop_price\":\"330000\",\"quantity\":\"0.000005\"}"
+      }
+    ]
   }
 }
