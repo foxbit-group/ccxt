@@ -261,6 +261,41 @@
           5
         ]
       }
+    ],
+    "fetchOpenOrders": [
+      {
+        "description": "Fetch the open orders",
+        "method": "fetchOpenOrders",
+        "url": "https://api.foxbit.com.br/rest/v3/orders?state=ACTIVE",
+        "input": []
+      },
+      {
+        "description": "Fetch the open orders with market symbol filter",
+        "method": "fetchOpenOrders",
+        "url": "https://api.foxbit.com.br/rest/v3/orders?state=ACTIVE&market_symbol=btcbrl",
+        "input": [
+          "BTC/BRL"
+        ]
+      },
+      {
+        "description": "Fetch the open orders with since filter",
+        "method": "fetchOpenOrders",
+        "url": "https://api.foxbit.com.br/rest/v3/orders?state=ACTIVE&start_time=2024-07-27T00%3A52%3A27.316Z",
+        "input": [
+          null,
+          1722041547316
+        ]
+      },
+      {
+        "description": "Fetch the open orders with limit filter",
+        "method": "fetchOpenOrders",
+        "url": "https://api.foxbit.com.br/rest/v3/orders?state=ACTIVE&page_size=5",
+        "input": [
+          null,
+          null,
+          5
+        ]
+      }
     ]
   }
 }
