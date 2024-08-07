@@ -331,6 +331,35 @@
           5
         ]
       }
+    ],
+    "fetchMyTrades": [
+      {
+        "description": "Fetch the user's trades by market symbol",
+        "method": "fetchMyTrades",
+        "url": "https://api.foxbit.com.br/rest/v3/trades?market_symbol=btcbrl",
+        "input": [
+          "BTC/BRL"
+        ]
+      },
+      {
+        "description": "Fetch the user's trades with since filter",
+        "method": "fetchMyTrades",
+        "url": "https://api.foxbit.com.br/rest/v3/trades?market_symbol=btcbrl&start_time=2024-07-27T00%3A52%3A27.316Z",
+        "input": [
+          "BTC/BRL",
+          1722041547316
+        ]
+      },
+      {
+        "description": "Fetch the user's trades with limit filter",
+        "method": "fetchMyTrades",
+        "url": "https://api.foxbit.com.br/rest/v3/trades?market_symbol=btcbrl&page_size=5",
+        "input": [
+          "BTC/BRL",
+          null,
+          5
+        ]
+      }
     ]
   }
 }
