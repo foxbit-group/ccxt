@@ -465,6 +465,16 @@
           2
         ]
       }
+    ],
+    "fetchDepositAddress": [
+      {
+        "description": "Fetch deposit address by currency code",
+        "method": "fetchDepositAddress",
+        "url": "https://api.foxbit.com.br/rest/v3/deposits/address?currency_symbol=btc",
+        "input": [
+          "BTC"
+        ]
+      }
     ]
   }
 }
