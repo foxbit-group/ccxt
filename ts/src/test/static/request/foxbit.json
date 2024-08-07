@@ -217,6 +217,24 @@
         "output": "{\"id\":3916418841,\"type\":\"ID\"}"
       }
     ],
+    "cancelAllOrders": [
+      {
+        "description": "Cancel al orders",
+        "method": "cancelAllOrders",
+        "url": "https://api.foxbit.com.br/rest/v3/orders/cancel",
+        "input": [],
+        "output": "{\"type\":\"ALL\"}"
+      },
+      {
+        "description": "Cancel orders by symbol",
+        "method": "cancelAllOrders",
+        "url": "https://api.foxbit.com.br/rest/v3/orders/cancel",
+        "input": [
+          "BTC/BRL"
+        ],
+        "output": "{\"type\":\"MARKET\",\"market_symbol\":\"btcbrl\"}"
+      }
+    ],
     "fetchOrder": [
       {
         "description": "Fetch an order by ID",

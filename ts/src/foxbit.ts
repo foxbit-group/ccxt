@@ -81,6 +81,7 @@ export default class foxbit extends Exchange {
                 'fetchOrder': true,
                 'fetchOrders': true,
                 'cancelOrder': true,
+                'cancelAllOrders': true,
                 'fetchDepositAddress': true,
                 'fetchDeposits': true,
             },
@@ -914,6 +915,30 @@ export default class foxbit extends Exchange {
         const data = this.safeList (response, 'data', []);
         const result = this.safeValue (data, 0, {});
         return this.parseOrder (result);
+    }
+
+    async cancelAllOrders (symbol: Str = undefined, params = {}): Promise<{}> {
+        await this.loadMarkets ();
+        const request: Dict = {
+            'type': 'ALL',
+        };
+        if (symbol !== undefined) {
+            const market = this.market (symbol);
+            request['type'] = 'MARKET';
+            request['market_symbol'] = market['baseId'] + market['quoteId'];
+        }
+        const response = await this.v3PrivatePutOrdersCancel (this.extend (request, params));
+        // {
+        //     "data": [
+        //         {
+        //           "sn": "OKMAKSDHRVVREK",
+        //           "id": 123456789
+        //         }
+        //     ]
+        // }
+        return this.safeOrder ({
+            'info': response,
+        });
     }
 
     async fetchOrder (id: string, symbol: Str = undefined, params = {}): Promise<Order> {
