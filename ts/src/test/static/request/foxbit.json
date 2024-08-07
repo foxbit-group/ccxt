@@ -360,6 +360,41 @@
           5
         ]
       }
+    ],
+    "fetchDeposits": [
+      {
+        "description": "Fetch all deposits",
+        "method": "fetchDeposits",
+        "url": "https://api.foxbit.com.br/rest/v3/deposits",
+        "input": []
+      },
+      {
+        "description": "Fetch deposits by currency code",
+        "method": "fetchDeposits",
+        "url": "https://api.foxbit.com.br/rest/v3/deposits",
+        "input": [
+          "BTC"
+        ]
+      },
+      {
+        "description": "Fetch deposits by since filter",
+        "method": "fetchDeposits",
+        "url": "https://api.foxbit.com.br/rest/v3/deposits?start_time=2024-07-27T00%3A52%3A27.316Z",
+        "input": [
+          null,
+          1722041547316
+        ]
+      },
+      {
+        "description": "Fetch deposits by limit filter",
+        "method": "fetchDeposits",
+        "url": "https://api.foxbit.com.br/rest/v3/deposits?page_size=2",
+        "input": [
+          null,
+          null,
+          2
+        ]
+      }
     ]
   }
 }
