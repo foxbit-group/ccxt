@@ -58,6 +58,7 @@ export default class foxbit extends Exchange {
                         ],
                         'post': [
                             'orders',
+                            'orders/cancel-replace',
                         ],
                         'put': [
                             'orders/cancel',
@@ -887,6 +888,57 @@ export default class foxbit extends Exchange {
             'url': undefined,
             'info': response,
         };
+    }
+
+    async editOrder (id: string, symbol: string, type: OrderType, side: OrderSide, amount: Num = undefined, price: Num = undefined, params = {}): Promise<Order> {
+        if (symbol === undefined) {
+            throw new ArgumentsRequired (this.id + ' editOrder() requires a symbol argument');
+        }
+        const validOrderTypes = [ 'LIMIT', 'MARKET', 'STOP_MARKET', 'INSTANT' ];
+        const isOrderTypeValid = validOrderTypes.indexOf (type) >= 0;
+        type = type.toUpperCase ();
+        if (!isOrderTypeValid) {
+            throw new InvalidOrder ('Invalid order type: ' + type + '. Must be one of ' + validOrderTypes.join (', ') + '.');
+        }
+        await this.loadMarkets ();
+        const market = this.market (symbol);
+        const request: Dict = {
+            'mode': 'ALLOW_FAILURE',
+            'cancel': {
+                'type': 'ID',
+                'id': id,
+            },
+            'create': {
+                'type': type,
+                'side': side.toUpperCase (),
+                'market_symbol': market['baseId'] + market['quoteId'],
+            },
+        };
+        if (type === 'LIMIT' || type === 'MARKET') {
+            request['create']['quantity'] = this.amountToPrecision (symbol, amount);
+            if (type === 'LIMIT') {
+                request['create']['price'] = this.priceToPrecision (symbol, price);
+            }
+        }
+        if (type === 'STOP_MARKET') {
+            request['create']['stop_price'] = this.priceToPrecision (symbol, price);
+            request['create']['quantity'] = this.amountToPrecision (symbol, amount);
+        }
+        if (type === 'INSTANT') {
+            request['create']['amount'] = this.priceToPrecision (symbol, amount);
+        }
+        let response = undefined;
+        response = await this.v3PrivatePostOrdersCancelReplace (this.extend (request, params));
+        // {
+        //     "cancel": {
+        //         "id": 123456789
+        //     },
+        //     "create": {
+        //         "id": 1234567890,
+        //         "client_order_id": "451637946501"
+        //     }
+        // }
+        return this.parseOrder (response['create'], market);
     }
 
     parseTicker (ticker: Dict, market: Market = undefined): Ticker {

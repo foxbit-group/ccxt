@@ -501,6 +501,62 @@
         "url": "https://metadata-v2.foxbit.com.br/api/status",
         "input": []
       }
+    ],
+    "editOrder": [
+      {
+        "description": "Cancel an order and replace by a market one",
+        "method": "editOrder",
+        "url": "https://api.foxbit.com.br/rest/v3/orders/cancel-replace",
+        "input": [
+          4071391945,
+          "BTC/BRL",
+          "MARKET",
+          "SELL",
+          0.00001
+        ],
+        "output": "{\"mode\":\"ALLOW_FAILURE\",\"cancel\":{\"type\":\"ID\",\"id\":4071391945},\"create\":{\"type\":\"MARKET\",\"side\":\"SELL\",\"market_symbol\":\"btcbrl\",\"quantity\":\"0.00001\"}}"
+      },
+      {
+        "description": "Cancel an order and replace by a limit one",
+        "method": "editOrder",
+        "url": "https://api.foxbit.com.br/rest/v3/orders/cancel-replace",
+        "input": [
+          4071396126,
+          "BTC/BRL",
+          "LIMIT",
+          "SELL",
+          0.0001,
+          355000
+        ],
+        "output": "{\"mode\":\"ALLOW_FAILURE\",\"cancel\":{\"type\":\"ID\",\"id\":4071396126},\"create\":{\"type\":\"LIMIT\",\"side\":\"SELL\",\"market_symbol\":\"btcbrl\",\"quantity\":\"0.0001\",\"price\":\"355000\"}}"
+      },
+      {
+        "description": "Cancel an order and replace by a stop market one",
+        "method": "editOrder",
+        "url": "https://api.foxbit.com.br/rest/v3/orders/cancel-replace",
+        "input": [
+          4071399012,
+          "BTC/BRL",
+          "STOP_MARKET",
+          "SELL",
+          0.0001,
+          375000
+        ],
+        "output": "{\"mode\":\"ALLOW_FAILURE\",\"cancel\":{\"type\":\"ID\",\"id\":4071399012},\"create\":{\"type\":\"STOP_MARKET\",\"side\":\"SELL\",\"market_symbol\":\"btcbrl\",\"stop_price\":\"375000\",\"quantity\":\"0.0001\"}}"
+      },
+      {
+        "description": "Cancel an order and replace by a instant one",
+        "method": "editOrder",
+        "url": "https://api.foxbit.com.br/rest/v3/orders/cancel-replace",
+        "input": [
+          4071399967,
+          "BTC/BRL",
+          "INSTANT",
+          "SELL",
+          2
+        ],
+        "output": "{\"mode\":\"ALLOW_FAILURE\",\"cancel\":{\"type\":\"ID\",\"id\":4071399967},\"create\":{\"type\":\"INSTANT\",\"side\":\"SELL\",\"market_symbol\":\"btcbrl\",\"amount\":\"2\"}}"
+      }
     ]
   }
 }
