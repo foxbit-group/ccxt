@@ -18,6 +18,7 @@ interface Exchange {
   v3PrivateGetDepositsAddress (params?: {}): Promise<implicitReturnType>;
   v3PrivateGetDeposits (params?: {}): Promise<implicitReturnType>;
   v3PrivateGetWithdrawals (params?: {}): Promise<implicitReturnType>;
+  statusGetStatus (params?: {}): Promise<implicitReturnType>;
 }
 abstract class Exchange extends _Exchange {}
 

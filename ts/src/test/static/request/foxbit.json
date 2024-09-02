@@ -493,6 +493,14 @@
           "BTC"
         ]
       }
+    ],
+    "fetchStatus": [
+      {
+        "description": "Fetch status",
+        "method": "fetchStatus",
+        "url": "https://metadata-v2.foxbit.com.br/api/status",
+        "input": []
+      }
     ]
   }
 }

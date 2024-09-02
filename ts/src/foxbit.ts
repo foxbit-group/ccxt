@@ -18,7 +18,11 @@ export default class foxbit extends Exchange {
             'comment': 'Foxbit Exchange',
             'urls': {
                 'logo': 'https://foxbit.com.br/wp-content/uploads/2024/05/Logo_Foxbit.png',
-                'api': 'https://api.foxbit.com.br',
+                'api': {
+                    'public': 'https://api.foxbit.com.br',
+                    'private': 'https://api.foxbit.com.br',
+                    'status': 'https://metadata-v2.foxbit.com.br/api',
+                },
                 'www': 'https://app.foxbit.com.br',
                 'doc': [
                     'https://docs.foxbit.com.br',
@@ -59,6 +63,11 @@ export default class foxbit extends Exchange {
                             'orders/cancel',
                         ],
                     },
+                },
+                'status': {
+                    'get': [
+                        'status',
+                    ],
                 },
             },
             'has': {
@@ -848,6 +857,38 @@ export default class foxbit extends Exchange {
         return result;
     }
 
+    async fetchStatus (params = {}) {
+        const response = await this.statusGetStatus (params);
+        // {
+        //     "data": {
+        //       "id": 1,
+        //       "attributes": {
+        //         "status": "NORMAL",
+        //         "createdAt": "2023-05-17T18:37:05.934Z",
+        //         "updatedAt": "2024-04-17T02:33:50.945Z",
+        //         "publishedAt": "2023-05-17T18:37:07.653Z",
+        //         "locale": "pt-BR"
+        //       }
+        //     },
+        //     "meta": {
+        //     }
+        // }
+        const data = this.safeValue (response, 'data', {});
+        const attributes = this.safeValue (data, 'attributes', {});
+        const statusRaw = this.safeString (attributes, 'status');
+        const statusMap = {
+            'NORMAL': 'ok',
+            'UNDER_MAINTENANCE': 'maintenance',
+        };
+        return {
+            'status': this.safeString (statusMap, statusRaw, statusRaw),
+            'updated': this.safeString (attributes, 'updatedAt'),
+            'eta': undefined,
+            'url': undefined,
+            'info': response,
+        };
+    }
+
     parseTicker (ticker: Dict, market: Market = undefined): Ticker {
         const marketId = this.safeString (ticker, 'market_symbol');
         const symbol = this.safeSymbol (marketId, market, undefined, 'spot');
@@ -1058,10 +1099,15 @@ export default class foxbit extends Exchange {
         };
     }
 
-    sign (path, api = [], method = 'GET', params = {}, headers = undefined, body = undefined) {
+    sign (path, api: string | string[] = [], method = 'GET', params = {}, headers = undefined, body = undefined) {
         const version = api[0];
-        const fullPath = '/rest/' + version + '/' + this.implodeParams (path, params);
-        let url = this.urls['api'] + fullPath;
+        let urlPath = api[1];
+        let fullPath = '/rest/' + version + '/' + this.implodeParams (path, params);
+        if (api === 'status') {
+            fullPath = '/status';
+            urlPath = 'status';
+        }
+        let url = this.urls['api'][urlPath] + fullPath;
         params = this.omit (params, this.extractParams (path));
         const timestamp = this.now ();
         let query = '';
