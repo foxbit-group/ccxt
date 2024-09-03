@@ -59,6 +59,7 @@ export default class foxbit extends Exchange {
                         'post': [
                             'orders',
                             'orders/cancel-replace',
+                            'withdrawals',
                         ],
                         'put': [
                             'orders/cancel',
@@ -941,6 +942,30 @@ export default class foxbit extends Exchange {
         return this.parseOrder (response['create'], market);
     }
 
+    async withdraw (code: string, amount: number, address: string, tag = undefined, params = {}) {
+        [ tag, params ] = this.handleWithdrawTagAndParams (tag, params);
+        await this.loadMarkets ();
+        const currency = this.currency (code);
+        const networkCode = this.safeString (params, 'network_code');
+        params = this.omit (params, 'network_code');
+        const request: Dict = {
+            'currency_symbol': currency['id'],
+            'amount': this.numberToString (amount),
+            'destination_address': address,
+            'destination_tag': tag,
+            'network_code': networkCode,
+        };
+        const response = await this.v3PrivatePostWithdrawals (this.extend (request, params));
+        // {
+        //     "amount": "1",
+        //     "currency_symbol": "xrp",
+        //     "network_code": "ripple",
+        //     "destination_address": "0x1234567890123456789012345678",
+        //     "destination_tag": "123456"
+        // }
+        return this.parseTransaction (response);
+    }
+
     parseTicker (ticker: Dict, market: Market = undefined): Ticker {
         const marketId = this.safeString (ticker, 'market_symbol');
         const symbol = this.safeSymbol (marketId, market, undefined, 'spot');
@@ -1106,7 +1131,7 @@ export default class foxbit extends Exchange {
 
     parseTransaction (transaction, currency: Currency = undefined, since: Int = undefined, limit: Int = undefined): Transaction {
         const cryptoDetails = this.safeDict (transaction, 'details_crypto');
-        const address = this.safeString (cryptoDetails, 'receiving_address');
+        const address = this.safeString2 (cryptoDetails, 'receiving_address', 'destination_address');
         const sn = this.safeString (transaction, 'sn');
         const snPrefix = sn[0];
         const type = snPrefix === 'W' ? 'withdrawal' : 'deposit';
@@ -1133,12 +1158,12 @@ export default class foxbit extends Exchange {
             'txid': this.safeString (cryptoDetails, 'transaction_id'),
             'timestamp': timestamp,
             'datetime': datetime,
-            'network': undefined,
+            'network': this.safeString (transaction, 'network_code'),
             'address': address,
             'addressTo': address,
             'addressFrom': undefined,
-            'tag': undefined,
-            'tagTo': undefined,
+            'tag': this.safeString (transaction, 'destination_tag'),
+            'tagTo': this.safeString (transaction, 'destination_tag'),
             'tagFrom': undefined,
             'type': type,
             'amount': actualAmount,
