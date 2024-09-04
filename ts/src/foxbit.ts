@@ -1211,17 +1211,18 @@ export default class foxbit extends Exchange {
         if (body !== undefined) {
             bodyToSignature = body;
         }
-        // ADICIONAR RAW BODY NA ASSINATURA QUANDO FOR POST
-        const preHash = timestamp + method + fullPath + signatureQuery + bodyToSignature;
-        console.log ('PRE HASH DA ASSINATURA:', preHash);
-        const signature = this.hmac (preHash, this.secret, sha256, 'hex');
-        console.log ('ASSINATURA DA REQUISIÇÃO:', signature);
         headers = {
             'Content-Type': 'application/json',
-            'X-FB-ACCESS-KEY': this.apiKey,
-            'X-FB-ACCESS-TIMESTAMP': this.numberToString (timestamp),
-            'X-FB-ACCESS-SIGNATURE': signature,
         };
+        if (urlPath === 'private') {
+            const preHash = timestamp + method + fullPath + signatureQuery + bodyToSignature;
+            const signature = this.hmac (preHash, this.secret, sha256, 'hex');
+            headers['X-FB-ACCESS-KEY'] = this.apiKey;
+            headers['X-FB-ACCESS-TIMESTAMP'] = this.numberToString (timestamp);
+            headers['X-FB-ACCESS-SIGNATURE'] = signature;
+            console.log ('PRE HASH DA ASSINATURA:', preHash);
+            console.log ('ASSINATURA DA REQUISIÇÃO:', signature);
+        }
         console.log ('BODY DA REQUISIÇÃO:', body);
         console.log ('FAZENDO REQUISIÇÃO PARA A ROTA: ', url);
         return { 'url': url, 'method': method, 'body': body, 'headers': headers };
