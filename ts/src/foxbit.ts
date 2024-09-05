@@ -13,7 +13,9 @@ export default class foxbit extends Exchange {
             'id': 'foxbit',
             'name': 'Foxbit',
             'country': [ 'pt-BR' ],
-            'rateLimit': 1000,
+            // 300 requests per 10 seconds = 30 requests per second
+            // rateLimit = 1000 ms / 30 requests ~= 33.334
+            'rateLimit': 33.334,
             'version': '1',
             'comment': 'Foxbit Exchange',
             'urls': {
@@ -35,41 +37,40 @@ export default class foxbit extends Exchange {
             'api': {
                 'v3': {
                     'public': {
-                        'get': [
-                            'currencies',
-                            'markets',
-                            'markets/ticker/24hr',
-                            'markets/{market}/orderbook',
-                            'markets/{market}/candlesticks',
-                            'markets/{market}/trades/history',
-                            'markets/{market}/ticker/24hr',
-                            'markets/{market}/orderbook',
-                        ],
+                        'get': {
+                            'currencies': 5, // 6 requests per second
+                            'markets': 5, // 6 requests per second
+                            'markets/ticker/24hr': 60, // 1 request per 2 seconds
+                            'markets/{market}/orderbook': 6, // 10 requests per 2 seconds
+                            'markets/{market}/candlesticks': 12, // 5 requests per 2 seconds
+                            'markets/{market}/trades/history': 12, // 5 requests per 2 seconds
+                            'markets/{market}/ticker/24hr': 15, // 4 requests per 2 seconds
+                        },
                     },
                     'private': {
-                        'get': [
-                            'accounts',
-                            'orders',
-                            'orders/by-order-id/{id}',
-                            'trades',
-                            'deposits/address',
-                            'deposits',
-                            'withdrawals',
-                        ],
-                        'post': [
-                            'orders',
-                            'orders/cancel-replace',
-                            'withdrawals',
-                        ],
-                        'put': [
-                            'orders/cancel',
-                        ],
+                        'get': {
+                            'accounts': 2, // 15 requests per second
+                            'orders': 2, // 30 requests per 2 seconds
+                            'orders/by-order-id/{id}': 2, // 30 requests per 2 seconds
+                            'trades': 6, // 5 orders per second
+                            'deposits/address': 10, // 3 requests per second
+                            'deposits': 10, // 3 requests per second
+                            'withdrawals': 10, // 3 requests per second
+                        },
+                        'post': {
+                            'orders': 2, // 30 requests per 2 seconds
+                            'orders/cancel-replace': 3, // 20 requests per 2 seconds
+                            'withdrawals': 10, // 3 requests per second
+                        },
+                        'put': {
+                            'orders/cancel': 2, // 30 requests per 2 seconds
+                        },
                     },
                 },
                 'status': {
-                    'get': [
-                        'status',
-                    ],
+                    'get': {
+                        'status': 30, // 1 request per second
+                    },
                 },
             },
             'has': {
