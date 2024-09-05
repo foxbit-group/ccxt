@@ -1,5 +1,5 @@
-import { ArgumentsRequired, InvalidOrder } from '../ccxt';
-import Exchange from './abstract/foxbit';
+import { ArgumentsRequired, InvalidOrder } from './base/errors.js';
+import Exchange from './abstract/foxbit.js';
 import type { Currencies, Market, OrderBook, Dict, Ticker, TradingFees, Int, Str, Num, Trade, OHLCV, Balances, Order, OrderType, OrderSide, Strings, Tickers, Currency, Transaction } from './base/types.js';
 import { sha256 } from './static_dependencies/noble-hashes/sha256.js';
 
