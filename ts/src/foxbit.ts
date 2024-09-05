@@ -99,6 +99,7 @@ export default class foxbit extends Exchange {
                 'fetchWithdrawals': true,
                 'fetchTransactions': true,
                 'fetchDepositAddress': true,
+                'withdraw': true,
             },
             'timeframes': {
                 '1m': '1m',
@@ -187,6 +188,14 @@ export default class foxbit extends Exchange {
     }
 
     async fetchMarkets (params = {}): Promise<Market[]> {
+        /**
+         * @method
+         * @name foxbit#fetchMarkets
+         * @description Retrieves data on all markets for foxbit.
+         * @see https://docs.foxbit.com.br/rest/v3/#tag/Market-Data/operation/MarketsController_index
+         * @param {object} [params] extra parameters specific to the exchange API endpoint
+         * @returns {object[]} an array of objects representing market data
+         */
         const response = await this.v3PublicGetMarkets (params);
         //  {
         //    "data": [
@@ -308,6 +317,15 @@ export default class foxbit extends Exchange {
     }
 
     async fetchTicker (symbol: string, params = {}): Promise<Ticker> {
+        /**
+         * @method
+         * @name foxbit#fetchTicker
+         * @description Get last 24 hours ticker information, in real-time, for given market.
+         * @see https://docs.foxbit.com.br/rest/v3/#tag/Market-Data/operation/MarketsController_ticker
+         * @param {string} symbol unified symbol of the market to fetch the ticker for
+         * @param {object} [params] extra parameters specific to the exchange API endpoint
+         * @returns {object} a [ticker structure]{@link https://docs.ccxt.com/#/?id=ticker-structure}
+         */
         await this.loadMarkets ();
         const market = this.market (symbol);
         const request: Dict = {
@@ -351,6 +369,15 @@ export default class foxbit extends Exchange {
     }
 
     async fetchTickers (symbols: Strings = undefined, params = {}): Promise<Tickers> {
+        /**
+         * @method
+         * @name foxbit#fetchTickers
+         * @description Retrieve the ticker data of all markets.
+         * @see https://docs.foxbit.com.br/rest/v3/#tag/Market-Data/operation/MarketsController_tickers
+         * @param {string[]|undefined} symbols unified symbols of the markets to fetch the ticker for, all market tickers are returned if not assigned
+         * @param {object} [params] extra parameters specific to the exchange API endpoint
+         * @returns {object} a dictionary of [ticker structures]{@link https://docs.ccxt.com/#/?id=ticker-structure}
+         */
         await this.loadMarkets ();
         symbols = this.marketSymbols (symbols);
         const response = await this.v3PublicGetMarketsTicker24hr (params);
@@ -379,15 +406,21 @@ export default class foxbit extends Exchange {
         return this.parseTickers (data, symbols);
     }
 
-    async fetchTradingLimits (symbols: string[], params: {}): Promise<{}> {
-        return [];
-    }
-
     async fetchTradingFees (params: {}): Promise<TradingFees> {
         return {};
     }
 
     async fetchOrderBook (symbol: string, limit: Int = 20, params = {}): Promise<OrderBook> {
+        /**
+         * @method
+         * @name foxbit#fetchOrderBook
+         * @description Exports a copy of the order book of a specific market.
+         * @see https://docs.foxbit.com.br/rest/v3/#tag/Market-Data/operation/MarketsController_findOrderbook
+         * @param {string} symbol unified symbol of the market to fetch the order book for
+         * @param {int} [limit] the maximum amount of order book entries to return
+         * @param {object} [params] extra parameters specific to the exchange API endpoint
+         * @returns {object} A dictionary of [order book structures]{@link https://docs.ccxt.com/#/?id=order-book-structure} indexed by market symbols
+         */
         await this.loadMarkets ();
         const market = this.market (symbol);
         const request: Dict = {
@@ -424,6 +457,17 @@ export default class foxbit extends Exchange {
     }
 
     async fetchTrades (symbol: string, since?: number, limit?: number, params?: {}): Promise<Trade[]> {
+        /**
+         * @method
+         * @name foxbit#fetchTrades
+         * @description Retrieve the trades of a specific market.
+         * @see https://docs.foxbit.com.br/rest/v3/#tag/Market-Data/operation/MarketsController_publicTrades
+         * @param {string} symbol unified symbol of the market to fetch trades for
+         * @param {int} [since] timestamp in ms of the earliest trade to fetch
+         * @param {int} [limit] the maximum amount of trades to fetch
+         * @param {object} [params] extra parameters specific to the exchange API endpoint
+         * @returns {Trade[]} a list of [trade structures]{@link https://docs.ccxt.com/#/?id=public-trades}
+         */
         await this.loadMarkets ();
         const market = this.market (symbol);
         const request: Dict = {
@@ -450,6 +494,18 @@ export default class foxbit extends Exchange {
     }
 
     async fetchOHLCV (symbol: string, timeframe = '1m', since: Int = undefined, limit: Int = undefined, params = {}): Promise<OHLCV[]> {
+        /**
+         * @method
+         * @name foxbit#fetchOHLCV
+         * @description Fetch historical candlestick data containing the open, high, low, and close price, and the volume of a market.
+         * @see https://docs.foxbit.com.br/rest/v3/#tag/Market-Data/operation/MarketsController_findCandlesticks
+         * @param {string} symbol unified symbol of the market to fetch OHLCV data for
+         * @param {string} timeframe the length of time each candle represents
+         * @param {int} [since] timestamp in ms of the earliest candle to fetch
+         * @param {int} [limit] the maximum amount of candles to fetch
+         * @param {object} [params] extra parameters specific to the exchange API endpoint
+         * @returns {int[][]} A list of candles ordered as timestamp, open, high, low, close, volume
+         */
         await this.loadMarkets ();
         const market = this.market (symbol);
         const request: Dict = {
@@ -485,6 +541,14 @@ export default class foxbit extends Exchange {
     }
 
     async fetchBalance (params = {}): Promise<Balances> {
+        /**
+         * @method
+         * @name foxbit#fetchBalance
+         * @description Query for balance and get the amount of funds available for trading or funds locked in orders.
+         * @see https://docs.foxbit.com.br/rest/v3/#tag/Account/operation/AccountsController_all
+         * @param {object} [params] extra parameters specific to the exchange API endpoint
+         * @returns {object} a [balance structure]{@link https://docs.ccxt.com/#/?id=balance-structure}
+         */
         await this.loadMarkets ();
         const response = await this.v3PrivateGetAccounts (params);
         // {
@@ -519,10 +583,32 @@ export default class foxbit extends Exchange {
     }
 
     async fetchOpenOrders (symbol: Str = undefined, since: Int = undefined, limit: Int = undefined, params = {}): Promise<Order[]> {
+        /**
+         * @method
+         * @name foxbit#fetchOpenOrders
+         * @description Fetch all unfilled currently open orders.
+         * @see https://docs.foxbit.com.br/rest/v3/#tag/Trading/operation/OrdersController_listOrders
+         * @param {string} symbol unified market symbol
+         * @param {int} [since] the earliest time in ms to fetch open orders for
+         * @param {int} [limit] the maximum number of open order structures to retrieve
+         * @param {object} [params] extra parameters specific to the exchange API endpoint
+         * @returns {Order[]} a list of [order structures]{@link https://docs.ccxt.com/#/?id=order-structure}
+         */
         return this.fetchOrdersByStatus ('ACTIVE', symbol, since, limit, params);
     }
 
     async fetchClosedOrders (symbol: Str = undefined, since: Int = undefined, limit: Int = undefined, params = {}): Promise<Order[]> {
+        /**
+         * @method
+         * @name foxbit#fetchClosedOrders
+         * @description Fetch all currently closed orders.
+         * @see https://docs.foxbit.com.br/rest/v3/#tag/Trading/operation/OrdersController_listOrders
+         * @param {string} symbol unified market symbol of the market orders were made in
+         * @param {int} [since] the earliest time in ms to fetch orders for
+         * @param {int} [limit] the maximum number of order structures to retrieve
+         * @param {object} [params] extra parameters specific to the exchange API endpoint
+         * @returns {Order[]} a list of [order structures]{@link https://docs.ccxt.com/#/?id=order-structure}
+         */
         return this.fetchOrdersByStatus ('FILLED', symbol, since, limit, params);
     }
 
@@ -551,6 +637,22 @@ export default class foxbit extends Exchange {
     }
 
     async createOrder (symbol: string, type: OrderType, side: OrderSide, amount: number, price: Num = undefined, params = {}): Promise<Order> {
+        /**
+         * @method
+         * @name foxbit#createOrder
+         * @description Create an order with the specified characteristics
+         * @see https://docs.foxbit.com.br/rest/v3/#tag/Trading/operation/OrdersController_create
+         * @param {string} symbol unified symbol of the market to create an order in
+         * @param {string} type 'market' or 'limit'
+         * @param {string} side 'buy' or 'sell'
+         * @param {float} amount how much you want to trade in units of the base currency
+         * @param {float} [price] the price at which the order is to be fullfilled, in units of the quote currency, ignored in market orders, used as stop_price on stop market orders
+         * @param {object} [params] extra parameters specific to the exchange API endpoint
+         * @param {float} [params.client_order_id] Client-provided numeric identifier (max. of 2^53 - 1) of the order
+         * @param {string} [params.remark] A note for the order (<= 100 characters)
+         * @param {boolean} [params.post_only] When true your order will not be executed immediately in the market.
+         * @returns {object} an [order structure]{@link https://docs.ccxt.com/#/?id=order-structure}
+         */
         await this.loadMarkets ();
         const market = this.market (symbol);
         type = type.toUpperCase ();
@@ -587,6 +689,16 @@ export default class foxbit extends Exchange {
     }
 
     async cancelOrder (id: string, symbol: Str = undefined, params = {}): Promise<{}> {
+        /**
+         * @method
+         * @name foxbit#cancelOrders
+         * @description Cancel open orders.
+         * @see https://docs.foxbit.com.br/rest/v3/#tag/Trading/operation/OrdersController_cancel
+         * @param {string} id order id
+         * @param {string} symbol unified symbol of the market the order was made in
+         * @param {object} [params] extra parameters specific to the exchange API endpoint
+         * @returns {object} an [order structure]{@link https://docs.ccxt.com/#/?id=order-structure}
+         */
         await this.loadMarkets ();
         const request: Dict = {
             'id': id,
@@ -607,6 +719,15 @@ export default class foxbit extends Exchange {
     }
 
     async cancelAllOrders (symbol: Str = undefined, params = {}): Promise<{}> {
+        /**
+         * @method
+         * @name foxbit#cancelAllOrders
+         * @description Cancel all open orders or all open orders for a specific market.
+         * @see https://docs.foxbit.com.br/rest/v3/#tag/Trading/operation/OrdersController_cancel
+         * @param {string} symbol unified market symbol of the market to cancel orders in
+         * @param {object} [params] extra parameters specific to the exchange API endpoint
+         * @returns {object[]} a list of [order structures]{@link https://docs.ccxt.com/#/?id=order-structure}
+         */
         await this.loadMarkets ();
         const request: Dict = {
             'type': 'ALL',
@@ -631,6 +752,15 @@ export default class foxbit extends Exchange {
     }
 
     async fetchOrder (id: string, symbol: Str = undefined, params = {}): Promise<Order> {
+        /**
+         * @method
+         * @name foxbit#fetchOrder
+         * @description Get an order by ID.
+         * @see https://docs.foxbit.com.br/rest/v3/#tag/Trading/operation/OrdersController_findByOrderId
+         * @param {string} symbol it is not used in the foxbit API
+         * @param {object} [params] extra parameters specific to the exchange API endpoint
+         * @returns {object} An [order structure]{@link https://docs.ccxt.com/#/?id=order-structure}
+         */
         await this.loadMarkets ();
         const request: Dict = {
             'id': id,
@@ -659,6 +789,18 @@ export default class foxbit extends Exchange {
     }
 
     async fetchOrders (symbol?: string, since?: number, limit?: number, params?: {}): Promise<Order[]> {
+        /**
+         * @method
+         * @name foxbit#fetchOrdersByStatus
+         * @description Fetch a list of orders.
+         * @see https://docs.foxbit.com.br/rest/v3/#tag/Trading/operation/OrdersController_listOrders
+         * @param {string} symbol unified market symbol of the market orders were made in
+         * @param {int} [since] the earliest time in ms to fetch orders for
+         * @param {int} [limit] the maximum number of orders to retrieve
+         * @param {string} [params.state] Enum: ACTIVE, CANCELED, FILLED, PARTIALLY_CANCELED, PARTIALLY_FILLED
+         * @param {string} [params.side] Enum: BUY, SELL
+         * @returns {Order[]} a list of [order structures]{@link https://docs.ccxt.com/#/?id=order-structure}
+         */
         await this.loadMarkets ();
         let market = undefined;
         const request: Dict = {};
@@ -704,6 +846,18 @@ export default class foxbit extends Exchange {
     }
 
     async fetchMyTrades (symbol: Str = undefined, since: Int = undefined, limit: Int = undefined, params = {}): Promise<Trade[]> {
+        /**
+         * @method
+         * @name foxbit#fetchMyTrades
+         * @description Trade history queries will only have data available for the last 3 months, in descending order (most recents trades first).
+         * @see https://docs.foxbit.com.br/rest/v3/#tag/Trading/operation/TradesController_all
+         * @param {string} symbol unified market symbol
+         * @param {int} [since] the earliest time in ms to fetch trades for
+         * @param {int} [limit] the maximum number of trade structures to retrieve
+         * @param {object} [params] extra parameters specific to the exchange API endpoint
+         * @param {string} [params.order_id] The specific order ID identification you want to filter.
+         * @returns {Trade[]} a list of [trade structures]{@link https://docs.ccxt.com/#/?id=trade-structure}
+         */
         if (symbol === undefined) {
             throw new ArgumentsRequired (this.id + ' fetchMyTrades() requires a symbol argument');
         }
@@ -741,13 +895,21 @@ export default class foxbit extends Exchange {
     }
 
     async fetchDepositAddress (code: string, params = {}) {
+        /**
+         * @method
+         * @name foxbit#fetchDepositAddress
+         * @description Fetch the deposit address for a currency associated with this account.
+         * @see https://docs.foxbit.com.br/rest/v3/#tag/Deposit/operation/DepositsController_depositAddress
+         * @param {string} code unified currency code
+         * @param {object} [params] extra parameters specific to the exchange API endpoint
+         * @param {string} [params.network_code] the blockchain network to create a deposit address on
+         * @returns {object} an [address structure]{@link https://docs.ccxt.com/#/?id=address-structure}
+         */
         await this.loadMarkets ();
         const currency = this.currency (code);
         const request: Dict = {
             'currency_symbol': currency['id'],
         };
-        // TODO: adicionar validações de networks válidas
-        // -- ainda é preciso fazer a implementação das networks
         const response = await this.v3PrivateGetDepositsAddress (this.extend (request, params));
         // {
         //     "currency_symbol": "btc",
@@ -763,6 +925,17 @@ export default class foxbit extends Exchange {
     }
 
     async fetchDeposits (code: Str = undefined, since: Int = undefined, limit: Int = undefined, params = {}): Promise<Transaction[]> {
+        /**
+         * @method
+         * @name foxbit#fetchDeposits
+         * @description Fetch all deposits made to an account.
+         * @see https://docs.foxbit.com.br/rest/v3/#tag/Deposit/operation/DepositsController_listOrders
+         * @param {string} [code] unified currency code
+         * @param {int} [since] the earliest time in ms to fetch deposits for
+         * @param {int} [limit] the maximum number of deposit structures to retrieve
+         * @param {object} [params] extra parameters specific to the exchange API endpoint
+         * @returns {object[]} a list of [transaction structures]{@link https://docs.ccxt.com/#/?id=transaction-structure}
+         */
         await this.loadMarkets ();
         const request: Dict = {};
         let currency = undefined;
@@ -800,6 +973,17 @@ export default class foxbit extends Exchange {
     }
 
     async fetchWithdrawals (code: Str = undefined, since: Int = undefined, limit: Int = undefined, params = {}): Promise<Transaction[]> {
+        /**
+         * @method
+         * @name foxbit#fetchWithdrawals
+         * @description Fetch all withdrawals made from an account.
+         * @see https://docs.foxbit.com.br/rest/v3/#tag/Withdrawal/operation/WithdrawalsController_listWithdrawals
+         * @param {string} [code] unified currency code
+         * @param {int} [since] the earliest time in ms to fetch withdrawals for
+         * @param {int} [limit] the maximum number of withdrawal structures to retrieve
+         * @param {object} [params] extra parameters specific to the exchange API endpoint
+         * @returns {object[]} a list of [transaction structures]{@link https://docs.ccxt.com/#/?id=transaction-structure}
+         */
         await this.loadMarkets ();
         const request: Dict = {};
         let currency = undefined;
@@ -852,6 +1036,18 @@ export default class foxbit extends Exchange {
     }
 
     async fetchTransactions (code: Str = undefined, since: Int = undefined, limit: Int = undefined, params = {}) {
+        /**
+         * @method
+         * @name foxbit#fetchTransactions
+         * @description Fetch all transactions (deposits and withdrawals) made from an account.
+         * @see https://docs.foxbit.com.br/rest/v3/#tag/Withdrawal/operation/WithdrawalsController_listWithdrawals
+         * @see https://docs.foxbit.com.br/rest/v3/#tag/Deposit/operation/DepositsController_listOrders
+         * @param {string} [code] unified currency code
+         * @param {int} [since] the earliest time in ms to fetch withdrawals for
+         * @param {int} [limit] the maximum number of withdrawal structures to retrieve
+         * @param {object} [params] extra parameters specific to the exchange API endpoint
+         * @returns {object[]} a list of [transaction structures]{@link https://docs.ccxt.com/#/?id=transaction-structure}
+         */
         const withdrawals = await this.fetchWithdrawals (code, since, limit, params);
         const deposits = await this.fetchDeposits (code, since, limit, params);
         const allTransactions = this.arrayConcat (withdrawals, deposits);
@@ -860,6 +1056,14 @@ export default class foxbit extends Exchange {
     }
 
     async fetchStatus (params = {}) {
+        /**
+         * @method
+         * @name foxbit#fetchStatus
+         * @description The latest known information on the availability of the exchange API.
+         * @see https://status.foxbit.com/
+         * @param {object} [params] extra parameters specific to the exchange API endpoint
+         * @returns {object} a [status structure]{@link https://docs.ccxt.com/#/?id=exchange-status-structure}
+         */
         const response = await this.statusGetStatus (params);
         // {
         //     "data": {
@@ -892,6 +1096,20 @@ export default class foxbit extends Exchange {
     }
 
     async editOrder (id: string, symbol: string, type: OrderType, side: OrderSide, amount: Num = undefined, price: Num = undefined, params = {}): Promise<Order> {
+        /**
+         * @method
+         * @name foxbit#editOrder
+         * @description Simultaneously cancel an existing order and create a new one.
+         * @see https://docs.foxbit.com.br/rest/v3/#tag/Trading/operation/OrdersController_cancelReplace
+         * @param {string} id order id
+         * @param {string} symbol unified symbol of the market to create an order in
+         * @param {string} type 'market' or 'limit'
+         * @param {string} side 'buy' or 'sell'
+         * @param {float} amount how much of the currency you want to trade in units of the base currency
+         * @param {float} [price] the price at which the order is to be fullfilled, in units of the quote currency, ignored in market orders, used as stop_price on stop market orders
+         * @param {object} [params] extra parameters specific to the exchange API endpoint
+         * @returns {object} an [order structure]{@link https://docs.ccxt.com/#/?id=order-structure}
+         */
         if (symbol === undefined) {
             throw new ArgumentsRequired (this.id + ' editOrder() requires a symbol argument');
         }
@@ -943,17 +1161,27 @@ export default class foxbit extends Exchange {
     }
 
     async withdraw (code: string, amount: number, address: string, tag = undefined, params = {}) {
+        /**
+         * @method
+         * @name foxbit#withdraw
+         * @description Make a withdrawal.
+         * @see https://docs.foxbit.com.br/rest/v3/#tag/Withdrawal/operation/WithdrawalsController_createWithdrawal
+         * @param {string} code unified currency code
+         * @param {float} amount the amount to withdraw
+         * @param {string} address the address to withdraw to
+         * @param {string} tag
+         * @param {object} [params] extra parameters specific to the exchange API endpoint
+         * @param {string} [params.network_code] unified network code
+         * @returns {object} a [transaction structure]{@link https://docs.ccxt.com/#/?id=transaction-structure}
+         */
         [ tag, params ] = this.handleWithdrawTagAndParams (tag, params);
         await this.loadMarkets ();
         const currency = this.currency (code);
-        const networkCode = this.safeString (params, 'network_code');
-        params = this.omit (params, 'network_code');
         const request: Dict = {
             'currency_symbol': currency['id'],
             'amount': this.numberToString (amount),
             'destination_address': address,
             'destination_tag': tag,
-            'network_code': networkCode,
         };
         const response = await this.v3PrivatePostWithdrawals (this.extend (request, params));
         // {
