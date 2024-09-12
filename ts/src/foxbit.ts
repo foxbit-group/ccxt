@@ -84,26 +84,26 @@ export default class foxbit extends Exchange {
                 'swap': undefined,
                 'future': undefined,
                 'option': undefined,
-                'fetchMarkets': true,
-                'fetchCurrencies': true,
-                'fetchTicker': true,
-                'fetchTickers': true,
-                'fecthOrderBook': true,
-                'fetchOHLCV': true,
-                'fetchTrades': true,
-                'fetchBalance': true,
-                'createOrder': true,
-                'cancelOrder': true,
                 'cancelAllOrders': true,
+                'cancelOrder': true,
+                'createOrder': true,
+                'fecthOrderBook': true,
+                'fetchBalance': true,
+                'fetchClosedOrders': true,
+                'fetchCurrencies': true,
+                'fetchDepositAddress': true,
+                'fetchDeposits': true,
+                'fetchMarkets': true,
+                'fetchMyTrades': true,
+                'fetchOHLCV': true,
+                'fetchOpenOrders': true,
                 'fetchOrder': true,
                 'fetchOrders': true,
-                'fetchOpenOrders': true,
-                'fetchClosedOrders': true,
-                'fetchMyTrades': true,
-                'fetchDeposits': true,
-                'fetchWithdrawals': true,
+                'fetchTicker': true,
+                'fetchTickers': true,
+                'fetchTrades': true,
                 'fetchTransactions': true,
-                'fetchDepositAddress': true,
+                'fetchWithdrawals': true,
                 'withdraw': true,
             },
             'timeframes': {
@@ -1409,7 +1409,7 @@ export default class foxbit extends Exchange {
         };
     }
 
-    sign (path, api: string | string[] = [], method = 'GET', params = {}, headers = undefined, body = undefined) {
+    sign (path, api: string[] | string = [], method = 'GET', params = {}, headers = undefined, body = undefined) {
         const version = api[0];
         let urlPath = api[1];
         let fullPath = '/rest/' + version + '/' + this.implodeParams (path, params);
@@ -1422,7 +1422,6 @@ export default class foxbit extends Exchange {
         const timestamp = this.now ();
         let query = '';
         let signatureQuery = '';
-        console.log ('OS PARAMS QUE CHEGARAM NO sign() FORAM', params);
         if (method === 'GET') {
             const paramKeys = Object.keys (params);
             if (paramKeys.length > 0) {
@@ -1453,11 +1452,7 @@ export default class foxbit extends Exchange {
             headers['X-FB-ACCESS-KEY'] = this.apiKey;
             headers['X-FB-ACCESS-TIMESTAMP'] = this.numberToString (timestamp);
             headers['X-FB-ACCESS-SIGNATURE'] = signature;
-            console.log ('PRE HASH DA ASSINATURA:', preHash);
-            console.log ('ASSINATURA DA REQUISIÇÃO:', signature);
         }
-        console.log ('BODY DA REQUISIÇÃO:', body);
-        console.log ('FAZENDO REQUISIÇÃO PARA A ROTA: ', url);
         return { 'url': url, 'method': method, 'body': body, 'headers': headers };
     }
 }
