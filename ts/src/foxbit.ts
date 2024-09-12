@@ -1,7 +1,11 @@
+//  ---------------------------------------------------------------------------
+
 import { ArgumentsRequired, InvalidOrder } from './base/errors.js';
 import Exchange from './abstract/foxbit.js';
 import type { Currencies, Market, OrderBook, Dict, Ticker, TradingFees, Int, Str, Num, Trade, OHLCV, Balances, Order, OrderType, OrderSide, Strings, Tickers, Currency, Transaction } from './base/types.js';
 import { sha256 } from './static_dependencies/noble-hashes/sha256.js';
+
+//  ---------------------------------------------------------------------------
 
 /**
  * @class foxbit
@@ -457,7 +461,7 @@ export default class foxbit extends Exchange {
         return this.parseOrderBook (response, symbol, timestamp);
     }
 
-    async fetchTrades (symbol: string, since?: number, limit?: number, params?: {}): Promise<Trade[]> {
+    async fetchTrades (symbol: string, since: Int = undefined, limit: Int = undefined, params = {}): Promise<Trade[]> {
         /**
          * @method
          * @name foxbit#fetchTrades
@@ -789,7 +793,7 @@ export default class foxbit extends Exchange {
         return this.parseOrder (response, undefined);
     }
 
-    async fetchOrders (symbol?: string, since?: number, limit?: number, params?: {}): Promise<Order[]> {
+    async fetchOrders (symbol: Str = undefined, since: Int = undefined, limit: Int = undefined, params = {}): Promise<Order[]> {
         /**
          * @method
          * @name foxbit#fetchOrdersByStatus
@@ -1036,7 +1040,7 @@ export default class foxbit extends Exchange {
         return this.parseTransactions (data, currency, since, limit);
     }
 
-    async fetchTransactions (code: Str = undefined, since: Int = undefined, limit: Int = undefined, params = {}) {
+    async fetchTransactions (code: Str = undefined, since: Int = undefined, limit: Int = undefined, params = {}): Promise<Transaction[]> {
         /**
          * @method
          * @name foxbit#fetchTransactions
