@@ -656,7 +656,7 @@ export default class foxbit extends Exchange {
          * @param {float} amount how much you want to trade in units of the base currency
          * @param {float} [price] the price at which the order is to be fullfilled, in units of the quote currency, ignored in market orders, used as stop_price on stop market orders
          * @param {object} [params] extra parameters specific to the exchange API endpoint
-         * @param {float} [params.client_order_id] Client-provided numeric identifier (max. of 2^53 - 1) of the order
+         * @param {float} [params.client_order_id] client-provided numeric identifier (max. of 2^53 - 1) of the order
          * @param {string} [params.remark] A note for the order (<= 100 characters)
          * @param {boolean} [params.post_only] When true your order will not be executed immediately in the market.
          * @returns {object} an [order structure]{@link https://docs.ccxt.com/#/?id=order-structure}
