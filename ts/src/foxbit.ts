@@ -22,6 +22,8 @@ export default class foxbit extends Exchange {
             'rateLimit': 33.334,
             'version': '1',
             'comment': 'Foxbit Exchange',
+            'certified': false,
+            'pro': false,
             'urls': {
                 'logo': 'https://foxbit.com.br/wp-content/uploads/2024/05/Logo_Foxbit.png',
                 'api': {
