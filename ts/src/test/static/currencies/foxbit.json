@@ -1,0 +1,116 @@
+{
+    "BRL": {
+        "id": "brl",
+        "code": "BRL",
+        "name": "Real",
+        "active": true,
+        "deposit": true,
+        "withdraw": true,
+        "fee": 0,
+        "precision": "2",
+        "limits": {
+            "amount": {},
+            "deposit": {
+                "min": 5
+            },
+            "withdraw": {
+                "min": 10
+            }
+        }
+    },
+    "BTC": {
+        "id": "btc",
+        "code": "BTC",
+        "name": "Bitcoin",
+        "active": true,
+        "deposit": true,
+        "withdraw": true,
+        "fee": 0.00005,
+        "precision": "8",
+        "limits": {
+            "amount": {},
+            "deposit": {
+                "min": 0.0008
+            },
+            "withdraw": {
+                "min": 0.0004
+            }
+        }
+    },
+    "XRP": {
+        "id": "xrp",
+        "code": "XRP",
+        "name": "XRP",
+        "active": true,
+        "deposit": true,
+        "withdraw": true,
+        "fee": 0.1,
+        "precision": "6",
+        "limits": {
+            "amount": {},
+            "deposit": {
+                "min": 0.2
+            },
+            "withdraw": {
+                "min": 40
+            }
+        }
+    },
+    "LTC": {
+        "id": "ltc",
+        "code": "LTC",
+        "name": "Litecoin",
+        "active": true,
+        "deposit": true,
+        "withdraw": true,
+        "fee": 0.001,
+        "precision": "8",
+        "limits": {
+            "amount": {},
+            "deposit": {
+                "min": 0.004
+            },
+            "withdraw": {
+                "min": 0.008
+            }
+        }
+    },
+    "ETH": {
+        "id": "eth",
+        "code": "ETH",
+        "name": "Ethereum",
+        "active": true,
+        "deposit": true,
+        "withdraw": true,
+        "fee": 0.003,
+        "precision": "8",
+        "limits": {
+            "amount": {},
+            "deposit": {
+                "min": 0.016
+            },
+            "withdraw": {
+                "min": 0.012
+            }
+        }
+    },
+    "USDT": {
+        "id": "usdt",
+        "code": "USDT",
+        "name": "Tether",
+        "active": true,
+        "deposit": true,
+        "withdraw": true,
+        "fee": 12,
+        "precision": "8",
+        "limits": {
+            "amount": {},
+            "deposit": {
+                "min": 5
+            },
+            "withdraw": {
+                "min": 48
+            }
+        }
+    }
+}

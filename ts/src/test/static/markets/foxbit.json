@@ -1,0 +1,382 @@
+{
+    "BTC/BRL": {
+        "id": "btcbrl",
+        "lowercaseId": null,
+        "symbol": "BTC/BRL",
+        "base": "BTC",
+        "quote": "BRL",
+        "settle": null,
+        "baseId": "btc",
+        "quoteId": "brl",
+        "settleId": null,
+        "type": "spot",
+        "spot": true,
+        "margin": null,
+        "swap": null,
+        "future": null,
+        "option": null,
+        "index": null,
+        "active": true,
+        "contract": null,
+        "linear": null,
+        "inverse": null,
+        "subType": null,
+        "taker": null,
+        "maker": null,
+        "contractSize": null,
+        "expiry": null,
+        "expiryDatetime": null,
+        "strike": null,
+        "optionType": null,
+        "precision": {
+            "price": 2,
+            "amount": 8,
+            "cost": 2
+        },
+        "limits": {
+            "leverage": {
+                "min": null,
+                "max": null
+            },
+            "amount": {
+                "min": 0.0000025,
+                "max": null
+            },
+            "price": {
+                "min": 0.0001,
+                "max": null
+            },
+            "cost": {
+                "min": null,
+                "max": null
+            }
+        },
+        "created": null,
+        "info": {
+            "base": {
+                "name": "Bitcoin",
+                "precision": "8",
+                "symbol": "btc",
+                "type": "CRYPTO"
+            },
+            "quote": {
+                "name": "Real",
+                "precision": "2",
+                "symbol": "brl",
+                "type": "FIAT"
+            },
+            "symbol": "btcbrl",
+            "quantity_min": "0.0000025",
+            "quantity_increment": "0.00000001",
+            "price_min": "0.0001",
+            "price_increment": "0.0001"
+        },
+        "tierBased": false,
+        "percentage": true,
+        "feeSide": "get"
+    },
+    "ETH/BRL": {
+        "id": "ethbrl",
+        "lowercaseId": null,
+        "symbol": "ETH/BRL",
+        "base": "ETH",
+        "quote": "BRL",
+        "settle": null,
+        "baseId": "eth",
+        "quoteId": "brl",
+        "settleId": null,
+        "type": "spot",
+        "spot": true,
+        "margin": null,
+        "swap": null,
+        "future": null,
+        "option": null,
+        "index": null,
+        "active": true,
+        "contract": null,
+        "linear": null,
+        "inverse": null,
+        "subType": null,
+        "taker": null,
+        "maker": null,
+        "contractSize": null,
+        "expiry": null,
+        "expiryDatetime": null,
+        "strike": null,
+        "optionType": null,
+        "precision": {
+            "price": 2,
+            "amount": 8,
+            "cost": 2
+        },
+        "limits": {
+            "leverage": {
+                "min": null,
+                "max": null
+            },
+            "amount": {
+                "min": 0.0000591,
+                "max": null
+            },
+            "price": {
+                "min": 0.0001,
+                "max": null
+            },
+            "cost": {
+                "min": null,
+                "max": null
+            }
+        },
+        "created": null,
+        "info": {
+            "base": {
+                "name": "Ethereum",
+                "precision": "8",
+                "symbol": "eth",
+                "type": "CRYPTO"
+            },
+            "quote": {
+                "name": "Real",
+                "precision": "2",
+                "symbol": "brl",
+                "type": "FIAT"
+            },
+            "symbol": "ethbrl",
+            "quantity_min": "0.0000591",
+            "quantity_increment": "0.00000001",
+            "price_min": "0.0001",
+            "price_increment": "0.0001"
+        },
+        "tierBased": false,
+        "percentage": true,
+        "feeSide": "get"
+    },
+    "USDT/BRL": {
+        "id": "usdtbrl",
+        "lowercaseId": null,
+        "symbol": "USDT/BRL",
+        "base": "USDT",
+        "quote": "BRL",
+        "settle": null,
+        "baseId": "usdt",
+        "quoteId": "brl",
+        "settleId": null,
+        "type": "spot",
+        "spot": true,
+        "margin": null,
+        "swap": null,
+        "future": null,
+        "option": null,
+        "index": null,
+        "active": true,
+        "contract": null,
+        "linear": null,
+        "inverse": null,
+        "subType": null,
+        "taker": null,
+        "maker": null,
+        "contractSize": null,
+        "expiry": null,
+        "expiryDatetime": null,
+        "strike": null,
+        "optionType": null,
+        "precision": {
+            "price": 2,
+            "amount": 8,
+            "cost": 2
+        },
+        "limits": {
+            "leverage": {
+                "min": null,
+                "max": null
+            },
+            "amount": {
+                "min": 0.14222475,
+                "max": null
+            },
+            "price": {
+                "min": 0.0001,
+                "max": null
+            },
+            "cost": {
+                "min": null,
+                "max": null
+            }
+        },
+        "created": null,
+        "info": {
+            "base": {
+                "name": "Tether",
+                "precision": "8",
+                "symbol": "usdt",
+                "type": "CRYPTO"
+            },
+            "quote": {
+                "name": "Real",
+                "precision": "2",
+                "symbol": "brl",
+                "type": "FIAT"
+            },
+            "symbol": "usdtbrl",
+            "quantity_min": "0.14222475",
+            "quantity_increment": "0.00000001",
+            "price_min": "0.0001",
+            "price_increment": "0.0001"
+        },
+        "tierBased": false,
+        "percentage": true,
+        "feeSide": "get"
+    },
+    "XRP/BRL": {
+      "id": "xrpbrl",
+      "lowercaseId": null,
+      "symbol": "XRP/BRL",
+      "base": "XRP",
+      "quote": "BRL",
+      "settle": null,
+      "baseId": "xrp",
+      "quoteId": "brl",
+      "settleId": null,
+      "type": "spot",
+      "spot": true,
+      "margin": null,
+      "swap": null,
+      "future": null,
+      "option": null,
+      "index": null,
+      "active": true,
+      "contract": null,
+      "linear": null,
+      "inverse": null,
+      "subType": null,
+      "taker": null,
+      "maker": null,
+      "contractSize": null,
+      "expiry": null,
+      "expiryDatetime": null,
+      "strike": null,
+      "optionType": null,
+      "precision": {
+        "price": 2,
+        "amount": 6,
+        "cost": 2
+      },
+      "limits": {
+        "leverage": {
+          "min": null,
+          "max": null
+        },
+        "amount": {
+          "min": 0.24474562,
+          "max": null
+        },
+        "price": {
+          "min": 0.0001,
+          "max": null
+        },
+        "cost": {
+          "min": null,
+          "max": null
+        }
+      },
+      "created": null,
+      "info": {
+        "base": {
+          "name": "XRP",
+          "precision": "6",
+          "symbol": "xrp",
+          "type": "CRYPTO"
+        },
+        "quote": {
+          "name": "Real",
+          "precision": "2",
+          "symbol": "brl",
+          "type": "FIAT"
+        },
+        "symbol": "xrpbrl",
+        "quantity_min": "0.24474562",
+        "quantity_increment": "0.000001",
+        "price_min": "0.0001",
+        "price_increment": "0.0001"
+      },
+      "tierBased": false,
+      "percentage": true,
+      "feeSide": "get"
+    },
+    "LTC/BRL": {
+      "id": "ltcbrl",
+      "lowercaseId": null,
+      "symbol": "LTC/BRL",
+      "base": "LTC",
+      "quote": "BRL",
+      "settle": null,
+      "baseId": "ltc",
+      "quoteId": "brl",
+      "settleId": null,
+      "type": "spot",
+      "spot": true,
+      "margin": null,
+      "swap": null,
+      "future": null,
+      "option": null,
+      "index": null,
+      "active": true,
+      "contract": null,
+      "linear": null,
+      "inverse": null,
+      "subType": null,
+      "taker": null,
+      "maker": null,
+      "contractSize": null,
+      "expiry": null,
+      "expiryDatetime": null,
+      "strike": null,
+      "optionType": null,
+      "precision": {
+        "price": 2,
+        "amount": 8,
+        "cost": 2
+      },
+      "limits": {
+        "leverage": {
+          "min": null,
+          "max": null
+        },
+        "amount": {
+          "min": 0.00235294,
+          "max": null
+        },
+        "price": {
+          "min": 0.0001,
+          "max": null
+        },
+        "cost": {
+          "min": null,
+          "max": null
+        }
+      },
+      "created": null,
+      "info": {
+        "base": {
+          "name": "Litecoin",
+          "precision": "8",
+          "symbol": "ltc",
+          "type": "CRYPTO"
+        },
+        "quote": {
+          "name": "Real",
+          "precision": "2",
+          "symbol": "brl",
+          "type": "FIAT"
+        },
+        "symbol": "ltcbrl",
+        "quantity_min": "0.00235294",
+        "quantity_increment": "0.00000001",
+        "price_min": "0.0001",
+        "price_increment": "0.0001"
+      },
+      "tierBased": false,
+      "percentage": true,
+      "feeSide": "get"
+    }
+}
