@@ -124,6 +124,31 @@ export default class foxbit extends Exchange {
                 '2w': '2w',
                 '1M': '1M',
             },
+            'options': {
+                'networksById': {
+                    'bitcoin': 'BTC',
+                    'bitcoincash': 'BCH',
+                    'polygon': 'MATIC',
+                    'ripple': 'XRP',
+                    'litecoin': 'LTC',
+                    'erc20': 'ERC20',
+                    'trc20': 'TRX',
+                    'polkadot': 'DOT',
+                    'cardano': 'ADA',
+                    'tezos': 'XTZ',
+                    'solana': 'SOL',
+                    'dogecoin': 'DOGE',
+                    'avalanchechain': 'AVAX',
+                    'cosmos': 'ATOM',
+                    'optimism': 'OPTIMISM',
+                    'algorand': 'ALGO',
+                    'arbitruim': 'ARBITRUM',
+                    'near': 'NEAR',
+                    'hedera': 'HBAR',
+                    'stacks': 'STX',
+                    'thorchain': 'RUNE',
+                },
+            },
         });
     }
 
@@ -148,7 +173,21 @@ export default class foxbit extends Exchange {
         //       "category": {
         //           "code": "cripto",
         //         "name": "Cripto"
-        //       }
+        //       },
+        //       "networks": [
+        //           {
+        //               "name": "Bitcoin",
+        //               "code": "btc",
+        //               "deposit_info": {
+        //                  status: "ENABLED",
+        //               },
+        //               "withdraw_info": {
+        //                  "status": "ENABLED",
+        //                  "fee": "0.0001",
+        //               },
+        //               "has_destination_tag": false
+        //           }
+        //       ]
         //     }
         //   ]
         // }
@@ -158,23 +197,29 @@ export default class foxbit extends Exchange {
         for (let i = 0; i < coins.length; i++) {
             const coin = coins[i];
             const currency = data[coin];
-            const precison = this.safeString (currency, 'precision');
+            const precision = this.safeInteger (currency, 'precision');
             const currencyId = this.safeString (currency, 'symbol');
             const name = this.safeString (currency, 'name');
             const code = this.safeCurrencyCode (currencyId);
             const depositInfo = this.safeDict (currency, 'deposit_info');
             const withdrawInfo = this.safeDict (currency, 'withdraw_info');
-            if (this.safeValue (result, code) === undefined) {
-                result[code] = {
-                    'id': currencyId,
-                    'code': code,
+            const networks = this.safeValue (currency, 'networks', []);
+            const parsedNetworks: Dict = {};
+            for (let j = 0; j < networks.length; j++) {
+                const network = networks[j];
+                const networkId = this.safeString (network, 'code');
+                const networkCode = this.networkIdToCode (networkId, code);
+                const networkWithdrawInfo = this.safeDict (network, 'withdraw_info');
+                parsedNetworks[networkCode] = {
                     'info': currency,
-                    'name': name,
+                    'id': networkId,
+                    'network': networkCode,
+                    'name': this.safeString (network, 'name'),
+                    'deposit': this.safeString (network, 'deposit_info', 'status') === 'ENABLED',
+                    'withdraw': this.safeString (network, 'withdraw_info', 'status') === 'ENABLED',
                     'active': true,
-                    'deposit': true,
-                    'withdraw': this.safeBool (withdrawInfo, 'enabled'),
-                    'fee': this.safeNumber (withdrawInfo, 'fee'),
-                    'precision': precison,
+                    'precision': precision,
+                    'fee': this.safeNumber (networkWithdrawInfo, 'fee'),
                     'limits': {
                         'amount': {
                             'min': undefined,
@@ -189,6 +234,34 @@ export default class foxbit extends Exchange {
                             'max': undefined,
                         },
                     },
+                };
+            }
+            if (this.safeValue (result, code) === undefined) {
+                result[code] = {
+                    'id': currencyId,
+                    'code': code,
+                    'info': currency,
+                    'name': name,
+                    'active': true,
+                    'deposit': true,
+                    'withdraw': this.safeBool (withdrawInfo, 'enabled'),
+                    'fee': this.safeNumber (withdrawInfo, 'fee'),
+                    'precision': precision,
+                    'limits': {
+                        'amount': {
+                            'min': undefined,
+                            'max': undefined,
+                        },
+                        'deposit': {
+                            'min': this.safeNumber (depositInfo, 'min_amount'),
+                            'max': undefined,
+                        },
+                        'withdraw': {
+                            'min': this.safeNumber (withdrawInfo, 'min_amount'),
+                            'max': undefined,
+                        },
+                    },
+                    'networks': parsedNetworks,
                 };
             }
         }
@@ -276,11 +349,11 @@ export default class foxbit extends Exchange {
                 'active': true,
                 'type': 'spot',
                 'spot': true,
-                'margin': undefined,
-                'future': undefined,
-                'swap': undefined,
-                'option': undefined,
-                'contract': undefined,
+                'margin': false,
+                'future': false,
+                'swap': false,
+                'option': false,
+                'contract': false,
                 'settle': undefined,
                 'settleId': undefined,
                 'contractSize': undefined,
