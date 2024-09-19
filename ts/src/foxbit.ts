@@ -79,6 +79,15 @@ export default class foxbit extends Exchange {
                     },
                 },
             },
+            'fees': {
+                'trading': {
+                    'feeSide': 'get',
+                    'tierBased': false,
+                    'percentage': true,
+                    'taker': this.parseNumber ('0.005'),
+                    'maker': this.parseNumber ('0.0025'),
+                },
+            },
             'has': {
                 'CORS': true,
                 'spot': true,
@@ -210,13 +219,16 @@ export default class foxbit extends Exchange {
                 const networkId = this.safeString (network, 'code');
                 const networkCode = this.networkIdToCode (networkId, code);
                 const networkWithdrawInfo = this.safeDict (network, 'withdraw_info');
+                const networkDepositInfo = this.safeDict (network, 'deposit_info');
+                const isWithdrawEnabled = this.safeString (networkWithdrawInfo, 'status') === 'ENABLED';
+                const isDepositEnabled = this.safeString (networkDepositInfo, 'status') === 'ENABLED';
                 parsedNetworks[networkCode] = {
                     'info': currency,
                     'id': networkId,
                     'network': networkCode,
                     'name': this.safeString (network, 'name'),
-                    'deposit': this.safeString (network, 'deposit_info', 'status') === 'ENABLED',
-                    'withdraw': this.safeString (network, 'withdraw_info', 'status') === 'ENABLED',
+                    'deposit': isDepositEnabled,
+                    'withdraw': isWithdrawEnabled,
                     'active': true,
                     'precision': precision,
                     'fee': this.safeNumber (networkWithdrawInfo, 'fee'),
@@ -244,7 +256,7 @@ export default class foxbit extends Exchange {
                     'name': name,
                     'active': true,
                     'deposit': true,
-                    'withdraw': this.safeBool (withdrawInfo, 'enabled'),
+                    'withdraw': this.safeBool (withdrawInfo, 'enabled', false),
                     'fee': this.safeNumber (withdrawInfo, 'fee'),
                     'precision': precision,
                     'limits': {
@@ -1331,7 +1343,7 @@ export default class foxbit extends Exchange {
             'cost': this.safeNumber (trade, 'fee'),
             'rate': undefined,
         };
-        return {
+        return this.safeTrade ({
             'id': this.safeString (trade, 'id'),
             'info': trade,
             'timestamp': timestamp,
@@ -1345,7 +1357,7 @@ export default class foxbit extends Exchange {
             'amount': amount,
             'cost': cost,
             'fee': fee,
-        };
+        }, market);
     }
 
     parseOrderStatus (status: Str) {

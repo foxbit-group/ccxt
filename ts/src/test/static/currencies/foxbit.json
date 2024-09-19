@@ -2,114 +2,740 @@
     "BRL": {
         "id": "brl",
         "code": "BRL",
+        "info": {
+            "name": "Real",
+            "precision": "2",
+            "category": null,
+            "symbol": "brl",
+            "type": "FIAT",
+            "deposit_info": {
+                "min_to_confirm": null,
+                "min_amount": "5"
+            },
+            "withdraw_info": {
+                "enabled": true,
+                "min_amount": "10",
+                "fee": "0"
+            }
+        },
         "name": "Real",
         "active": true,
         "deposit": true,
         "withdraw": true,
         "fee": 0,
-        "precision": "2",
+        "precision": 2,
         "limits": {
-            "amount": {},
+            "amount": {
+                "min": null,
+                "max": null
+            },
             "deposit": {
-                "min": 5
+                "min": 5,
+                "max": null
             },
             "withdraw": {
-                "min": 10
+                "min": 10,
+                "max": null
             }
-        }
+        },
+        "networks": {}
     },
     "BTC": {
         "id": "btc",
         "code": "BTC",
+        "info": {
+            "name": "Bitcoin",
+            "precision": "8",
+            "category": {
+                "code": "cripto",
+                "name": "Cripto"
+            },
+            "networks": [
+                {
+                    "name": "Bitcoin Network",
+                    "code": "bitcoin",
+                    "deposit_info": {
+                        "status": "ENABLED"
+                    },
+                    "withdraw_info": {
+                        "fee": "0.00005",
+                        "status": "ENABLED"
+                    },
+                    "has_destination_tag": false
+                }
+            ],
+            "symbol": "btc",
+            "type": "CRYPTO",
+            "deposit_info": {
+                "min_to_confirm": "2",
+                "min_amount": "0.0008"
+            },
+            "withdraw_info": {
+                "enabled": true,
+                "min_amount": "0.0004",
+                "fee": "0.00005"
+            }
+        },
         "name": "Bitcoin",
         "active": true,
         "deposit": true,
         "withdraw": true,
         "fee": 0.00005,
-        "precision": "8",
+        "precision": 8,
         "limits": {
-            "amount": {},
+            "amount": {
+                "min": null,
+                "max": null
+            },
             "deposit": {
-                "min": 0.0008
+                "min": 0.0008,
+                "max": null
             },
             "withdraw": {
-                "min": 0.0004
+                "min": 0.0004,
+                "max": null
+            }
+        },
+        "networks": {
+            "BTC": {
+                "info": {
+                    "name": "Bitcoin",
+                    "precision": "8",
+                    "category": {
+                        "code": "cripto",
+                        "name": "Cripto"
+                    },
+                    "networks": [
+                        {
+                            "name": "Bitcoin Network",
+                            "code": "bitcoin",
+                            "deposit_info": {
+                                "status": "ENABLED"
+                            },
+                            "withdraw_info": {
+                                "fee": "0.00005",
+                                "status": "ENABLED"
+                            },
+                            "has_destination_tag": false
+                        }
+                    ],
+                    "symbol": "btc",
+                    "type": "CRYPTO",
+                    "deposit_info": {
+                        "min_to_confirm": "2",
+                        "min_amount": "0.0008"
+                    },
+                    "withdraw_info": {
+                        "enabled": true,
+                        "min_amount": "0.0004",
+                        "fee": "0.00005"
+                    }
+                },
+                "id": "bitcoin",
+                "network": "BTC",
+                "name": "Bitcoin Network",
+                "deposit": true,
+                "withdraw": true,
+                "active": true,
+                "precision": 8,
+                "fee": 0.00005,
+                "limits": {
+                    "amount": {
+                        "min": null,
+                        "max": null
+                    },
+                    "deposit": {
+                        "min": 0.0008,
+                        "max": null
+                    },
+                    "withdraw": {
+                        "min": 0.0004,
+                        "max": null
+                    }
+                }
             }
         }
     },
     "XRP": {
         "id": "xrp",
         "code": "XRP",
+        "info": {
+            "name": "XRP",
+            "precision": "6",
+            "category": {
+                "code": "cripto",
+                "name": "Cripto"
+            },
+            "networks": [
+                {
+                    "name": "XRP Network",
+                    "code": "ripple",
+                    "deposit_info": {
+                        "status": "ENABLED"
+                    },
+                    "withdraw_info": {
+                        "fee": "0.1",
+                        "status": "ENABLED"
+                    },
+                    "has_destination_tag": true
+                }
+            ],
+            "symbol": "xrp",
+            "type": "CRYPTO",
+            "deposit_info": {
+                "min_to_confirm": "1",
+                "min_amount": "0.2"
+            },
+            "withdraw_info": {
+                "enabled": true,
+                "min_amount": "40",
+                "fee": "0.1"
+            }
+        },
         "name": "XRP",
         "active": true,
         "deposit": true,
         "withdraw": true,
         "fee": 0.1,
-        "precision": "6",
+        "precision": 6,
         "limits": {
-            "amount": {},
+            "amount": {
+                "min": null,
+                "max": null
+            },
             "deposit": {
-                "min": 0.2
+                "min": 0.2,
+                "max": null
             },
             "withdraw": {
-                "min": 40
+                "min": 40,
+                "max": null
             }
-        }
-    },
-    "LTC": {
-        "id": "ltc",
-        "code": "LTC",
-        "name": "Litecoin",
-        "active": true,
-        "deposit": true,
-        "withdraw": true,
-        "fee": 0.001,
-        "precision": "8",
-        "limits": {
-            "amount": {},
-            "deposit": {
-                "min": 0.004
-            },
-            "withdraw": {
-                "min": 0.008
-            }
-        }
-    },
-    "ETH": {
-        "id": "eth",
-        "code": "ETH",
-        "name": "Ethereum",
-        "active": true,
-        "deposit": true,
-        "withdraw": true,
-        "fee": 0.003,
-        "precision": "8",
-        "limits": {
-            "amount": {},
-            "deposit": {
-                "min": 0.016
-            },
-            "withdraw": {
-                "min": 0.012
+        },
+        "networks": {
+            "XRP": {
+                "info": {
+                    "name": "XRP",
+                    "precision": "6",
+                    "category": {
+                        "code": "cripto",
+                        "name": "Cripto"
+                    },
+                    "networks": [
+                        {
+                            "name": "XRP Network",
+                            "code": "ripple",
+                            "deposit_info": {
+                                "status": "ENABLED"
+                            },
+                            "withdraw_info": {
+                                "fee": "0.1",
+                                "status": "ENABLED"
+                            },
+                            "has_destination_tag": true
+                        }
+                    ],
+                    "symbol": "xrp",
+                    "type": "CRYPTO",
+                    "deposit_info": {
+                        "min_to_confirm": "1",
+                        "min_amount": "0.2"
+                    },
+                    "withdraw_info": {
+                        "enabled": true,
+                        "min_amount": "40",
+                        "fee": "0.1"
+                    }
+                },
+                "id": "ripple",
+                "network": "XRP",
+                "name": "XRP Network",
+                "deposit": true,
+                "withdraw": true,
+                "active": true,
+                "precision": 6,
+                "fee": 0.1,
+                "limits": {
+                    "amount": {
+                        "min": null,
+                        "max": null
+                    },
+                    "deposit": {
+                        "min": 0.2,
+                        "max": null
+                    },
+                    "withdraw": {
+                        "min": 40,
+                        "max": null
+                    }
+                }
             }
         }
     },
     "USDT": {
         "id": "usdt",
         "code": "USDT",
+        "info": {
+            "name": "Tether",
+            "precision": "8",
+            "category": {
+                "code": "stablecoin",
+                "name": "Stablecoin"
+            },
+            "networks": [
+                {
+                    "name": "Ethereum (ERC-20)",
+                    "code": "erc20",
+                    "deposit_info": {
+                        "status": "ENABLED"
+                    },
+                    "withdraw_info": {
+                        "fee": "0.2423329241044612",
+                        "status": "ENABLED"
+                    },
+                    "has_destination_tag": false
+                },
+                {
+                    "name": "Binance Smart Chain (BEP-20)",
+                    "code": "bsc",
+                    "deposit_info": {
+                        "status": "ENABLED"
+                    },
+                    "withdraw_info": {
+                        "fee": "0.0703579596774194",
+                        "status": "DISABLED"
+                    },
+                    "has_destination_tag": false
+                },
+                {
+                    "name": "Tron Network (TRC-20)",
+                    "code": "trc20",
+                    "deposit_info": {
+                        "status": "ENABLED"
+                    },
+                    "withdraw_info": {
+                        "fee": "4.2878294585424472",
+                        "status": "ENABLED"
+                    },
+                    "has_destination_tag": false
+                },
+                {
+                    "name": "Polygon",
+                    "code": "polygon",
+                    "deposit_info": {
+                        "status": "ENABLED"
+                    },
+                    "withdraw_info": {
+                        "fee": "0.0007910693603061",
+                        "status": "DISABLED"
+                    },
+                    "has_destination_tag": false
+                }
+            ],
+            "symbol": "usdt",
+            "type": "CRYPTO",
+            "deposit_info": {
+                "min_to_confirm": "15",
+                "min_amount": "5"
+            },
+            "withdraw_info": {
+                "enabled": true,
+                "min_amount": "48",
+                "fee": "12"
+            }
+        },
         "name": "Tether",
         "active": true,
         "deposit": true,
         "withdraw": true,
         "fee": 12,
-        "precision": "8",
+        "precision": 8,
         "limits": {
-            "amount": {},
+            "amount": {
+                "min": null,
+                "max": null
+            },
             "deposit": {
-                "min": 5
+                "min": 5,
+                "max": null
             },
             "withdraw": {
-                "min": 48
+                "min": 48,
+                "max": null
+            }
+        },
+        "networks": {
+            "ERC20": {
+                "info": {
+                    "name": "Tether",
+                    "precision": "8",
+                    "category": {
+                        "code": "stablecoin",
+                        "name": "Stablecoin"
+                    },
+                    "networks": [
+                        {
+                            "name": "Ethereum (ERC-20)",
+                            "code": "erc20",
+                            "deposit_info": {
+                                "status": "ENABLED"
+                            },
+                            "withdraw_info": {
+                                "fee": "0.2423329241044612",
+                                "status": "ENABLED"
+                            },
+                            "has_destination_tag": false
+                        },
+                        {
+                            "name": "Binance Smart Chain (BEP-20)",
+                            "code": "bsc",
+                            "deposit_info": {
+                                "status": "ENABLED"
+                            },
+                            "withdraw_info": {
+                                "fee": "0.0703579596774194",
+                                "status": "DISABLED"
+                            },
+                            "has_destination_tag": false
+                        },
+                        {
+                            "name": "Tron Network (TRC-20)",
+                            "code": "trc20",
+                            "deposit_info": {
+                                "status": "ENABLED"
+                            },
+                            "withdraw_info": {
+                                "fee": "4.2878294585424472",
+                                "status": "ENABLED"
+                            },
+                            "has_destination_tag": false
+                        },
+                        {
+                            "name": "Polygon",
+                            "code": "polygon",
+                            "deposit_info": {
+                                "status": "ENABLED"
+                            },
+                            "withdraw_info": {
+                                "fee": "0.0007910693603061",
+                                "status": "DISABLED"
+                            },
+                            "has_destination_tag": false
+                        }
+                    ],
+                    "symbol": "usdt",
+                    "type": "CRYPTO",
+                    "deposit_info": {
+                        "min_to_confirm": "15",
+                        "min_amount": "5"
+                    },
+                    "withdraw_info": {
+                        "enabled": true,
+                        "min_amount": "48",
+                        "fee": "12"
+                    }
+                },
+                "id": "erc20",
+                "network": "ERC20",
+                "name": "Ethereum (ERC-20)",
+                "deposit": true,
+                "withdraw": true,
+                "active": true,
+                "precision": 8,
+                "fee": 0.2423329241044612,
+                "limits": {
+                    "amount": {
+                        "min": null,
+                        "max": null
+                    },
+                    "deposit": {
+                        "min": 5,
+                        "max": null
+                    },
+                    "withdraw": {
+                        "min": 48,
+                        "max": null
+                    }
+                }
+            },
+            "bsc": {
+                "info": {
+                    "name": "Tether",
+                    "precision": "8",
+                    "category": {
+                        "code": "stablecoin",
+                        "name": "Stablecoin"
+                    },
+                    "networks": [
+                        {
+                            "name": "Ethereum (ERC-20)",
+                            "code": "erc20",
+                            "deposit_info": {
+                                "status": "ENABLED"
+                            },
+                            "withdraw_info": {
+                                "fee": "0.2423329241044612",
+                                "status": "ENABLED"
+                            },
+                            "has_destination_tag": false
+                        },
+                        {
+                            "name": "Binance Smart Chain (BEP-20)",
+                            "code": "bsc",
+                            "deposit_info": {
+                                "status": "ENABLED"
+                            },
+                            "withdraw_info": {
+                                "fee": "0.0703579596774194",
+                                "status": "DISABLED"
+                            },
+                            "has_destination_tag": false
+                        },
+                        {
+                            "name": "Tron Network (TRC-20)",
+                            "code": "trc20",
+                            "deposit_info": {
+                                "status": "ENABLED"
+                            },
+                            "withdraw_info": {
+                                "fee": "4.2878294585424472",
+                                "status": "ENABLED"
+                            },
+                            "has_destination_tag": false
+                        },
+                        {
+                            "name": "Polygon",
+                            "code": "polygon",
+                            "deposit_info": {
+                                "status": "ENABLED"
+                            },
+                            "withdraw_info": {
+                                "fee": "0.0007910693603061",
+                                "status": "DISABLED"
+                            },
+                            "has_destination_tag": false
+                        }
+                    ],
+                    "symbol": "usdt",
+                    "type": "CRYPTO",
+                    "deposit_info": {
+                        "min_to_confirm": "15",
+                        "min_amount": "5"
+                    },
+                    "withdraw_info": {
+                        "enabled": true,
+                        "min_amount": "48",
+                        "fee": "12"
+                    }
+                },
+                "id": "bsc",
+                "network": "bsc",
+                "name": "Binance Smart Chain (BEP-20)",
+                "deposit": true,
+                "withdraw": false,
+                "active": true,
+                "precision": 8,
+                "fee": 0.0703579596774194,
+                "limits": {
+                    "amount": {
+                        "min": null,
+                        "max": null
+                    },
+                    "deposit": {
+                        "min": 5,
+                        "max": null
+                    },
+                    "withdraw": {
+                        "min": 48,
+                        "max": null
+                    }
+                }
+            },
+            "TRX": {
+                "info": {
+                    "name": "Tether",
+                    "precision": "8",
+                    "category": {
+                        "code": "stablecoin",
+                        "name": "Stablecoin"
+                    },
+                    "networks": [
+                        {
+                            "name": "Ethereum (ERC-20)",
+                            "code": "erc20",
+                            "deposit_info": {
+                                "status": "ENABLED"
+                            },
+                            "withdraw_info": {
+                                "fee": "0.2423329241044612",
+                                "status": "ENABLED"
+                            },
+                            "has_destination_tag": false
+                        },
+                        {
+                            "name": "Binance Smart Chain (BEP-20)",
+                            "code": "bsc",
+                            "deposit_info": {
+                                "status": "ENABLED"
+                            },
+                            "withdraw_info": {
+                                "fee": "0.0703579596774194",
+                                "status": "DISABLED"
+                            },
+                            "has_destination_tag": false
+                        },
+                        {
+                            "name": "Tron Network (TRC-20)",
+                            "code": "trc20",
+                            "deposit_info": {
+                                "status": "ENABLED"
+                            },
+                            "withdraw_info": {
+                                "fee": "4.2878294585424472",
+                                "status": "ENABLED"
+                            },
+                            "has_destination_tag": false
+                        },
+                        {
+                            "name": "Polygon",
+                            "code": "polygon",
+                            "deposit_info": {
+                                "status": "ENABLED"
+                            },
+                            "withdraw_info": {
+                                "fee": "0.0007910693603061",
+                                "status": "DISABLED"
+                            },
+                            "has_destination_tag": false
+                        }
+                    ],
+                    "symbol": "usdt",
+                    "type": "CRYPTO",
+                    "deposit_info": {
+                        "min_to_confirm": "15",
+                        "min_amount": "5"
+                    },
+                    "withdraw_info": {
+                        "enabled": true,
+                        "min_amount": "48",
+                        "fee": "12"
+                    }
+                },
+                "id": "trc20",
+                "network": "TRX",
+                "name": "Tron Network (TRC-20)",
+                "deposit": true,
+                "withdraw": true,
+                "active": true,
+                "precision": 8,
+                "fee": 4.287829458542447,
+                "limits": {
+                    "amount": {
+                        "min": null,
+                        "max": null
+                    },
+                    "deposit": {
+                        "min": 5,
+                        "max": null
+                    },
+                    "withdraw": {
+                        "min": 48,
+                        "max": null
+                    }
+                }
+            },
+            "MATIC": {
+                "info": {
+                    "name": "Tether",
+                    "precision": "8",
+                    "category": {
+                        "code": "stablecoin",
+                        "name": "Stablecoin"
+                    },
+                    "networks": [
+                        {
+                            "name": "Ethereum (ERC-20)",
+                            "code": "erc20",
+                            "deposit_info": {
+                                "status": "ENABLED"
+                            },
+                            "withdraw_info": {
+                                "fee": "0.2423329241044612",
+                                "status": "ENABLED"
+                            },
+                            "has_destination_tag": false
+                        },
+                        {
+                            "name": "Binance Smart Chain (BEP-20)",
+                            "code": "bsc",
+                            "deposit_info": {
+                                "status": "ENABLED"
+                            },
+                            "withdraw_info": {
+                                "fee": "0.0703579596774194",
+                                "status": "DISABLED"
+                            },
+                            "has_destination_tag": false
+                        },
+                        {
+                            "name": "Tron Network (TRC-20)",
+                            "code": "trc20",
+                            "deposit_info": {
+                                "status": "ENABLED"
+                            },
+                            "withdraw_info": {
+                                "fee": "4.2878294585424472",
+                                "status": "ENABLED"
+                            },
+                            "has_destination_tag": false
+                        },
+                        {
+                            "name": "Polygon",
+                            "code": "polygon",
+                            "deposit_info": {
+                                "status": "ENABLED"
+                            },
+                            "withdraw_info": {
+                                "fee": "0.0007910693603061",
+                                "status": "DISABLED"
+                            },
+                            "has_destination_tag": false
+                        }
+                    ],
+                    "symbol": "usdt",
+                    "type": "CRYPTO",
+                    "deposit_info": {
+                        "min_to_confirm": "15",
+                        "min_amount": "5"
+                    },
+                    "withdraw_info": {
+                        "enabled": true,
+                        "min_amount": "48",
+                        "fee": "12"
+                    }
+                },
+                "id": "polygon",
+                "network": "MATIC",
+                "name": "Polygon",
+                "deposit": true,
+                "withdraw": false,
+                "active": true,
+                "precision": 8,
+                "fee": 0.0007910693603061,
+                "limits": {
+                    "amount": {
+                        "min": null,
+                        "max": null
+                    },
+                    "deposit": {
+                        "min": 5,
+                        "max": null
+                    },
+                    "withdraw": {
+                        "min": 48,
+                        "max": null
+                    }
+                }
             }
         }
     }
