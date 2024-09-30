@@ -1398,7 +1398,7 @@ export default class foxbit extends Exchange {
             'symbol': this.safeString (market, 'symbol'),
             'type': this.safeString (order, 'type'),
             'timeInForce': undefined,
-            'postOnly': undefined,
+            'postOnly': this.safeBool (order, 'post_only'),
             'reduceOnly': undefined,
             'side': this.safeStringLower (order, 'side'),
             'price': price,
