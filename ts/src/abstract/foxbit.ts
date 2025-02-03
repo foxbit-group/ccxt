@@ -27,7 +27,7 @@ interface Exchange {
     v3PrivatePostOrdersCancelReplace (params?: {}): Promise<implicitReturnType>;
     v3PrivatePostWithdrawals (params?: {}): Promise<implicitReturnType>;
     v3PrivatePutOrdersCancel (params?: {}): Promise<implicitReturnType>;
-    statusGetStatus (params?: {}): Promise<implicitReturnType>;
+    statusPublicGetStatus (params?: {}): Promise<implicitReturnType>;
 }
 abstract class Exchange extends _Exchange {}
 

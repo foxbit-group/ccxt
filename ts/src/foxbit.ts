@@ -74,8 +74,10 @@ export default class foxbit extends Exchange {
                     },
                 },
                 'status': {
-                    'get': {
-                        'status': 30, // 1 request per second
+                    'public': {
+                        'get': {
+                            'status': 30, // 1 request per second
+                        },
                     },
                 },
             },
@@ -1157,7 +1159,7 @@ export default class foxbit extends Exchange {
          * @param {object} [params] extra parameters specific to the exchange API endpoint
          * @returns {object} a [status structure]{@link https://docs.ccxt.com/#/?id=exchange-status-structure}
          */
-        const response = await this.statusGetStatus (params);
+        const response = await this.statusPublicGetStatus (params);
         // {
         //     "data": {
         //       "id": 1,
@@ -1497,11 +1499,11 @@ export default class foxbit extends Exchange {
         };
     }
 
-    sign (path, api: string[] | string = [], method = 'GET', params = {}, headers = undefined, body = undefined) {
+    sign (path, api = [], method = 'GET', params = {}, headers = undefined, body = undefined) {
         const version = api[0];
         let urlPath = api[1];
         let fullPath = '/rest/' + version + '/' + this.implodeParams (path, params);
-        if (api === 'status') {
+        if (version === 'status') {
             fullPath = '/status';
             urlPath = 'status';
         }
