@@ -1509,7 +1509,7 @@ export default class foxbit extends Exchange {
         }
         let url = this.urls['api'][urlPath] + fullPath;
         params = this.omit (params, this.extractParams (path));
-        const timestamp = this.now ();
+        const timestamp = this.milliseconds ();
         let query = '';
         let signatureQuery = '';
         if (method === 'GET') {
