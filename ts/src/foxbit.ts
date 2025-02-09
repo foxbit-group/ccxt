@@ -1536,7 +1536,7 @@ export default class foxbit extends Exchange {
         };
         if (urlPath === 'private') {
             const preHash = this.numberToString (timestamp) + method + fullPath + signatureQuery + bodyToSignature;
-            const signature = this.hmac (preHash, this.secret, sha256, 'hex');
+            const signature = this.hmac (this.encode (preHash), this.encode (this.secret), sha256, 'hex');
             headers['X-FB-ACCESS-KEY'] = this.apiKey;
             headers['X-FB-ACCESS-TIMESTAMP'] = this.numberToString (timestamp);
             headers['X-FB-ACCESS-SIGNATURE'] = signature;
