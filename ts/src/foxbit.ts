@@ -203,11 +203,9 @@ export default class foxbit extends Exchange {
         //   ]
         // }
         const data = this.safeValue (response, 'data', []);
-        const coins = Object.keys (data);
         const result: Dict = {};
-        for (let i = 0; i < coins.length; i++) {
-            const coin = coins[i];
-            const currency = data[coin];
+        for (let i = 0; i < data.length; i++) {
+            const currency = data[i];
             const precision = this.safeInteger (currency, 'precision');
             const currencyId = this.safeString (currency, 'symbol');
             const name = this.safeString (currency, 'name');
@@ -1537,7 +1535,7 @@ export default class foxbit extends Exchange {
             'Content-Type': 'application/json',
         };
         if (urlPath === 'private') {
-            const preHash = timestamp + method + fullPath + signatureQuery + bodyToSignature;
+            const preHash = this.numberToString (timestamp) + method + fullPath + signatureQuery + bodyToSignature;
             const signature = this.hmac (preHash, this.secret, sha256, 'hex');
             headers['X-FB-ACCESS-KEY'] = this.apiKey;
             headers['X-FB-ACCESS-TIMESTAMP'] = this.numberToString (timestamp);
