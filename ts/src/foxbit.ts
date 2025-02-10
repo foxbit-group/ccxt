@@ -1320,7 +1320,7 @@ export default class foxbit extends Exchange {
         }, market);
     }
 
-    parseOHLCV (ohlcv): OHLCV {
+    parseOHLCV (ohlcv, market: Market = undefined): OHLCV {
         return [
             this.safeInteger (ohlcv, 0),
             this.safeFloat (ohlcv, 1),
