@@ -1518,7 +1518,7 @@ export default class foxbit extends Exchange {
             }
             for (let i = 0; i < paramKeys.length; i++) {
                 const key = paramKeys[i];
-                signatureQuery += key + '=' + params[key];
+                signatureQuery += key + '=' + this.safeString (params, key);
                 if (i < paramKeys.length - 1) {
                     signatureQuery += '&';
                 }
