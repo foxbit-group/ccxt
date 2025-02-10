@@ -4,6 +4,7 @@ import { ArgumentsRequired, InvalidOrder } from './base/errors.js';
 import Exchange from './abstract/foxbit.js';
 import type { Currencies, Market, OrderBook, Dict, Ticker, TradingFees, Int, Str, Num, Trade, OHLCV, Balances, Order, OrderType, OrderSide, Strings, Tickers, Currency, Transaction } from './base/types.js';
 import { sha256 } from './static_dependencies/noble-hashes/sha256.js';
+import { TICK_SIZE } from './base/functions/number.js';
 
 //  ---------------------------------------------------------------------------
 
@@ -36,6 +37,7 @@ export default class foxbit extends Exchange {
                     'https://docs.foxbit.com.br',
                 ],
             },
+            'precisionMode': TICK_SIZE,
             'requiredCredentials': {
                 'apiKey': true,
                 'secret': true,
@@ -749,10 +751,8 @@ export default class foxbit extends Exchange {
         await this.loadMarkets ();
         const market = this.market (symbol);
         type = type.toUpperCase ();
-        const validOrderTypes = [ 'LIMIT', 'MARKET', 'STOP_MARKET', 'INSTANT' ];
-        const isOrderTypeValid = validOrderTypes.indexOf (type) >= 0;
-        if (!isOrderTypeValid) {
-            throw new InvalidOrder ('Invalid order type: ' + type + '. Must be one of ' + validOrderTypes.join (', ') + '.');
+        if (type !== 'LIMIT' && type !== 'MARKET' && type !== 'STOP_MARKET' && type !== 'INSTANT') {
+            throw new InvalidOrder ('Invalid order type: ' + type + '. Must be one of: LIMIT, MARKET, STOP_MARKET, INSTANT.');
         }
         const request: Dict = {
             'market_symbol': market['baseId'] + market['quoteId'],
