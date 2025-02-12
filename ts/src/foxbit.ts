@@ -1206,11 +1206,9 @@ export default class foxbit extends Exchange {
         if (symbol === undefined) {
             throw new ArgumentsRequired (this.id + ' editOrder() requires a symbol argument');
         }
-        const validOrderTypes = [ 'LIMIT', 'MARKET', 'STOP_MARKET', 'INSTANT' ];
-        const isOrderTypeValid = validOrderTypes.indexOf (type) >= 0;
         type = type.toUpperCase ();
-        if (!isOrderTypeValid) {
-            throw new InvalidOrder ('Invalid order type: ' + type + '. Must be one of ' + validOrderTypes.join (', ') + '.');
+        if (type !== 'LIMIT' && type !== 'MARKET' && type !== 'STOP_MARKET' && type !== 'INSTANT') {
+            throw new InvalidOrder ('Invalid order type: ' + type + '. Must be one of: LIMIT, MARKET, STOP_MARKET, INSTANT.');
         }
         await this.loadMarkets ();
         const market = this.market (symbol);
@@ -1298,8 +1296,8 @@ export default class foxbit extends Exchange {
         const lastPrice = this.safeString (lastTrade, 'price');
         return this.safeTicker ({
             'symbol': symbol,
-            'timestamp': this.parseDate (lastTrade['date']),
-            'datetime': this.iso8601 (this.parseDate (lastTrade['date'])),
+            'timestamp': this.parseDate (this.safeString (lastTrade, 'date')),
+            'datetime': this.iso8601 (this.parseDate (this.safeString (lastTrade, 'date'))),
             'high': this.safeNumber (rolling_24h, 'high'),
             'low': this.safeNumber (rolling_24h, 'low'),
             'bid': this.safeNumber (bestBid, 'price'),
@@ -1455,7 +1453,10 @@ export default class foxbit extends Exchange {
         const address = this.safeString2 (cryptoDetails, 'receiving_address', 'destination_address');
         const sn = this.safeString (transaction, 'sn');
         const snPrefix = sn[0];
-        const type = snPrefix === 'W' ? 'withdrawal' : 'deposit';
+        let type = 'withdrawal';
+        if (snPrefix === 'D') {
+            type = 'deposit';
+        }
         const fee = this.safeNumber (transaction, 'fee');
         const amount = this.safeNumber (transaction, 'amount');
         const currencySymbol = this.safeString (transaction, 'currency_symbol');
