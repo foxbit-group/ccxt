@@ -1,8 +1,8 @@
 //  ---------------------------------------------------------------------------
 
-import { ArgumentsRequired, InvalidOrder } from './base/errors.js';
+import { AccountSuspended, ArgumentsRequired, AuthenticationError, BadRequest, BadSymbol, ExchangeError, ExchangeNotAvailable, InsufficientFunds, InvalidOrder, OnMaintenance, PermissionDenied, RateLimitExceeded } from './base/errors.js';
 import Exchange from './abstract/foxbit.js';
-import type { Currencies, Market, OrderBook, Dict, Ticker, TradingFees, Int, Str, Num, Trade, OHLCV, Balances, Order, OrderType, OrderSide, Strings, Tickers, Currency, Transaction, TradingFeeInterface } from './base/types.js';
+import type { Currencies, Market, OrderBook, Dict, Ticker, TradingFees, Int, Str, Num, Trade, OHLCV, Balances, Order, OrderType, OrderSide, Strings, Tickers, Currency, Transaction, TradingFeeInterface, int } from './base/types.js';
 import { sha256 } from './static_dependencies/noble-hashes/sha256.js';
 import { TICK_SIZE } from './base/functions/number.js';
 
@@ -38,6 +38,41 @@ export default class foxbit extends Exchange {
                 ],
             },
             'precisionMode': TICK_SIZE,
+            'exceptions': {
+                'exact': {
+                    // https://docs.foxbit.com.br/rest/v3/#tag/API-Codes/Errors
+                    '400': BadRequest, // Bad request. An unknown error occurred while processing request parameters.
+                    '429': RateLimitExceeded, // Too many requests. Request limit exceeded. Try again later.
+                    '404': BadRequest, // Resource not found. A resource was not found while processing the request.
+                    '500': ExchangeError, // Internal server error. An unknown error occurred while processing the request.
+                    '2001': AuthenticationError, // Authentication error. Error authenticating request.
+                    '2002': AuthenticationError, // Invalid signature. The signature for this request is not valid.
+                    '2003': AuthenticationError, // Invalid access key. Access key missing, invalid or not found.
+                    '2004': BadRequest, // Invalid timestamp. Invalid or missing timestamp.
+                    '2005': PermissionDenied, // IP not allowed. The IP address {IP_ADDR} isn't on the trusted list for this API key.
+                    '3001': PermissionDenied, // Permission denied. Permission denied for this request.
+                    '3002': PermissionDenied, // KYC required. A greater level of KYC verification is required to proceed with this request.
+                    '3003': AccountSuspended, // Member disabled. This member is disabled. Please get in touch with our support for more information.
+                    '4001': BadRequest, // Validation error. A validation error occurred.
+                    '4002': InsufficientFunds, // Insufficient funds. Insufficient funds to proceed with this request.
+                    '4003': InvalidOrder, // Quantity below the minimum allowed. Quantity below the minimum allowed to proceed with this request.
+                    '4004': BadSymbol, // Invalid symbol. The market or asset symbol is invalid or was not found.
+                    '4005': BadRequest, // Invalid idempotent. Characters allowed are "a-z", "0-9", "_" or "-", and 36 at max. We recommend UUID v4 in lowercase.
+                    '4007': ExchangeError, // Locked error. There was an error in your allocated balance, please contact us.
+                    '4008': InvalidOrder, // Cannot submit order. The order cannot be created.
+                    '4009': PermissionDenied, // Invalid level. The sub-member does not have the required level to create the transaction.
+                    '4011': RateLimitExceeded, // Too many open orders. You have reached the limit of open orders per market/side.
+                    '4012': ExchangeError, // Too many simultaneous account operations. We are currently unable to process your balance change due to simultaneous operations on your account. Please retry shortly.
+                    '5001': ExchangeNotAvailable, // Service unavailable. The requested resource is currently unavailable. Try again later.
+                    '5002': OnMaintenance, // Service under maintenance. The requested resource is currently under maintenance. Try again later.
+                    '5003': OnMaintenance, // Market under maintenance. The market is under maintenance. Try again later.
+                    '5004': InvalidOrder, // Market is not deep enough. The market is not deep enough to complete your request.
+                    '5005': InvalidOrder, // Price out of range from market. The order price is out of range from market to complete your request.
+                    '5006': InvalidOrder, // Significant price deviation detected, exceeding acceptable limits. The order price is exceeding acceptable limits from market to complete your request.
+                },
+                'broad': {
+                },
+            },
             'requiredCredentials': {
                 'apiKey': true,
                 'secret': true,
@@ -1676,5 +1711,28 @@ export default class foxbit extends Exchange {
             headers['X-FB-ACCESS-SIGNATURE'] = signature;
         }
         return { 'url': url, 'method': method, 'body': body, 'headers': headers };
+    }
+
+    handleErrors (httpCode: int, reason: string, url: string, method: string, headers: Dict, body: string, response, requestHeaders, requestBody) {
+        if (response === undefined) {
+            return undefined;
+        }
+        const error = this.safeDict (response, 'error');
+        const code = this.safeString (error, 'code');
+        const details = this.safeDict (error, 'details');
+        const message = this.safeString (error, 'message');
+        let detailsString = '';
+        if (details) {
+            for (let i = 0; i < details.length; i++) {
+                detailsString = detailsString + details[i] + ' ';
+            }
+        }
+        if (error !== undefined) {
+            const feedback = this.id + ' ' + message + ' details: ' + detailsString;
+            this.throwBroadlyMatchedException (this.exceptions['broad'], message, feedback);
+            this.throwExactlyMatchedException (this.exceptions['exact'], code, feedback);
+            throw new ExchangeError (feedback);
+        }
+        return undefined;
     }
 }
