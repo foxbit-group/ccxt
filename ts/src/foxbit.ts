@@ -209,7 +209,7 @@ export default class foxbit extends Exchange {
         //     }
         //   ]
         // }
-        const data = this.safeValue (response, 'data', []);
+        const data = this.safeList (response, 'data', []);
         const result: Dict = {};
         for (let i = 0; i < data.length; i++) {
             const currency = data[i];
@@ -219,7 +219,7 @@ export default class foxbit extends Exchange {
             const code = this.safeCurrencyCode (currencyId);
             const depositInfo = this.safeDict (currency, 'deposit_info');
             const withdrawInfo = this.safeDict (currency, 'withdraw_info');
-            const networks = this.safeValue (currency, 'networks', []);
+            const networks = this.safeList (currency, 'networks', []);
             const parsedNetworks: Dict = {};
             for (let j = 0; j < networks.length; j++) {
                 const network = networks[j];
@@ -255,7 +255,7 @@ export default class foxbit extends Exchange {
                     },
                 };
             }
-            if (this.safeValue (result, code) === undefined) {
+            if (this.safeDict (result, code) === undefined) {
                 result[code] = {
                     'id': currencyId,
                     'code': code,
@@ -351,9 +351,9 @@ export default class foxbit extends Exchange {
         for (let i = 0; i < markets.length; i++) {
             const market = markets[i];
             const id = this.safeString (market, 'symbol');
-            const baseAssets = this.safeValue (market, 'base');
+            const baseAssets = this.safeDict (market, 'base');
             const baseId = this.safeString (baseAssets, 'symbol');
-            const quoteAssets = this.safeValue (market, 'quote');
+            const quoteAssets = this.safeDict (market, 'quote');
             const quoteId = this.safeString (quoteAssets, 'symbol');
             const base = this.safeCurrencyCode (baseId);
             const quote = this.safeCurrencyCode (quoteId);
@@ -534,21 +534,6 @@ export default class foxbit extends Exchange {
             result[symbol] = this.parseTradingFee (entry, market);
         }
         return result;
-    }
-
-    async fetchTradingFee (symbol: string, params = {}): Promise<TradingFeeInterface> {
-        /**
-         * @method
-         * @name foxbit#fetchTradingFee
-         * @description fetch the trading fees for a market
-         * @see https://docs.foxbit.com.br/rest/v3/#tag/Member-Info/operation/MembersController_listTradingFees
-         * @param {string} symbol unified market symbol
-         * @param {object} [params] extra parameters specific to the exchange API endpoint
-         * @returns {object} a [fee structure]{@link https://docs.ccxt.com/#/?id=fee-structure}
-         */
-        const tradingFees = await this.fetchTradingFees (params);
-        const fee = this.safeValue (tradingFees, symbol);
-        return fee;
     }
 
     async fetchOrderBook (symbol: string, limit: Int = 20, params = {}): Promise<OrderBook> {
@@ -853,7 +838,7 @@ export default class foxbit extends Exchange {
         //     ]
         // }
         const data = this.safeList (response, 'data', []);
-        const result = this.safeValue (data, 0, {});
+        const result = this.safeDict (data, 0, {});
         return this.parseOrder (result);
     }
 
@@ -1218,8 +1203,8 @@ export default class foxbit extends Exchange {
         //     "meta": {
         //     }
         // }
-        const data = this.safeValue (response, 'data', {});
-        const attributes = this.safeValue (data, 'attributes', {});
+        const data = this.safeDict (response, 'data', {});
+        const attributes = this.safeDict (data, 'attributes', {});
         const statusRaw = this.safeString (attributes, 'status');
         const statusMap = {
             'NORMAL': 'ok',
@@ -1542,12 +1527,11 @@ export default class foxbit extends Exchange {
         const cryptoDetails = this.safeDict (transaction, 'details_crypto');
         const address = this.safeString2 (cryptoDetails, 'receiving_address', 'destination_address');
         const sn = this.safeString (transaction, 'sn');
-        const snPrefix = sn[0];
         let type = 'withdrawal';
-        if (snPrefix === 'D') {
+        if (sn !== undefined && sn[0] === 'D') {
             type = 'deposit';
         }
-        const fee = this.safeNumber (transaction, 'fee');
+        const fee = this.safeNumber (transaction, 'fee', 0);
         const amount = this.safeNumber (transaction, 'amount');
         const currencySymbol = this.safeString (transaction, 'currency_symbol');
         let actualAmount = amount;
@@ -1559,11 +1543,12 @@ export default class foxbit extends Exchange {
         if (fee !== undefined && amount !== undefined) {
             actualAmount = amount - fee;
         }
+        const feeRate = fee / actualAmount;
         const feeObj = {
             'cost': fee,
             'currency': currencyCode,
+            'rate': feeRate,
         };
-        feeObj['rate'] = feeObj['cost'] / actualAmount;
         return {
             'info': transaction,
             'id': this.safeString (transaction, 'sn'),
