@@ -17,12 +17,14 @@ interface Exchange {
     v3PublicGetMarketsMarketTradesHistory (params?: {}): Promise<implicitReturnType>;
     v3PublicGetMarketsMarketTicker24hr (params?: {}): Promise<implicitReturnType>;
     v3PrivateGetAccounts (params?: {}): Promise<implicitReturnType>;
+    v3PrivateGetAccountsSymbolTransactions (params?: {}): Promise<implicitReturnType>;
     v3PrivateGetOrders (params?: {}): Promise<implicitReturnType>;
     v3PrivateGetOrdersByOrderIdId (params?: {}): Promise<implicitReturnType>;
     v3PrivateGetTrades (params?: {}): Promise<implicitReturnType>;
     v3PrivateGetDepositsAddress (params?: {}): Promise<implicitReturnType>;
     v3PrivateGetDeposits (params?: {}): Promise<implicitReturnType>;
     v3PrivateGetWithdrawals (params?: {}): Promise<implicitReturnType>;
+    v3PrivateGetMeFeesTrading (params?: {}): Promise<implicitReturnType>;
     v3PrivatePostOrders (params?: {}): Promise<implicitReturnType>;
     v3PrivatePostOrdersCancelReplace (params?: {}): Promise<implicitReturnType>;
     v3PrivatePostWithdrawals (params?: {}): Promise<implicitReturnType>;

@@ -2,7 +2,7 @@
 
 import { ArgumentsRequired, InvalidOrder } from './base/errors.js';
 import Exchange from './abstract/foxbit.js';
-import type { Currencies, Market, OrderBook, Dict, Ticker, TradingFees, Int, Str, Num, Trade, OHLCV, Balances, Order, OrderType, OrderSide, Strings, Tickers, Currency, Transaction } from './base/types.js';
+import type { Currencies, Market, OrderBook, Dict, Ticker, TradingFees, Int, Str, Num, Trade, OHLCV, Balances, Order, OrderType, OrderSide, Strings, Tickers, Currency, Transaction, TradingFeeInterface } from './base/types.js';
 import { sha256 } from './static_dependencies/noble-hashes/sha256.js';
 import { TICK_SIZE } from './base/functions/number.js';
 
@@ -58,12 +58,14 @@ export default class foxbit extends Exchange {
                     'private': {
                         'get': {
                             'accounts': 2, // 15 requests per second
+                            'accounts/{symbol}/transactions': 60, // 1 requests per 2 seconds
                             'orders': 2, // 30 requests per 2 seconds
                             'orders/by-order-id/{id}': 2, // 30 requests per 2 seconds
                             'trades': 6, // 5 orders per second
                             'deposits/address': 10, // 3 requests per second
                             'deposits': 10, // 3 requests per second
                             'withdrawals': 10, // 3 requests per second
+                            'me/fees/trading': 60, // 1 requests per 2 seconds
                         },
                         'post': {
                             'orders': 2, // 30 requests per 2 seconds
@@ -108,6 +110,7 @@ export default class foxbit extends Exchange {
                 'fetchCurrencies': true,
                 'fetchDepositAddress': true,
                 'fetchDeposits': true,
+                'fetchLedger': true,
                 'fetchMarkets': true,
                 'fetchMyTrades': true,
                 'fetchOHLCV': true,
@@ -117,6 +120,8 @@ export default class foxbit extends Exchange {
                 'fetchTicker': true,
                 'fetchTickers': true,
                 'fetchTrades': true,
+                'fetchTradingFee': true,
+                'fetchTradingFees': true,
                 'fetchTransactions': true,
                 'fetchWithdrawals': true,
                 'withdraw': true,
@@ -502,7 +507,48 @@ export default class foxbit extends Exchange {
     }
 
     async fetchTradingFees (params: {}): Promise<TradingFees> {
-        return {};
+        /**
+         * @method
+         * @name foxbit#fetchTradingFees
+         * @description fetch the trading fees for multiple markets
+         * @see https://docs.foxbit.com.br/rest/v3/#tag/Member-Info/operation/MembersController_listTradingFees
+         * @param {object} [params] extra parameters specific to the exchange API endpoint
+         * @returns {object} a dictionary of [fee structures]{@link https://docs.ccxt.com/#/?id=fee-structure} indexed by market symbols
+         */
+        await this.loadMarkets ();
+        const response = await this.v3PrivateGetMeFeesTrading (params);
+        // [
+        //     {
+        //         "market_symbol": "btcbrl",
+        //         "maker": "0.0025",
+        //         "taker": "0.005"
+        //     }
+        // ]
+        const data = this.safeList (response, 'data', []);
+        const result = {};
+        for (let i = 0; i < response.data.length; i++) {
+            const entry = data[i];
+            const marketId = this.safeString (entry, 'market_symbol');
+            const market = this.safeMarket (marketId);
+            const symbol = market['symbol'];
+            result[symbol] = this.parseTradingFee (entry, market);
+        }
+        return result;
+    }
+
+    async fetchTradingFee (symbol: string, params = {}): Promise<TradingFeeInterface> {
+        /**
+         * @method
+         * @name foxbit#fetchTradingFee
+         * @description fetch the trading fees for a market
+         * @see https://docs.foxbit.com.br/rest/v3/#tag/Member-Info/operation/MembersController_listTradingFees
+         * @param {string} symbol unified market symbol
+         * @param {object} [params] extra parameters specific to the exchange API endpoint
+         * @returns {object} a [fee structure]{@link https://docs.ccxt.com/#/?id=fee-structure}
+         */
+        const tradingFees = await this.fetchTradingFees (params);
+        const fee = this.safeValue (tradingFees, symbol);
+        return fee;
     }
 
     async fetchOrderBook (symbol: string, limit: Int = 20, params = {}): Promise<OrderBook> {
@@ -1285,6 +1331,50 @@ export default class foxbit extends Exchange {
         return this.parseTransaction (response);
     }
 
+    async fetchLedger (code: Str = undefined, since: Int = undefined, limit: Int = undefined, params = {}) {
+        /**
+         * @method
+         * @name foxbit#fetchLedger
+         * @description fetch the history of changes, actions done by the user or operations that altered balance of the user
+         * @see https://docs.foxbit.com.br/rest/v3/#tag/Account/operation/AccountsController_getTransactions
+         * @param {string} code unified currency code, default is undefined
+         * @param {int} [since] timestamp in ms of the earliest ledger entry, default is undefined
+         * @param {int} [limit] max number of ledger entrys to return, default is undefined
+         * @param {object} [params] extra parameters specific to the exchange API endpoint
+         * @returns {object} a [ledger structure]{@link https://docs.ccxt.com/#/?id=ledger-structure}
+         */
+        await this.loadMarkets ();
+        const request: Dict = {};
+        if (code === undefined) {
+            throw new ArgumentsRequired (this.id + ' fetchLedger() requires a code argument');
+        }
+        if (limit !== undefined) {
+            request['page_size'] = limit;
+            if (limit > 100) {
+                request['page_size'] = 100;
+            }
+        }
+        if (since !== undefined) {
+            request['start_time'] = this.iso8601 (since);
+        }
+        const currency = this.currency (code);
+        request['symbol'] = currency['id'];
+        const response = await this.v3PrivateGetAccountsSymbolTransactions (this.extend (request, params));
+        const data = this.safeList (response, 'data', []);
+        return this.parseLedger (data, currency, since, limit);
+    }
+
+    parseTradingFee (entry: Dict, market: Market = undefined): TradingFeeInterface {
+        return {
+            'info': entry,
+            'symbol': market['symbol'],
+            'maker': this.safeNumber (entry, 'maker'),
+            'taker': this.safeNumber (entry, 'taker'),
+            'percentage': true,
+            'tierBased': true,
+        };
+    }
+
     parseTicker (ticker: Dict, market: Market = undefined): Ticker {
         const marketId = this.safeString (ticker, 'market_symbol');
         const symbol = this.safeSymbol (marketId, market, undefined, 'spot');
@@ -1488,13 +1578,71 @@ export default class foxbit extends Exchange {
             'tagTo': this.safeString (transaction, 'destination_tag'),
             'tagFrom': undefined,
             'type': type,
-            'amount': actualAmount,
+            'amount': amount,
             'currency': currencyCode,
             'status': status,
             'updated': undefined,
             'fee': feeObj,
             'comment': undefined,
             'internal': undefined,
+        };
+    }
+
+    parseLedgerEntryType (type) {
+        const types: Dict = {
+            'DEPOSITING': 'transaction',
+            'WITHDRAWING': 'transaction',
+            'TRADING': 'trade',
+            'INTERNAL_TRANSFERING': 'transfer',
+            'OTHERS': 'transaction',
+        };
+        return this.safeString (types, type, type);
+    }
+
+    parseLedgerEntry (item: Dict, currency: Currency = undefined) {
+        // {
+        //     "uuid": "f8e9f2d6-3c1e-4f2d-8f8e-9f2d6c1e4f2d",
+        //     "amount": "0.0001",
+        //     "balance": "0.0002",
+        //     "created_at": "2021-07-01T12:00:00Z",
+        //     "currency_symbol": "btc",
+        //     "fee": "0.0001",
+        //     "locked": "0.0001",
+        //     "locked_amount": "0.0001",
+        //     "reason_type": "DEPOSITING"
+        // }
+        const id = this.safeString (item, 'uuid');
+        const timestamp = this.parse8601 (this.safeString (item, 'created_at'));
+        const type = this.parseLedgerEntryType (this.safeString (item, 'reason_type'));
+        const currencySymbol = this.safeCurrencyCode (this.safeString (item, 'currency_symbol'));
+        let direction = 'in';
+        const amount = this.safeNumber (item, 'amount');
+        let realAmount = amount;
+        const balance = this.safeNumber (item, 'balance');
+        const fee = {
+            'cost': this.safeNumber (item, 'fee'),
+            'currency': currencySymbol,
+        };
+        if (amount < 0) {
+            direction = 'out';
+            realAmount = amount * -1;
+        }
+        return {
+            'id': id,
+            'info': item,
+            'timestamp': timestamp,
+            'datetime': this.iso8601 (timestamp),
+            'direction': direction,
+            'account': undefined,
+            'referenceId': undefined,
+            'referenceAccount': undefined,
+            'type': type,
+            'currency': currencySymbol,
+            'amount': realAmount,
+            'before': balance - amount,
+            'after': balance,
+            'status': 'ok',
+            'fee': fee,
         };
     }
 
