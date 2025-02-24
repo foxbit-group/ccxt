@@ -4,7 +4,7 @@ import { AccountSuspended, ArgumentsRequired, AuthenticationError, BadRequest, B
 import Exchange from './abstract/foxbit.js';
 import type { Currencies, Market, OrderBook, Dict, Ticker, TradingFees, Int, Str, Num, Trade, OHLCV, Balances, Order, OrderType, OrderSide, Strings, Tickers, Currency, Transaction, TradingFeeInterface, int } from './base/types.js';
 import { sha256 } from './static_dependencies/noble-hashes/sha256.js';
-import { TICK_SIZE } from './base/functions/number.js';
+import { DECIMAL_PLACES } from './base/functions/number.js';
 
 //  ---------------------------------------------------------------------------
 
@@ -37,7 +37,7 @@ export default class foxbit extends Exchange {
                     'https://docs.foxbit.com.br',
                 ],
             },
-            'precisionMode': TICK_SIZE,
+            'precisionMode': DECIMAL_PLACES,
             'exceptions': {
                 'exact': {
                     // https://docs.foxbit.com.br/rest/v3/#tag/API-Codes/Errors
@@ -71,6 +71,7 @@ export default class foxbit extends Exchange {
                     '5006': InvalidOrder, // Significant price deviation detected, exceeding acceptable limits. The order price is exceeding acceptable limits from market to complete your request.
                 },
                 'broad': {
+                    // todo: add details messages that can be usefull here, like when market is not found
                 },
             },
             'requiredCredentials': {
@@ -423,9 +424,9 @@ export default class foxbit extends Exchange {
                 'tierBased': false,
                 'feeSide': 'get',
                 'precision': {
-                    'price': this.safeNumber (quoteAssets, 'precision'),
-                    'amount': this.safeNumber (baseAssets, 'precision'),
-                    'cost': this.safeNumber (quoteAssets, 'precision'),
+                    'price': this.safeInteger (quoteAssets, 'precision'),
+                    'amount': this.safeInteger (baseAssets, 'precision'),
+                    'cost': this.safeInteger (quoteAssets, 'precision'),
                 },
                 'limits': {
                     'amount': {
@@ -1730,6 +1731,7 @@ export default class foxbit extends Exchange {
         if (error !== undefined) {
             const feedback = this.id + ' ' + message + ' details: ' + detailsString;
             this.throwBroadlyMatchedException (this.exceptions['broad'], message, feedback);
+            this.throwBroadlyMatchedException (this.exceptions['broad'], detailsString, feedback);
             this.throwExactlyMatchedException (this.exceptions['exact'], code, feedback);
             throw new ExchangeError (feedback);
         }
