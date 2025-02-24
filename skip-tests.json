@@ -1667,14 +1667,5 @@
     },
     "tradeogre": {
         "skip": "flaky"
-    },
-    "foxbit": {
-        "skipPhpAsync": true,
-        "skipMethods": {
-            "loadMarkets": {
-                "taker": "is undefined",
-                "maker": "is undefined"
-            }
-        }
     }
 }

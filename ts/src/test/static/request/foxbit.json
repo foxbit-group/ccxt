@@ -7,9 +7,9 @@
       {
         "description": "Fetch a ticker by a market symbol",
         "method": "fetchTicker",
-        "url": "https://api.foxbit.com.br/rest/v3/markets/manabrl/ticker/24hr",
+        "url": "https://api.foxbit.com.br/rest/v3/markets/btcbrl/ticker/24hr",
         "input": [
-          "MANA/BRL"
+          "BTC/BRL"
         ]
       }
     ],
@@ -36,17 +36,17 @@
       {
         "description": "Fetch order book without limit",
         "method": "fetchOrderBook",
-        "url": "https://api.foxbit.com.br/rest/v3/markets/manabrl/orderbook?depth=20",
+        "url": "https://api.foxbit.com.br/rest/v3/markets/btcbrl/orderbook?depth=20",
         "input": [
-          "MANA/BRL"
+          "BTC/BRL"
         ]
       },
       {
         "description": "Fetch order book with limit",
         "method": "fetchOrderBook",
-        "url": "https://api.foxbit.com.br/rest/v3/markets/manabrl/orderbook?depth=5",
+        "url": "https://api.foxbit.com.br/rest/v3/markets/btcbrl/orderbook?depth=5",
         "input": [
-          "MANA/BRL",
+          "BTC/BRL",
           5
         ]
       }
@@ -66,7 +66,7 @@
         "url": "https://api.foxbit.com.br/rest/v3/markets/btcbrl/candlesticks?interval=1m&limit=5",
         "input": [
           "BTC/BRL",
-          null,
+          "1m",
           null,
           5
         ]
@@ -77,7 +77,7 @@
         "url": "https://api.foxbit.com.br/rest/v3/markets/btcbrl/candlesticks?interval=1m&start_time=2024-08-01T00%3A54%3A23.773Z",
         "input": [
           "BTC/BRL",
-          null,
+          "1m",
           1722473663773
         ]
       },
@@ -93,7 +93,7 @@
       {
         "description": "Fetch OHLCV at BTC/USDT symbol",
         "method": "fetchOHLCV",
-        "url": "https://api.foxbit.com.br/rest/v3/markets/btcbrl/candlesticks?interval=1m",
+        "url": "https://api.foxbit.com.br/rest/v3/markets/btcusdt/candlesticks?interval=15m",
         "input": [
           "BTC/USDT",
           "15m"
@@ -137,10 +137,10 @@
           "BTC/BRL",
           "LIMIT",
           "SELL",
-          0.00001,
+          0.0001,
           330000
         ],
-        "output": "{\"market_symbol\":\"btcbrl\",\"side\":\"SELL\",\"type\":\"LIMIT\",\"quantity\":\"0.00001\",\"price\":\"330000\"}"
+        "output": "{\"market_symbol\":\"btcbrl\",\"side\":\"SELL\",\"type\":\"LIMIT\",\"quantity\":\"0.0001\",\"price\":\"330000\"}"
       },
       {
         "description": "Create a limit buy order",
@@ -453,13 +453,13 @@
       {
         "description": "Fetch all transactions",
         "method": "fetchTransactions",
-        "url": "https://api.foxbit.com.br/rest/v3/deposits",
+        "url": "https://api.foxbit.com.br/rest/v3/withdrawals",
         "input": []
       },
       {
         "description": "Fetch transactions by currency code",
         "method": "fetchTransactions",
-        "url": "https://api.foxbit.com.br/rest/v3/deposits",
+        "url": "https://api.foxbit.com.br/rest/v3/withdrawals",
         "input": [
           "BTC"
         ]
@@ -467,7 +467,7 @@
       {
         "description": "Fetch transactions with since filter",
         "method": "fetchTransactions",
-        "url": "https://api.foxbit.com.br/rest/v3/deposits?start_time=2024-07-27T00%3A52%3A27.316Z",
+        "url": "https://api.foxbit.com.br/rest/v3/withdrawals?start_time=2024-07-27T00%3A52%3A27.316Z",
         "input": [
           null,
           1722041547316
@@ -476,7 +476,7 @@
       {
         "description": "Fetch transactions with limit filter",
         "method": "fetchTransactions",
-        "url": "https://api.foxbit.com.br/rest/v3/deposits?page_size=2",
+        "url": "https://api.foxbit.com.br/rest/v3/withdrawals?page_size=2",
         "input": [
           null,
           null,

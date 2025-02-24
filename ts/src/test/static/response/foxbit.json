@@ -7,12 +7,12 @@
         "description": "Fill this with a description of the method call",
         "method": "fetchTicker",
         "input": [
-          "MANA/BRL"
+          "BTC/BRL"
         ],
         "httpResponse": {
           "data": [
             {
-              "market_symbol": "manabrl",
+              "market_symbol": "btcbrl",
               "last_trade": {
                 "price": "1.77510000",
                 "volume": "55.77150583",
@@ -41,7 +41,7 @@
           ]
         },
         "parsedResponse": {
-          "symbol": "MANA/BRL",
+          "symbol": "BTC/BRL",
           "timestamp": 1722557541000,
           "datetime": "2024-08-02T00:12:21.000Z",
           "high": 1.8063,
@@ -61,7 +61,7 @@
           "baseVolume": 68017.36498606,
           "quoteVolume": null,
           "info": {
-            "market_symbol": "manabrl",
+            "market_symbol": "btcbrl",
             "last_trade": {
               "price": "1.77510000",
               "volume": "55.77150583",
@@ -95,7 +95,7 @@
         "description": "Fetch order book",
         "method": "fetchOrderBook",
         "input": [
-          "MANA/BRL",
+          "BTC/BRL",
           1
         ],
         "httpResponse": {
@@ -115,7 +115,7 @@
           ]
         },
         "parsedResponse": {
-          "symbol": "MANA/BRL",
+          "symbol": "BTC/BRL",
           "bids": [
             [
               1.7818,
@@ -183,31 +183,45 @@
         "httpResponse": {
           "data": [
             {
-              "id": "17230381",
-              "price": "373455.99120000",
-              "volume": "0.00001606",
+              "id": "24921295",
+              "price": "552874.00000000",
+              "volume": "0.00001776",
               "taker_side": "BUY",
-              "created_at": "2024-08-02T01:05:00.653Z"
+              "created_at": "2025-02-24T01:33:18.395Z"
             }
           ]
         },
         "parsedResponse": [
           {
-            "id": "17230381",
-            "timestamp": 1722560700653,
-            "datetime": "2024-08-02T01:05:00.653Z",
+            "id": "24921295",
+            "timestamp": 1740360798395,
+            "datetime": "2025-02-24T01:33:18.395Z",
             "symbol": "BTC/BRL",
             "order": null,
             "type": null,
             "side": "buy",
             "takerOrMaker": null,
-            "price": 373455.9912,
-            "amount": 0.00001606,
-            "cost": 5.997703218671999,
+            "price": 552874,
+            "amount": 0.00001776,
+            "cost": 9.81904224,
             "fee": {
               "currency": null,
               "cost": null,
               "rate": null
+            },
+            "fees": [
+              {
+                "currency": null,
+                "cost": null,
+                "rate": null
+              }
+            ],
+            "info": {
+              "id": "24921295",
+              "price": "552874.00000000",
+              "volume": "0.00001776",
+              "taker_side": "BUY",
+              "created_at": "2025-02-24T01:33:18.395Z"
             }
           }
         ]
