@@ -756,7 +756,7 @@ export default class foxbit extends Exchange {
          * @param {object} [params] extra parameters specific to the exchange API endpoint
          * @returns {Order[]} a list of [order structures]{@link https://docs.ccxt.com/#/?id=order-structure}
          */
-        return this.fetchOrdersByStatus ('ACTIVE', symbol, since, limit, params);
+        return await this.fetchOrdersByStatus ('ACTIVE', symbol, since, limit, params);
     }
 
     async fetchClosedOrders (symbol: Str = undefined, since: Int = undefined, limit: Int = undefined, params = {}): Promise<Order[]> {
@@ -771,7 +771,7 @@ export default class foxbit extends Exchange {
          * @param {object} [params] extra parameters specific to the exchange API endpoint
          * @returns {Order[]} a list of [order structures]{@link https://docs.ccxt.com/#/?id=order-structure}
          */
-        return this.fetchOrdersByStatus ('FILLED', symbol, since, limit, params);
+        return await this.fetchOrdersByStatus ('FILLED', symbol, since, limit, params);
     }
 
     async fetchOrdersByStatus (status: Str, symbol: Str = undefined, since: Int = undefined, limit: Int = undefined, params = {}): Promise<Order[]> {
