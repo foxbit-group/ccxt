@@ -1633,9 +1633,12 @@ export default class foxbit extends Exchange {
         //     "reason_type": "DEPOSITING"
         // }
         const id = this.safeString (item, 'uuid');
-        const timestamp = this.parse8601 (this.safeString (item, 'created_at'));
-        const type = this.parseLedgerEntryType (this.safeString (item, 'reason_type'));
-        const currencySymbol = this.safeCurrencyCode (this.safeString (item, 'currency_symbol'));
+        const createdAt = this.safeString (item, 'created_at');
+        const timestamp = this.parse8601 (createdAt);
+        const reasonType = this.safeString (item, 'reason_type');
+        const type = this.parseLedgerEntryType (reasonType);
+        const exchangeSymbol = this.safeString (item, 'currency_symbol');
+        const currencySymbol = this.safeCurrencyCode (exchangeSymbol);
         let direction = 'in';
         const amount = this.safeNumber (item, 'amount');
         let realAmount = amount;
