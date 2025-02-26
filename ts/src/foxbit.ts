@@ -542,7 +542,7 @@ export default class foxbit extends Exchange {
         return this.parseTickers (data, symbols);
     }
 
-    async fetchTradingFees (params: {}): Promise<TradingFees> {
+    async fetchTradingFees (params = {}): Promise<TradingFees> {
         /**
          * @method
          * @name foxbit#fetchTradingFees

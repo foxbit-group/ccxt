@@ -3,6 +3,22 @@
   "skipKeys": [],
   "outputType": "json",
   "methods": {
+    "fetchCurrencies": [
+      {
+        "description": "Fetch all currencies",
+        "method": "fetchCurrencies",
+        "url": "https://api.foxbit.com.br/rest/v3/currencies",
+        "input": []
+      }
+    ],
+    "fetchMarkets": [
+      {
+        "description": "Fetch all markets",
+        "method": "fetchMarkets",
+        "url": "https://api.foxbit.com.br/rest/v3/markets",
+        "input": []
+      }
+    ],
     "fetchTicker": [
       {
         "description": "Fetch a ticker by a market symbol",
@@ -556,6 +572,53 @@
           2
         ],
         "output": "{\"mode\":\"ALLOW_FAILURE\",\"cancel\":{\"type\":\"ID\",\"id\":4071399967},\"create\":{\"type\":\"INSTANT\",\"side\":\"SELL\",\"market_symbol\":\"btcbrl\",\"amount\":\"2\"}}"
+      }
+    ],
+    "fetchTradingFee": [
+      {
+        "description": "Fetch trading fee of a specific market",
+        "method": "fetchTradingFee",
+        "url": "https://api.foxbit.com.br/rest/v3/me/fees/trading",
+        "input": [
+          "BTC/BRL"
+        ]
+      }
+    ],
+    "fetchTradingFees": [
+      {
+        "description": "Fetch trading fees of all markets",
+        "method": "fetchTradingFees",
+        "url": "https://api.foxbit.com.br/rest/v3/me/fees/trading",
+        "input": []
+      }
+    ],
+    "fetchLedger": [
+      {
+        "description": "Fetch a ledger for BTC",
+        "method": "fetchLedger",
+        "url": "https://api.foxbit.com.br/rest/v3/accounts/btc/transactions",
+        "input": [
+          "BTC"
+        ]
+      },
+      {
+        "description": "Fetch a ledger with since param",
+        "method": "fetchLedger",
+        "url": "https://api.foxbit.com.br/rest/v3/accounts/btc/transactions?start_time=2024-07-27T00%3A52%3A27.316Z",
+        "input": [
+          "BTC",
+          1722041547316
+        ]
+      },
+      {
+        "description": "Fetch a ledger with limit param",
+        "method": "fetchLedger",
+        "url": "https://api.foxbit.com.br/rest/v3/accounts/btc/transactions?page_size=1",
+        "input": [
+          "BTC",
+          null,
+          1
+        ]
       }
     ]
   }
