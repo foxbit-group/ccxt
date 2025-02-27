@@ -397,6 +397,445 @@
                 ]
             }
         ],
+        "fetchOpenOrders": [
+            {
+                "description": "Fetch open orders",
+                "method": "fetchOpenOrders",
+                "input": [],
+                "httpResponse": {
+                    "data": [
+                        {
+                            "id": "5948042819",
+                            "sn": "OPXJI6CSIIRPWG",
+                            "client_order_id": null,
+                            "market_symbol": "btcbrl",
+                            "side": "SELL",
+                            "type": "LIMIT",
+                            "state": "ACTIVE",
+                            "price": "600000.0",
+                            "price_avg": "0.0",
+                            "quantity": "1",
+                            "quantity_executed": "0.0",
+                            "instant_amount": null,
+                            "instant_amount_executed": null,
+                            "created_at": "2025-02-27T02:02:37.129Z",
+                            "trades_count": "0",
+                            "fee_paid": "0.0",
+                            "post_only": false,
+                            "time_in_force": "GTC",
+                            "cancellation_reason": null
+                        }
+                    ]
+                },
+                "parsedResponse": [
+                    {
+                        "id": "5948042819",
+                        "info": {
+                            "id": "5948042819",
+                            "sn": "OPXJI6CSIIRPWG",
+                            "client_order_id": null,
+                            "market_symbol": "btcbrl",
+                            "side": "SELL",
+                            "type": "LIMIT",
+                            "state": "ACTIVE",
+                            "price": "600000.0",
+                            "price_avg": "0.0",
+                            "quantity": "1",
+                            "quantity_executed": "0.0",
+                            "instant_amount": null,
+                            "instant_amount_executed": null,
+                            "created_at": "2025-02-27T02:02:37.129Z",
+                            "trades_count": "0",
+                            "fee_paid": "0.0",
+                            "post_only": false,
+                            "time_in_force": "GTC",
+                            "cancellation_reason": null
+                        },
+                        "clientOrderId": null,
+                        "timestamp": 1740621757129,
+                        "datetime": "2025-02-27T02:02:37.129Z",
+                        "lastTradeTimestamp": null,
+                        "status": "open",
+                        "symbol": "BTC/BRL",
+                        "type": "LIMIT",
+                        "timeInForce": null,
+                        "postOnly": false,
+                        "reduceOnly": null,
+                        "side": "sell",
+                        "price": 600000,
+                        "triggerPrice": null,
+                        "takeProfitPrice": null,
+                        "stopLossPrice": null,
+                        "cost": null,
+                        "average": 0,
+                        "amount": 1,
+                        "filled": 0,
+                        "remaining": 1,
+                        "trades": null,
+                        "fee": {
+                            "currency": null,
+                            "cost": null
+                        }
+                    }
+                ]
+            }
+        ],
+        "fetchOrders": [
+            {
+                "description": "Fetch the current user orders, with limit set to 1",
+                "method": "fetchOrders",
+                "input": [
+                    "BTC/BRL",
+                    null,
+                    1
+                ],
+                "httpResponse": {
+                    "data": [
+                        {
+                            "id": "1234567890123",
+                            "sn": "OPXJI6CSIIRPWG",
+                            "client_order_id": null,
+                            "market_symbol": "btcbrl",
+                            "side": "SELL",
+                            "type": "LIMIT",
+                            "state": "CANCELED",
+                            "price": "600000.0",
+                            "price_avg": "0.0",
+                            "quantity": "1",
+                            "quantity_executed": "0.0",
+                            "instant_amount": null,
+                            "instant_amount_executed": null,
+                            "created_at": "2025-02-27T02:02:37.129Z",
+                            "trades_count": "0",
+                            "fee_paid": "0.0",
+                            "post_only": false,
+                            "time_in_force": "GTC",
+                            "cancellation_reason": "1"
+                        }
+                    ]
+                },
+                "parsedResponse": [
+                    {
+                        "info": {
+                            "id": "1234567890123",
+                            "sn": "OPXJI6CSIIRPWG",
+                            "client_order_id": null,
+                            "market_symbol": "btcbrl",
+                            "side": "SELL",
+                            "type": "LIMIT",
+                            "state": "CANCELED",
+                            "price": "600000.0",
+                            "price_avg": "0.0",
+                            "quantity": "1",
+                            "quantity_executed": "0.0",
+                            "instant_amount": null,
+                            "instant_amount_executed": null,
+                            "created_at": "2025-02-27T02:02:37.129Z",
+                            "trades_count": "0",
+                            "fee_paid": "0.0",
+                            "post_only": false,
+                            "time_in_force": "GTC",
+                            "cancellation_reason": "1"
+                        },
+                        "id": "1234567890123",
+                        "clientOrderId": null,
+                        "timestamp": 1740621757129,
+                        "datetime": "2025-02-27T02:02:37.129Z",
+                        "lastTradeTimestamp": null,
+                        "status": "canceled",
+                        "symbol": "BTC/BRL",
+                        "type": "LIMIT",
+                        "timeInForce": null,
+                        "postOnly": false,
+                        "reduceOnly": null,
+                        "side": "sell",
+                        "price": 600000,
+                        "triggerPrice": null,
+                        "takeProfitPrice": null,
+                        "stopLossPrice": null,
+                        "cost": null,
+                        "average": 0,
+                        "amount": 1,
+                        "filled": 0,
+                        "remaining": 1,
+                        "trades": null,
+                        "fee": {
+                            "currency": null,
+                            "cost": null
+                        }
+                    }
+                ]
+            }
+        ],
+        "fetchOrder": [
+            {
+                "description": "Fetch an order by id",
+                "method": "fetchOrder",
+                "input": [
+                    1234567890123
+                ],
+                "httpResponse": {
+                    "id": "1234567890123",
+                    "sn": "OPXJI6CSIIRPWG",
+                    "client_order_id": null,
+                    "market_symbol": "btcbrl",
+                    "side": "SELL",
+                    "type": "LIMIT",
+                    "state": "CANCELED",
+                    "price": "600000.0",
+                    "price_avg": "0.0",
+                    "quantity": "1",
+                    "quantity_executed": "0.0",
+                    "instant_amount": null,
+                    "instant_amount_executed": null,
+                    "created_at": "2025-02-27T02:02:37.129Z",
+                    "trades_count": "0",
+                    "remark": null,
+                    "fee_paid": "0.0",
+                    "post_only": false,
+                    "time_in_force": "GTC",
+                    "cancellation_reason": "1"
+                },
+                "parsedResponse": {
+                    "id": "1234567890123",
+                    "info": {
+                        "id": "1234567890123",
+                        "sn": "OPXJI6CSIIRPWG",
+                        "client_order_id": null,
+                        "market_symbol": "btcbrl",
+                        "side": "SELL",
+                        "type": "LIMIT",
+                        "state": "CANCELED",
+                        "price": "600000.0",
+                        "price_avg": "0.0",
+                        "quantity": "1",
+                        "quantity_executed": "0.0",
+                        "instant_amount": null,
+                        "instant_amount_executed": null,
+                        "created_at": "2025-02-27T02:02:37.129Z",
+                        "trades_count": "0",
+                        "remark": null,
+                        "fee_paid": "0.0",
+                        "post_only": false,
+                        "time_in_force": "GTC",
+                        "cancellation_reason": "1"
+                    },
+                    "clientOrderId": null,
+                    "timestamp": 1740621757129,
+                    "datetime": "2025-02-27T02:02:37.129Z",
+                    "lastTradeTimestamp": null,
+                    "status": "canceled",
+                    "symbol": "BTC/BRL",
+                    "type": "LIMIT",
+                    "timeInForce": null,
+                    "postOnly": false,
+                    "reduceOnly": null,
+                    "side": "sell",
+                    "price": 600000,
+                    "triggerPrice": null,
+                    "takeProfitPrice": null,
+                    "stopLossPrice": null,
+                    "cost": null,
+                    "average": 0,
+                    "amount": 1,
+                    "filled": 0,
+                    "remaining": 1,
+                    "trades": null,
+                    "fee": {
+                        "currency": null,
+                        "cost": null
+                    }
+                }
+            }
+        ],
+        "fetchTradingFee": [
+            {
+                "description": "Filters the trading fee by market symbol",
+                "method": "fetchTradingFee",
+                "input": [
+                    "BTC/BRL"
+                ],
+                "httpResponse": {
+                    "data": [
+                        {
+                            "market_symbol": "btcbrl",
+                            "maker": "0.0",
+                            "taker": "0.005"
+                        },
+                        {
+                            "market_symbol": "btcusdt",
+                            "maker": "0.0002",
+                            "taker": "0.0015"
+                        }
+                    ]
+                },
+                "parsedResponse": {
+                    "info": {
+                        "market_symbol": "btcbrl",
+                        "maker": "0.0",
+                        "taker": "0.005"
+                    },
+                    "symbol": "BTC/BRL",
+                    "maker": 0,
+                    "taker": 0.005,
+                    "percentage": true,
+                    "tierBased": true
+                }
+            }
+        ],
+        "fetchTradingFees": [
+            {
+                "description": "List all trading fees",
+                "method": "fetchTradingFees",
+                "input": [],
+                "httpResponse": {
+                    "data": [
+                        {
+                            "market_symbol": "btcbrl",
+                            "maker": "0.0",
+                            "taker": "0.005"
+                        },
+                        {
+                            "market_symbol": "btcusdt",
+                            "maker": "0.0002",
+                            "taker": "0.0015"
+                        }
+                    ]
+                },
+                "parsedResponse": {
+                    "BTC/BRL": {
+                        "info": {
+                            "market_symbol": "btcbrl",
+                            "maker": "0.0",
+                            "taker": "0.005"
+                        },
+                        "symbol": "BTC/BRL",
+                        "maker": 0,
+                        "taker": 0.005,
+                        "percentage": true,
+                        "tierBased": true
+                    },
+                    "BTC/USDT": {
+                        "info": {
+                            "market_symbol": "btcusdt",
+                            "maker": "0.0002",
+                            "taker": "0.0015"
+                        },
+                        "symbol": "BTC/USDT",
+                        "maker": 0.0002,
+                        "taker": 0.0015,
+                        "percentage": true,
+                        "tierBased": true
+                    }
+                }
+            }
+        ],
+        "fetchTransactions": [
+            {
+                "description": "Fetch all deposits and withdrawals",
+                "method": "fetchTransactions",
+                "input": [
+                    "BTC",
+                    null,
+                    1
+                ],
+                "httpResponse": {
+                    "data": [
+                        {
+                            "sn": "DJD5TMJGK12345",
+                            "state": "ACCEPTED",
+                            "currency_symbol": "btc",
+                            "amount": "1",
+                            "fee": "0.0",
+                            "created_at": "2024-12-12T17:16:46.867Z",
+                            "details_crypto": {
+                                "transaction_id": "12345bea6cc2151c9577f7e4506d211e84f75803a84bd0e5aade7601f412345",
+                                "receiving_address": "12345prpevhyf996ywlprea0a05mv5rqudpa320x2m6ukwqm602xzwsx12345",
+                                "network_code": null
+                            }
+                        }
+                    ]
+                },
+                "parsedResponse": [
+                    {
+                        "info": {
+                            "sn": "DJD5TMJGK12345",
+                            "state": "ACCEPTED",
+                            "currency_symbol": "btc",
+                            "amount": "1",
+                            "fee": "0.0",
+                            "created_at": "2024-12-12T17:16:46.867Z",
+                            "details_crypto": {
+                                "transaction_id": "12345bea6cc2151c9577f7e4506d211e84f75803a84bd0e5aade7601f412345",
+                                "receiving_address": "12345prpevhyf996ywlprea0a05mv5rqudpa320x2m6ukwqm602xzwsx12345",
+                                "network_code": null
+                            }
+                        },
+                        "id": "DJD5TMJGK12345",
+                        "txid": "12345bea6cc2151c9577f7e4506d211e84f75803a84bd0e5aade7601f412345",
+                        "timestamp": 1734023806867,
+                        "datetime": "2024-12-12T17:16:46.867Z",
+                        "network": null,
+                        "address": "12345prpevhyf996ywlprea0a05mv5rqudpa320x2m6ukwqm602xzwsx12345",
+                        "addressTo": "12345prpevhyf996ywlprea0a05mv5rqudpa320x2m6ukwqm602xzwsx12345",
+                        "addressFrom": null,
+                        "tag": null,
+                        "tagTo": null,
+                        "tagFrom": null,
+                        "type": "deposit",
+                        "amount": 1,
+                        "currency": "BTC",
+                        "status": "ok",
+                        "updated": null,
+                        "fee": {
+                            "cost": 0,
+                            "currency": "BTC",
+                            "rate": 0
+                        },
+                        "comment": null,
+                        "internal": null
+                    },
+                    {
+                        "info": {
+                            "sn": "DJD5TMJGK12345",
+                            "state": "ACCEPTED",
+                            "currency_symbol": "btc",
+                            "amount": "1",
+                            "fee": "0.0",
+                            "created_at": "2024-12-12T17:16:46.867Z",
+                            "details_crypto": {
+                                "transaction_id": "12345bea6cc2151c9577f7e4506d211e84f75803a84bd0e5aade7601f412345",
+                                "receiving_address": "12345prpevhyf996ywlprea0a05mv5rqudpa320x2m6ukwqm602xzwsx12345",
+                                "network_code": null
+                            }
+                        },
+                        "id": "DJD5TMJGK12345",
+                        "txid": "12345bea6cc2151c9577f7e4506d211e84f75803a84bd0e5aade7601f412345",
+                        "timestamp": 1734023806867,
+                        "datetime": "2024-12-12T17:16:46.867Z",
+                        "network": null,
+                        "address": "12345prpevhyf996ywlprea0a05mv5rqudpa320x2m6ukwqm602xzwsx12345",
+                        "addressTo": "12345prpevhyf996ywlprea0a05mv5rqudpa320x2m6ukwqm602xzwsx12345",
+                        "addressFrom": null,
+                        "tag": null,
+                        "tagTo": null,
+                        "tagFrom": null,
+                        "type": "deposit",
+                        "amount": 1,
+                        "currency": "BTC",
+                        "status": "ok",
+                        "updated": null,
+                        "fee": {
+                            "cost": 0,
+                            "currency": "BTC",
+                            "rate": 0
+                        },
+                        "comment": null,
+                        "internal": null
+                    }
+                ]
+            }
+        ],
         "fetchDepositAddress": [
             {
                 "description": "Fill this with a description of the method call",
@@ -500,6 +939,94 @@
                 ]
             }
         ],
+        "fetchWithdrawals": [
+            {
+                "description": "Fetch all user's withdrawals",
+                "method": "fetchWithdrawals",
+                "input": [
+                  "BRL",
+                  null,
+                  1
+                ],
+                "httpResponse": {
+                  "data": [
+                    {
+                      "sn": "W5X54CC2T12345",
+                      "state": "DONE",
+                      "rejection_reason": null,
+                      "currency_symbol": "brl",
+                      "amount": "1000",
+                      "fee": "0.0",
+                      "created_at": "2024-12-22T18:43:05.470Z",
+                      "details_fiat": {
+                        "bank": {
+                          "code": "123",
+                          "branch": {
+                            "number": "1234",
+                            "digit": null
+                          },
+                          "account": {
+                            "number": "0000000",
+                            "digit": "0",
+                            "type": "CHECK"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                },
+                "parsedResponse": [
+                  {
+                    "id": "W12345C2T12345",
+                    "txid": null,
+                    "timestamp": 1734892985470,
+                    "datetime": "2024-12-22T18:43:05.470Z",
+                    "network": null,
+                    "address": null,
+                    "addressTo": null,
+                    "addressFrom": null,
+                    "tag": null,
+                    "tagTo": null,
+                    "tagFrom": null,
+                    "type": "withdrawal",
+                    "amount": 1000,
+                    "currency": "BRL",
+                    "status": "ok",
+                    "updated": null,
+                    "fee": {
+                      "cost": 0,
+                      "currency": "BRL",
+                      "rate": 0
+                    },
+                    "comment": null,
+                    "internal": null,
+                    "info": {
+                        "sn": "W12345C2T12345",
+                        "state": "DONE",
+                        "rejection_reason": null,
+                        "currency_symbol": "brl",
+                        "amount": "1000",
+                        "fee": "0.0",
+                        "created_at": "2024-12-22T18:43:05.470Z",
+                        "details_fiat": {
+                          "bank": {
+                            "code": "123",
+                            "branch": {
+                              "number": "1234",
+                              "digit": null
+                            },
+                            "account": {
+                              "number": "0000000",
+                              "digit": "0",
+                              "type": "CHECK"
+                            }
+                          }
+                        }
+                      }
+                  }
+                ]
+              }
+        ],
         "fetchLedger": [
             {
                 "description": "Fill this with a description of the method call",
@@ -551,6 +1078,74 @@
                         "fee": {
                             "cost": 0,
                             "currency": "BTC"
+                        }
+                    }
+                ]
+            }
+        ],
+        "fetchMyTrades": [
+            {
+                "description": "Fetch all trades of current user",
+                "method": "fetchMyTrades",
+                "input": [
+                    "BTC/BRL",
+                    null,
+                    1
+                ],
+                "httpResponse": {
+                    "data": [
+                        {
+                            "id": "123456",
+                            "sn": "TAND2WLH5V5BJB",
+                            "side": "SELL",
+                            "order_id": "4971404189",
+                            "market_symbol": "btcbrl",
+                            "price": "600000.00000000",
+                            "quantity": "1",
+                            "fee_currency_symbol": "brl",
+                            "fee": "3000.00000000",
+                            "created_at": "2024-12-22T18:42:19.973Z",
+                            "role": "TAKER"
+                        }
+                    ]
+                },
+                "parsedResponse": [
+                    {
+                        "id": "123456",
+                        "timestamp": 1734892939973,
+                        "datetime": "2024-12-22T18:42:19.973Z",
+                        "symbol": "BTC/BRL",
+                        "order": null,
+                        "type": null,
+                        "side": "sell",
+                        "takerOrMaker": null,
+                        "price": 600000.000,
+                        "amount": 1,
+                        "cost": 600000.000,
+                        "fee": {
+                            "currency": "brl",
+                            "cost": 3000,
+                            "rate": null
+                        },
+                        "fees": [
+                            {
+                                "currency": "brl",
+                                "cost": 3000,
+                                "rate": null
+                            }
+                        ],
+                        "info": {
+                            "id": "123456",
+                            "sn": "TAND2WLH5V5BJB",
+                            "side": "SELL",
+                            "order_id": "4971404189",
+                            "market_symbol": "btcbrl",
+                            "price": "600000.00000000",
+                            "quantity": "1",
+                            "fee_currency_symbol": "brl",
+                            "fee": "3000.00000000",
+                            "created_at": "2024-12-22T18:42:19.973Z",
+                            "role": "TAKER"
                         }
                     }
                 ]
