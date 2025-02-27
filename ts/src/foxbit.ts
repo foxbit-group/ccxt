@@ -562,7 +562,7 @@ export default class foxbit extends Exchange {
         // ]
         const data = this.safeList (response, 'data', []);
         const result = {};
-        for (let i = 0; i < response.data.length; i++) {
+        for (let i = 0; i < data.length; i++) {
             const entry = data[i];
             const marketId = this.safeString (entry, 'market_symbol');
             const market = this.safeMarket (marketId);
