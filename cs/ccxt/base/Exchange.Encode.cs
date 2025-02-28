@@ -1,6 +1,7 @@
 namespace ccxt;
 using System.Security.Cryptography;
 using System.Text;
+
 using Cryptography.ECDSA;
 
 using MiniMessagePack;
@@ -96,15 +97,67 @@ public partial class Exchange
         // return (string)a + (string)b; // stub
     }
 
-    public object binaryConcatArray(object a)
+    public object binaryConcatArray(object arrays2)
     {
-        return (string)a; // stub
+        // if (byteArrays is not IList arrays)
+        // {
+        //     throw new ArgumentException("Input must be an array or collection of byte arrays.", nameof(byteArrays));
+        // }
+
+        var arrays = (IList<object>)arrays2;
+        // Determine total length
+        int totalLength = 0;
+        foreach (var item in arrays)
+        {
+            // if (item is not byte[] array)
+            // {
+            //     throw new ArgumentException("All elements in the collection must be byte arrays.", nameof(byteArrays));
+            // }
+            byte[] bytesItem;
+            if (item is string)
+            {
+                bytesItem = Encoding.ASCII.GetBytes(item as string);
+            }
+            else
+            {
+                bytesItem = (byte[])item;
+            }
+            totalLength += ((byte[])bytesItem).Length;
+        }
+
+        // Concatenate arrays
+        byte[] result = new byte[totalLength];
+        int offset = 0;
+
+        foreach (var item in arrays)
+        {
+            byte[] bytesItem;
+            if (item is string)
+            {
+                bytesItem = Encoding.ASCII.GetBytes(item as string);
+            }
+            else
+            {
+                bytesItem = (byte[])item;
+            }
+            byte[] array = (byte[])bytesItem;
+            Buffer.BlockCopy(array, 0, result, offset, array.Length);
+            offset += array.Length;
+        }
+
+        return result;
     }
 
-    public object numberToBE(object n, object padding = null)
+    public object numberToBE(object n2, object size2 = null)
     {
-        // implement number to big endian
-        return (string)n; // stub
+        var n = Convert.ToInt64(n2);
+        var size = size2 == null ? 0 : Convert.ToInt32(size2);
+        byte[] bytes = BitConverter.GetBytes(n);
+        if (BitConverter.IsLittleEndian)
+        {
+            Array.Reverse(bytes);
+        }
+        return bytes[^size..]; // Extract the last 'size' bytes
     }
 
     public static string binaryToHex(byte[] buff)
@@ -236,20 +289,30 @@ public partial class Exchange
     {
         var parameters = (dict)parameters2;
 
-        var queryString = System.Web.HttpUtility.ParseQueryString(string.Empty);
+        // var queryString = System.Web.HttpUtility.ParseQueryString(string.Empty);
+        var queryString = new List<string>();
         var keys = parameters.Keys;
         foreach (string key in keys)
         {
             var value = parameters[key];
+            string encodedKey = System.Web.HttpUtility.UrlEncode(key);
             var finalValue = value.ToString();
             if (value.GetType() == typeof(bool))
             {
                 finalValue = finalValue.ToLower(); // c# uses "True" and "False" instead of "true" and "false" $:(
 
             }
-            queryString.Add(key, finalValue);
+            if (key.ToLower() == "timestamp")
+            {
+                finalValue = System.Web.HttpUtility.UrlEncode(finalValue).ToUpper();
+            }
+            else
+            {
+                finalValue = System.Web.HttpUtility.UrlEncode(finalValue);
+            }
+            queryString.Add($"{encodedKey}={finalValue}");
         }
-        return queryString.ToString();
+        return string.Join("&", queryString);
     }
 
     public string encodeURIComponent(object str2)

@@ -155,12 +155,12 @@ This way you can keep the build tools and processes isolated, not having to work
     - via pip: `pip install tox`
     - MacOS with [brew](https://brew.sh): `brew install tox`
     - Ubuntu Linux: `apt-get install tox`
-- [PHP](https://secure.php.net/downloads.php) 5.3+ with the following extensions installed and enabled:
+- [PHP](https://secure.php.net/downloads.php) 8.1+ with the following extensions installed and enabled:
   - cURL
   - iconv
   - mbstring
   - PCRE
-  - bcmath (php<7.1) or gmp (this is a built-in extension as of PHP 7.2+)
+  - gmp
 - [C#](https://dotnet.microsoft.com/en-us/download) 7.0
 
 #### Build Steps
@@ -952,7 +952,7 @@ node cli.js binance fetchTrades "BTC/USDT:USDT" --report
 
 Folder: `ts/src/test/static/response/binance.json`
 
-You can create a static-request test by running this command and pasting the result in the correct file (eg: `static/response/binance.json`)
+You can create a static-response test by running this command and pasting the result in the correct file (eg: `static/response/binance.json`)
 
 ```Javascript
 node cli.js binance fetchTrades "BTC/USDT:USDT"  undefined 1 --response
@@ -1072,7 +1072,7 @@ node run-tests --python-async kraken # test Kraken with Python async test, requi
 Follow this steps to add a test:
 
 - Create a file in [ts/tests/Exchange](ts/test/Exchange/) following syntax that can be transpiled.
-- Add test to `runPrivateTests` or `runPublicTests` to [ts/src/test/test.ts](ts/src/test/test.ts#L354) or for ccxt.pro endpoints to [ts/src/pro/test/test.ts](ts/src/pro/test/test.ts#L121)
+- Add test to `runPrivateTests` or `runPublicTests` to [ts/src/test/tests.ts](ts/src/test/tests.ts#L354) or for ccxt.pro endpoints to [ts/src/pro/test/tests.ts](ts/src/pro/test/tests.ts#L121)
 - run `npm run transpile` to generate the test file in javascript, python and php.
 - Call tests `node run-tests`
 
