@@ -210,12 +210,7 @@
                             "currency": null,
                             "cost": null
                         },
-                        "fees": [
-                            {
-                                "currency": null,
-                                "cost": null
-                            }
-                        ],
+                        "fees": [],
                         "info": {
                             "id": "24921295",
                             "price": "552874.00000000",
