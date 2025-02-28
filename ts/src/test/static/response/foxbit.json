@@ -213,8 +213,7 @@
                         "fees": [
                             {
                                 "currency": null,
-                                "cost": null,
-                                "rate": null
+                                "cost": null
                             }
                         ],
                         "info": {
@@ -1130,8 +1129,7 @@
                         "fees": [
                             {
                                 "currency": "brl",
-                                "cost": 3000,
-                                "rate": null
+                                "cost": 3000
                             }
                         ],
                         "info": {
