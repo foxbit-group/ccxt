@@ -86,7 +86,9 @@
                                 "volume": "5116.51950000"
                             }
                         }
-                    }
+                    },
+                    "indexPrice": null,
+                    "markPrice": null
                 }
             }
         ],
@@ -206,8 +208,7 @@
                         "cost": 9.81904224,
                         "fee": {
                             "currency": null,
-                            "cost": null,
-                            "rate": null
+                            "cost": null
                         },
                         "fees": [
                             {
@@ -951,7 +952,7 @@
                 "httpResponse": {
                   "data": [
                     {
-                      "sn": "W5X54CC2T12345",
+                      "sn": "W12345C2T12345",
                       "state": "DONE",
                       "rejection_reason": null,
                       "currency_symbol": "brl",
@@ -1124,8 +1125,7 @@
                         "cost": 600000.000,
                         "fee": {
                             "currency": "brl",
-                            "cost": 3000,
-                            "rate": null
+                            "cost": 3000
                         },
                         "fees": [
                             {
