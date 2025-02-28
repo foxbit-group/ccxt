@@ -2,7 +2,7 @@
 
 import { AccountSuspended, ArgumentsRequired, AuthenticationError, BadRequest, BadSymbol, ExchangeError, ExchangeNotAvailable, InsufficientFunds, InvalidOrder, OnMaintenance, PermissionDenied, RateLimitExceeded } from './base/errors.js';
 import Exchange from './abstract/foxbit.js';
-import type { Currencies, Market, OrderBook, Dict, Ticker, TradingFees, Int, Str, Num, Trade, OHLCV, Balances, Order, OrderType, OrderSide, Strings, Tickers, Currency, Transaction, TradingFeeInterface, int } from './base/types.js';
+import type { Currencies, Market, OrderBook, Dict, Ticker, TradingFees, Int, Str, Num, Trade, OHLCV, Balances, Order, OrderType, OrderSide, Strings, Tickers, Currency, Transaction, TradingFeeInterface, int, DepositAddress } from './base/types.js';
 import { sha256 } from './static_dependencies/noble-hashes/sha256.js';
 import { DECIMAL_PLACES } from './base/functions/number.js';
 
@@ -1054,7 +1054,7 @@ export default class foxbit extends Exchange {
         return this.parseTrades (data, market, since, limit);
     }
 
-    async fetchDepositAddress (code: string, params = {}) {
+    async fetchDepositAddress (code: string, params = {}): Promise<DepositAddress> {
         /**
          * @method
          * @name foxbit#fetchDepositAddress
