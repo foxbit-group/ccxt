@@ -55,6 +55,7 @@ export default class foxbit extends Exchange {
                 'fetchOpenOrders': true,
                 'fetchOrder': true,
                 'fetchOrders': true,
+                'fetchStatus': true,
                 'fetchTicker': true,
                 'fetchTickers': true,
                 'fetchTrades': true,
@@ -1483,20 +1484,20 @@ export default class foxbit extends Exchange {
         const response = await this.statusPublicGetStatus (params);
         // {
         //     "data": {
-        //       "id": 1,
-        //       "attributes": {
-        //         "status": "NORMAL",
-        //         "createdAt": "2023-05-17T18:37:05.934Z",
-        //         "updatedAt": "2024-04-17T02:33:50.945Z",
-        //         "publishedAt": "2023-05-17T18:37:07.653Z",
-        //         "locale": "pt-BR"
-        //       }
+        //       "id": 8,
+        //       "documentId": "cmzs3dj03nnturhys0xfch9w",
+        //       "status": "NORMAL",
+        //       "alert": null,
+        //       "createdAt": "2023-05-17T18:37:05.934Z",
+        //       "updatedAt": "2026-06-12T02:17:11.314Z",
+        //       "publishedAt": "2026-06-12T02:17:11.340Z",
+        //       "locale": "pt-BR"
         //     },
         //     "meta": {
         //     }
         // }
         const data = this.safeDict (response, 'data', {});
-        const attributes = this.safeDict (data, 'attributes', {});
+        const attributes = this.safeDict (data, 'attributes', data);
         const statusRaw = this.safeString (attributes, 'status');
         const statusMap = {
             'NORMAL': 'ok',
@@ -1696,8 +1697,8 @@ export default class foxbit extends Exchange {
             'tierBased': false,
             'feeSide': 'get',
             'precision': {
-                'price': this.safeInteger (quoteAssets, 'precision'),
-                'amount': this.safeInteger (baseAssets, 'precision'),
+                'price': this.safeInteger (market, 'price_precision', this.safeInteger (quoteAssets, 'precision')),
+                'amount': this.safeInteger (market, 'quantity_precision', this.safeInteger (baseAssets, 'precision')),
                 'cost': this.safeInteger (quoteAssets, 'precision'),
             },
             'limits': {
